@@ -2,11 +2,31 @@
   <p>tourlogs works!</p>
 
   <div>
-    <p>Count:</p>
-    <p>Double:</p>
-
-    <button type="button">Increment</button>
-    <button type="button">Reset</button>
+    <label for="date">Datum eingeben: </label>
+    <input 
+        id="dateTime-local"
+        class="input"
+        type="datetime-local"
+        [(ngModel)]="date"
+    />
+    <h2> {{ date }} </h2>
+    <label for="time">Zeit eingeben: </label>
+    <input 
+        id="time"
+        class="input"
+        type="date"
+        [(ngModel)]="date"
+    />
+    <h2> {{ date }} </h2>
+    <label for="comment">Kommentar: </label>
+    <input
+        id="comment" 
+        class="input"
+        type="text"
+        [(ngModel)]="comment"
+        placeholder="comment"
+    />
+    <h2>{{ comment }}</h2>
   </div>
 </section>
 

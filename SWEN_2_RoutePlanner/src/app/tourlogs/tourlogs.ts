@@ -1,50 +1,49 @@
 import { Component, Input } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 
-interface logs {
-  date: Date;
-  comment: String;
+interface Log {
+  date: string;
+  time: string;
+  comment: string;
   difficulty: number;
   totalDistance: number;
   totalTime: number;
   rating: number;
   tourID: number;
 }
-
 @Component({
   selector: 'app-home',
-  imports: [],
+  imports: [FormsModule],
   templateUrl: './tourlogs.html',
   styleUrl: './tourlogs.css',
 })
 
 export class Tourlogs {
-  private date: Date = new Date();
-  private comment: String = new String();
-  private difficulty: Number = new Number();
+  date: Date = new Date();
+  comment: string = '';
+  difficulty: number = 0;
 
-
-  @Input()
-  set logDate(date: Date) {
+  //@Input()
+  set setDate(date: Date) {
     this.date = date;
   }
 
-  get logDate(): Date {
+  get getDate(): Date {
     return this.date;
   }
 
-  @Input()
-  set logComment(comment: String) {
-    this.comment = comment;
+  //@Input()
+  set setComment(comment: string) {
+  this.comment = comment;
   }
 
-  get logComment(): String {
+  get getComment(): string {
     return this.comment;
   }
 
-    @Input()
-  set diff(number: Number){
+  //@Input()
+  set setDiff(number: number){
     this.difficulty = number;
   }
-
 
 }
