@@ -4,9 +4,9 @@
   <div>
     <label for="date">Datum eingeben: </label>
     <input 
-        id="dateTime-local"
+        id="date"
         class="input"
-        type="datetime-local"
+        type="date"
         [(ngModel)]="date"
     />
     <h2> {{ date }} </h2>
@@ -14,10 +14,10 @@
     <input 
         id="time"
         class="input"
-        type="date"
-        [(ngModel)]="date"
+        type="time"
+        [(ngModel)]="time"
     />
-    <h2> {{ date }} </h2>
+    <h2> {{ time }} </h2>
     <label for="comment">Kommentar: </label>
     <input
         id="comment" 

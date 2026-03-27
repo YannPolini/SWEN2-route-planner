@@ -19,18 +19,10 @@ interface Log {
 })
 
 export class Tourlogs {
-  date: Date = new Date();
+  date: string = '';
+  time: string = '';
   comment: string = '';
   difficulty: number = 0;
-
-  //@Input()
-  set setDate(date: Date) {
-    this.date = date;
-  }
-
-  get getDate(): Date {
-    return this.date;
-  }
 
   //@Input()
   set setComment(comment: string) {
