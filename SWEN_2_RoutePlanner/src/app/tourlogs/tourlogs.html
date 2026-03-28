@@ -3,30 +3,43 @@
 
   <div>
     <label for="date">Datum eingeben: </label>
-    <input 
-        id="date"
-        class="input"
-        type="date"
-        [(ngModel)]="date"
+    <input
+      id="date"
+      class="input"
+      type="date"
+      [ngModel]="date()"
+      (ngModelChange)="date.set($event)"
     />
-    <h2> {{ date }} </h2>
+    <h2>{{ date() }}</h2>
+
     <label for="time">Zeit eingeben: </label>
-    <input 
-        id="time"
-        class="input"
-        type="time"
-        [(ngModel)]="time"
+    <input
+      id="time"
+      class="input"
+      type="time"
+      [ngModel]="time()"
+      (ngModelChange)="time.set($event)"
     />
-    <h2> {{ time }} </h2>
+    <h2>{{ time() }}</h2>
+
     <label for="comment">Kommentar: </label>
     <input
-        id="comment" 
-        class="input"
-        type="text"
-        [(ngModel)]="comment"
-        placeholder="comment"
+      id="comment"
+      class="input"
+      type="text"
+      [ngModel]="comment()"
+      (ngModelChange)="comment.set($event)"
+      placeholder="comment"
     />
-    <h2>{{ comment }}</h2>
+    <h2>{{ comment() }}</h2>
+  </div>
+
+  <div class="title">Liste</div>
+  <div class="list">
+    @for (log of logList(); track log.logID) {
+      <app-tourlogs-list [log]="log"></app-tourlogs-list>
+    } @empty {
+      <div class="text-muted">No matching items.</div>
+    }
   </div>
 </section>
-
