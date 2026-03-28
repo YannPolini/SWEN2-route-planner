@@ -1,5 +1,5 @@
 .list {
-  display: flex;
-  flex-direction: column;
+  display: flex;    /*hierdurch untereinander */
+  flex-direction: column; 
   gap: 12px;
 }

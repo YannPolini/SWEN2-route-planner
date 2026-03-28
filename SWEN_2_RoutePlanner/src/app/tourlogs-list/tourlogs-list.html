@@ -1,10 +1,12 @@
 <button type="button" class="btn text-start border w-100">
   <div class="d-flex justify-content-between align-items-center mb-1">
-    <div class="fw-semibold">{{ log.tourID }}</div>
+    <div class="fw-semibold">Tour: {{ log.tourID }} | Log: {{ log.logID }}</div>
   </div>
 
+  <div>Datum: {{ log.date }} | Uhrzeit: {{ log.time }}</div>
+
   <div>{{ log.comment }}</div>
-  <div class="small opacity-75">
-    Distanz: {{ log.totalDistance }} km
-  </div>
+  <div class="small opacity-75">Distanz: {{ log.totalDistance }} km |Total time: {{ log.totalTime }} </div>
+  <div>Rating: {{ log.rating }}</div>
+
 </button>
