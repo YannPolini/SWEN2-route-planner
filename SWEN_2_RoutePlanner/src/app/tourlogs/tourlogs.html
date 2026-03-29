@@ -36,10 +36,11 @@
 
   <div class="title">Liste</div>
   <div class="list">
-    @for (log of logList(); track log.logID) {
+    @for (log of logList(); track log.date) {
       <app-tourlogs-list [log]="log"></app-tourlogs-list>
     } @empty {
       <div class="text-muted">No matching items.</div>
     }
   </div>
+  <button type="button" (click)="addLog()">Log hinzufügen</button>
 </section>
