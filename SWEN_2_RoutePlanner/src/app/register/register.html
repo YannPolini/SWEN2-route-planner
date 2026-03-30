@@ -1,0 +1,79 @@
+<section class="auth-page d-flex justify-content-center">
+  <div class="card shadow auth-card">
+    <div class="card-body p-4 p-md-5">
+      <h1 class="h3 mb-2">Register</h1>
+      <p class="text-secondary mb-4">Create a local frontend-only account for the demo.</p>
+
+      @if (errorMessage()) {
+        <div class="alert alert-danger">{{ errorMessage() }}</div>
+      }
+
+      <form [formGroup]="registerForm" (ngSubmit)="submit()" novalidate>
+        <div class="mb-3">
+          <label for="name" class="form-label">Name</label>
+          <input id="name" type="text" class="form-control" formControlName="name"/>
+          @if ((submitted() || registerForm.controls.name.touched) && registerForm.controls.name.errors) {
+            <div class="invalid-feedback d-block">
+              @if (registerForm.controls.name.errors['required']) {
+                <span>Name is required.</span>
+              } @else if (registerForm.controls.name.errors['minlength']) {
+                <span>Name must be at least 2 characters long.</span>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="mb-3">
+          <label for="email" class="form-label">Email</label>
+          <input id="email" type="email" class="form-control" formControlName="email"/>
+          @if ((submitted() || registerForm.controls.email.touched) && registerForm.controls.email.errors) {
+            <div class="invalid-feedback d-block">
+              @if (registerForm.controls.email.errors['required']) {
+                <span>Email is required.</span>
+              } @else if (registerForm.controls.email.errors['email']) {
+                <span>Please enter a valid email address.</span>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="mb-3">
+          <label for="password" class="form-label">Password</label>
+          <input id="password" type="password" class="form-control" formControlName="password"/>
+          @if ((submitted() || registerForm.controls.password.touched) && registerForm.controls.password.errors) {
+            <div class="invalid-feedback d-block">
+              @if (registerForm.controls.password.errors['required']) {
+                <span>Password is required.</span>
+              } @else if (registerForm.controls.password.errors['minlength']) {
+                <span>Password must be at least 6 characters long.</span>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="mb-4">
+          <label for="confirmPassword" class="form-label">Confirm password</label>
+          <input
+            id="confirmPassword"
+            type="password"
+            class="form-control"
+            formControlName="confirmPassword"
+          />
+          @if ((submitted() || registerForm.controls.confirmPassword.touched) && registerForm.controls.confirmPassword.errors?.['required']) {
+            <div class="invalid-feedback d-block">Please confirm your password.</div>
+          }
+          @if (passwordMismatch()) {
+            <div class="invalid-feedback d-block">Passwords do not match.</div>
+          }
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">Create account</button>
+      </form>
+
+      <p class="text-secondary mt-4 mb-0 text-center">
+        Already registered?
+        <a routerLink="/login">Go to login</a>
+      </p>
+    </div>
+  </div>
+</section>
