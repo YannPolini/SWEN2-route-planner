@@ -1,13 +1,13 @@
-import { Component, computed, inject, signal } from '@angular/core';
-import { AbstractControl, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
-import { AuthService } from '../auth/auth.service';
+import {Component, computed, inject, signal} from '@angular/core';
+import {AbstractControl, FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
+import {Router, RouterLink} from '@angular/router';
+import {AuthService} from '../auth/auth.service';
 
 function passwordsMatch(control: AbstractControl) {
   const password = control.get('password')?.value;
   const confirmPassword = control.get('confirmPassword')?.value;
 
-  return password === confirmPassword ? null : { passwordMismatch: true };
+  return password === confirmPassword ? null : {passwordMismatch: true};
 }
 
 @Component({
@@ -31,7 +31,7 @@ export class RegisterComponent {
       password: ['', [Validators.required, Validators.minLength(6)]],
       confirmPassword: ['', [Validators.required]],
     },
-    { validators: passwordsMatch },
+    {validators: passwordsMatch},
   );
 
   readonly passwordMismatch = computed(
@@ -49,8 +49,8 @@ export class RegisterComponent {
       return;
     }
 
-    const { name, email, password } = this.registerForm.getRawValue();
-    const result = this.authService.register({ name, email, password });
+    const {name, email, password} = this.registerForm.getRawValue();
+    const result = this.authService.register({name, email, password});
 
     if (!result.success) {
       this.errorMessage.set(result.message ?? 'Registration failed.');

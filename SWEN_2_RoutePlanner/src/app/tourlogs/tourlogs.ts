@@ -1,6 +1,6 @@
-import { Component, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { TourlogsList } from '../tourlogs-list/tourlogs-list';
+import {Component, signal} from '@angular/core';
+import {FormsModule} from '@angular/forms';
+import {TourlogsList} from '../tourlogs-list/tourlogs-list';
 
 type Log = {
   date: string;
