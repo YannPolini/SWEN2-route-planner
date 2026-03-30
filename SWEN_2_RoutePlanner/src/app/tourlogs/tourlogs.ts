@@ -25,6 +25,7 @@ export class Tourlogs {
   readonly date = signal('');
   readonly time = signal('');
   readonly comment = signal('');
+  readonly difficulty = signal('');
   readonly formSubmitted = signal(false);
 
   readonly logList = signal<Log[]>([
@@ -82,5 +83,47 @@ export class Tourlogs {
 
   selectLog(log: Log): void {
     this.selectedLog.set(log);
+  }
+
+  readonly editingLog = signal<Log | null>(null);
+  //readonly showForm = signal<boolean>(false);
+  readonly showEditPopup = signal(false);
+
+  openEdit(log: Log): void {
+    this.editingLog.set(log);
+
+    this.date.set(log.date);
+    this.time.set(log.time);
+    this.comment.set(log.comment);
+    this.difficulty.set('0');
+
+    //this.showForm.set(true);
+    this.showEditPopup.set(true);
+  }
+
+  closeEditPopup(): void {
+    this.showEditPopup.set(false);
+    this.editingLog.set(null);
+  }
+
+  saveEdit(): void {
+  const currentLog = this.editingLog();
+
+  if (!currentLog) return;
+  this.logList.update(logs =>
+    logs.map(log =>
+      log.logID === currentLog.logID
+        ? {
+            ...log,
+            date: this.date(),
+            time: this.time(),
+            comment: this.comment(),
+            difficulty: 0,
+          }
+        : log
+    )
+  );
+
+  this.closeEditPopup();
   }
 }

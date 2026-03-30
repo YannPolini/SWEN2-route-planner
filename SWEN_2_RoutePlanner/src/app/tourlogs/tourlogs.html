@@ -60,14 +60,18 @@
       <h2 class="h4 mb-0">Existing Logs</h2>
       <span class="badge text-bg-light">{{ logList().length }} entries</span>
     </div>
+    
 
     <div class="list">
       @for (log of logList(); track log.date + log.time + log.comment) {
         <app-tourlogs-list [log]="log" (click)="selectLog(log)" [class.selected]="selectedLog()?.logID === log.logID"></app-tourlogs-list>
+        <button type="button" (click)="openEdit(log)">Bearbeiten</button><!--placeholder-->
+
       } @empty {
         <div class="alert alert-light border mb-0">No logs available yet.</div>
       }
     </div>
+
     @if (selectedLog(); as log) {
   <div class="details">
     <h2>Tourlog Details</h2>
@@ -85,4 +89,52 @@
   <p>Bitte ein Tourlog auswählen.</p>
 }
   </div>
+  
 </section>
+
+<!--Popup-->
+@if (showEditPopup()) {
+  <div class="popup-backdrop">
+    <div class="popup">
+      <h2>Tourlog bearbeiten</h2>
+
+      <label for="edit-date">Datum:</label>
+      <input
+        id="edit-date"
+        type="date"
+        [ngModel]="date()"
+        (ngModelChange)="date.set($event)"
+      />
+
+      <label for="edit-time">Zeit:</label>
+      <input
+        id="edit-time"
+        type="time"
+        [ngModel]="time()"
+        (ngModelChange)="time.set($event)"
+      />
+
+      <label for="edit-comment">Kommentar:</label>
+      <input
+        id="edit-comment"
+        type="text"
+        [ngModel]="comment()"
+        (ngModelChange)="comment.set($event)"
+      />
+
+      <label for="edit-difficulty">Schwierigkeit:</label>
+      <input
+        id="edit-difficulty"
+        type="number"
+        [ngModel]="difficulty()"
+        min="1"
+        max="5"
+      />
+
+      <div class="popup-buttons">
+        <button type="button" (click)="saveEdit()">Speichern</button>
+        <button type="button" (click)="closeEditPopup()">Abbrechen</button>
+      </div>
+    </div>
+  </div>
+}
