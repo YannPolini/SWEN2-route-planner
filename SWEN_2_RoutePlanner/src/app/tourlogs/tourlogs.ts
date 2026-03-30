@@ -6,6 +6,12 @@ type Log = {
   date: string;
   time: string;
   comment: string;
+  difficulty: number;
+  totalDistance: number;
+  totalTime: number;
+  rating: number;
+  tourID: string;
+  logID: number;
 };
 
 @Component({
@@ -20,31 +26,45 @@ export class Tourlogs {
   readonly time = signal('');
   readonly comment = signal('');
   readonly formSubmitted = signal(false);
+
   readonly logList = signal<Log[]>([
     {
       date: '2026-03-20',
       time: '08:45',
-      comment: 'Angenehme Tour mit schoenem Wetter und guter Sicht.',
+      comment: 'Angenehme Tour mit schönem Wetter und guter Sicht.',
+      difficulty: 2,
+      totalDistance: 12.4,
+      totalTime: 150,
+      rating: 4,
+      tourID: 'tour-001',
+      logID: 1
     },
     {
       date: '2026-03-21',
       time: '14:10',
       comment: 'Teilweise anstrengender Anstieg, aber insgesamt sehr lohnend.',
-    },
-    {
-      date: '2026-03-22',
-      time: '10:30',
-      comment: 'Kurze entspannte Runde, ideal fuer Anfaenger.',
-    },
+      difficulty: 4,
+      totalDistance: 18.7,
+      totalTime: 245,
+      rating: 5,
+      tourID: 'tour-002',
+      logID: 2
+    }
   ]);
 
   addLog(): void {
     this.formSubmitted.set(true);
 
     const newLog: Log = {
-      date: this.date().trim(),
-      time: this.time().trim(),
-      comment: this.comment().trim(),
+      date: this.date(),
+      time: this.time(),
+      comment: this.comment(),
+      difficulty: 0,
+      totalDistance: 0,
+      totalTime: 0,
+      rating: 0,
+      tourID: `tour-${this.logList().length + 1}`,
+      logID: Date.now()
     };
 
     if (!newLog.date || !newLog.time || !newLog.comment) {
@@ -56,5 +76,11 @@ export class Tourlogs {
     this.time.set('');
     this.comment.set('');
     this.formSubmitted.set(false);
+  }
+
+  readonly selectedLog = signal<Log | null>(null);
+
+  selectLog(log: Log): void {
+    this.selectedLog.set(log);
   }
 }
