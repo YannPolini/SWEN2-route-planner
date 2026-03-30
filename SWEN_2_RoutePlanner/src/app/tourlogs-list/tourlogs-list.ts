@@ -4,14 +4,12 @@ type Log = {
   date: string;
   time: string;
   comment: string;
-  /*
   difficulty: number;
   totalDistance: number;
   totalTime: number;
   rating: number;
   tourID: string;
   logID: number;
-  */
 };
 
 @Component({

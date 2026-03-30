@@ -34,13 +34,38 @@
     <h2>{{ comment() }}</h2>
   </div>
 
+  <button type="button" (click)="addLog()">Log hinzufügen</button>
+
   <div class="title">Liste</div>
+
   <div class="list">
     @for (log of logList(); track log.date) {
-      <app-tourlogs-list [log]="log"></app-tourlogs-list>
+      <app-tourlogs-list 
+      [log]="log"
+      (click)="selectLog(log)"
+      ></app-tourlogs-list>
     } @empty {
       <div class="text-muted">No matching items.</div>
     }
   </div>
-  <button type="button" (click)="addLog()">Log hinzufügen</button>
+  <div>
+
+@if (selectedLog(); as log) {
+  <div class="details">
+    <h2>Tourlog Details</h2>
+    <p><strong>Datum:</strong> {{ log.date }}</p>
+    <p><strong>Zeit:</strong> {{ log.time }}</p>
+    <p><strong>Kommentar:</strong> {{ log.comment }}</p>
+    <p><strong>Schwierigkeit:</strong> {{ log.difficulty }}</p>
+    <p><strong>Gesamtdistanz:</strong> {{ log.totalDistance }} km</p>
+    <p><strong>Gesamtzeit:</strong> {{ log.totalTime }} min</p>
+    <p><strong>Bewertung:</strong> {{ log.rating }}</p>
+    <p><strong>Tour-ID:</strong> {{ log.tourID }}</p>
+    <p><strong>Log-ID:</strong> {{ log.logID }}</p>
+  </div>
+} @else {
+  <p>Bitte ein Tourlog auswählen.</p>
+}
+</div>
+  
 </section>
