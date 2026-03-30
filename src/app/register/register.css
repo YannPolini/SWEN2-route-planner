@@ -1,0 +1,8 @@
+.auth-page {
+  padding-top: 4rem;
+}
+
+.auth-card {
+  width: min(100%, 460px);
+  border: 0;
+}

@@ -1,0 +1,32 @@
+.tour-list {
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.tour-item {
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.tour-item:hover {
+  background-color: #f8f9fa;
+}
+
+.tour-item.active {
+  background-color: #e8f0fe;
+  border-color: #4285f4;
+  border-left: 3px solid #4285f4;
+}
+
+.tour-item-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+  display: inline-block;
+}
+
+.map-placeholder {
+  height: 280px;
+}

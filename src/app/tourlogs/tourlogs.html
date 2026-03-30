@@ -1,0 +1,72 @@
+<section class="row g-4 align-items-start">
+  <div class="col-12 col-lg-5">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h1 class="h3 mb-3">Tour Logs</h1>
+        <p class="text-secondary mb-4">
+          Basic protected page with local demo data for the intermediate hand-in.
+        </p>
+
+        <div class="mb-3">
+          <label for="date" class="form-label">Date</label>
+          <input
+            id="date"
+            class="form-control"
+            type="date"
+            [ngModel]="date()"
+            (ngModelChange)="date.set($event)"
+          />
+          @if (formSubmitted() && !date()) {
+            <div class="invalid-feedback d-block">Please select a date.</div>
+          }
+        </div>
+
+        <div class="mb-3">
+          <label for="time" class="form-label">Time</label>
+          <input
+            id="time"
+            class="form-control"
+            type="time"
+            [ngModel]="time()"
+            (ngModelChange)="time.set($event)"
+          />
+          @if (formSubmitted() && !time()) {
+            <div class="invalid-feedback d-block">Please select a time.</div>
+          }
+        </div>
+
+        <div class="mb-3">
+          <label for="comment" class="form-label">Comment</label>
+          <textarea
+            id="comment"
+            class="form-control"
+            rows="4"
+            [ngModel]="comment()"
+            (ngModelChange)="comment.set($event)"
+            placeholder="How did the tour go?"
+          ></textarea>
+          @if (formSubmitted() && !comment().trim()) {
+            <div class="invalid-feedback d-block">Please enter a comment.</div>
+          }
+        </div>
+
+        <button type="button" class="btn btn-primary" (click)="addLog()">Add log</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-lg-7">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2 class="h4 mb-0">Existing Logs</h2>
+      <span class="badge text-bg-light">{{ logList().length }} entries</span>
+    </div>
+
+    <div class="list">
+      @for (log of logList(); track log.date + log.time + log.comment) {
+        <app-tourlogs-list [log]="log"></app-tourlogs-list>
+      } @empty {
+        <div class="alert alert-light border mb-0">No logs available yet.</div>
+      }
+    </div>
+  </div>
+</section>

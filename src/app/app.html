@@ -1,0 +1,26 @@
+<div class="app-shell">
+  <nav class="navbar navbar-expand-lg border-bottom bg-white shadow-sm">
+    <div class="container">
+      <a class="navbar-brand fw-semibold" routerLink="/">Tour Planner</a>
+
+      <div class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+        @if (authService.isAuthenticated()) {
+          <a class="nav-link" routerLink="/tourlogs" routerLinkActive="active">Tour Logs</a>
+          <span class="navbar-text text-secondary">
+            {{ authService.currentUser()?.name }}
+          </span>
+          <button type="button" class="btn btn-outline-secondary btn-sm" (click)="logout()">
+            Logout
+          </button>
+        } @else {
+          <a class="nav-link" routerLink="/login" routerLinkActive="active">Login</a>
+          <a class="btn btn-primary btn-sm" routerLink="/register">Register</a>
+        }
+      </div>
+    </div>
+  </nav>
+
+  <main class="app-content container py-4">
+    <router-outlet></router-outlet>
+  </main>
+</div>
