@@ -60,17 +60,62 @@
       <h2 class="h4 mb-0">Existing Logs</h2>
       <span class="badge text-bg-light">{{ logList().length }} entries</span>
     </div>
-    
 
+    <!--
+    <div class="list">
+  @for (log of logList(); track log.logID) {
+    <div
+      class="log-row"
+      [class.selected]="selectedLog()?.logID === log.logID"
+      (click)="selectLog(log)"
+    >
+      <app-tourlogs-list [log]="log"></app-tourlogs-list>
+    </div>
+  }
+</div>
+
+@if (selectedLog(); as log) {
+  <div class="actions">
+    <button type="button" (click)="openEdit(log)">
+      Bearbeiten
+    </button>
+  </div>
+}
+-->
+    
+  <!--
     <div class="list">
       @for (log of logList(); track log.date + log.time + log.comment) {
         <app-tourlogs-list [log]="log" (click)="selectLog(log)" [class.selected]="selectedLog()?.logID === log.logID"></app-tourlogs-list>
-        <button type="button" (click)="openEdit(log)">Bearbeiten</button><!--placeholder-->
+        <button type="button" (click)="openEdit(log)">Bearbeiten</button>   
 
       } @empty {
         <div class="alert alert-light border mb-0">No logs available yet.</div>
       }
     </div>
+  -->
+    <div class="list">
+      @for (log of logList(); track log.logID) {
+      <div
+        class="log-row"
+        [class.selected]="selectedLog()?.logID === log.logID"
+        (click)="selectLog(log)"
+      >
+        <app-tourlogs-list [log]="log"></app-tourlogs-list>
+      </div>
+      }
+    </div>
+
+    @if (selectedLog(); as log) {
+    <div class="actions">
+      <button type="button" (click)="openEdit(log)">
+        Bearbeiten
+      </button>
+    </div>
+    }
+
+
+  
 
     @if (selectedLog(); as log) {
   <div class="details">

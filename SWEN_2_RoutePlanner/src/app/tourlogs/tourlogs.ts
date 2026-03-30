@@ -113,14 +113,14 @@ export class Tourlogs {
   this.logList.update(logs =>
     logs.map(log =>
       log.logID === currentLog.logID
-        ? {
-            ...log,
+        ? { //Das ist ein ternärer Operator. Das ist einfach eine kurze Schreibweise für if/else.
+            ...log, //kopiert alle alten eigenschaften von log, --> danach kann ich die überschreiben mit dem was ich ändern will
             date: this.date(),
             time: this.time(),
             comment: this.comment(),
             difficulty: 0,
           }
-        : log
+        : log // Alle anderen Logs bleiben unverändert
     )
   );
 
