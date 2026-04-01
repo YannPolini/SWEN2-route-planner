@@ -50,7 +50,62 @@ export class Tourlogs {
       rating: 5,
       tourID: 'tour-002',
       logID: 2
-    }
+    },
+    {
+    date: '2026-04-01',
+    time: '09:15',
+    comment: 'Sehr schöne Morgenrunde entlang des Flusses, kaum Verkehr.',
+    difficulty: 2,
+    totalDistance: 10.5,
+    totalTime: 95,
+    rating: 4,
+    tourID: 'tour-006',
+    logID: 6
+  },
+  {
+    date: '2026-04-02',
+    time: '13:40',
+    comment: 'Heißes Wetter, aber tolle Aussicht auf den Bergen.',
+    difficulty: 4,
+    totalDistance: 21.3,
+    totalTime: 280,
+    rating: 5,
+    tourID: 'tour-007',
+    logID: 7
+  },
+  {
+    date: '2026-04-03',
+    time: '17:20',
+    comment: 'Kurze Feierabendtour, entspannend und ruhig.',
+    difficulty: 1,
+    totalDistance: 5.8,
+    totalTime: 60,
+    rating: 3,
+    tourID: 'tour-008',
+    logID: 8
+  },
+  {
+    date: '2026-04-04',
+    time: '08:00',
+    comment: 'Sehr anspruchsvoll, viele steile Abschnitte.',
+    difficulty: 5,
+    totalDistance: 25.0,
+    totalTime: 340,
+    rating: 5,
+    tourID: 'tour-009',
+    logID: 9
+  },
+  {
+    date: '2026-04-05',
+    time: '11:10',
+    comment: 'Gemütliche Tour durch den Wald, ideal zum Abschalten.',
+    difficulty: 2,
+    totalDistance: 13.2,
+    totalTime: 150,
+    rating: 4,
+    tourID: 'tour-010',
+    logID: 10
+  }
   ]);
 
   addLog(): void {
