@@ -297,7 +297,7 @@
               id="edit-totalDistance"
               class="form-control"
               type="number"
-              min="0"
+              min="0.1"
               step="0.1"
               formControlName="totalDistance"
             />
@@ -312,7 +312,7 @@
               id="edit-totalTime"
               class="form-control"
               type="number"
-              min="0"
+              min="1"
               formControlName="totalTime"
             />
             @if (formSubmitted() && logForm.controls.totalTime.invalid) {
