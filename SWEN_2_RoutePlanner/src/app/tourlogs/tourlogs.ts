@@ -1,6 +1,7 @@
-import {Component, signal} from '@angular/core';
-import {FormsModule} from '@angular/forms';
-import {TourlogsList} from '../tourlogs-list/tourlogs-list';
+import { Component, signal } from '@angular/core';
+import { TourlogsList } from '../tourlogs-list/tourlogs-list';
+import { FormBuilder, ReactiveFormsModule, FormControl, FormGroup, Validators, FormsModule } from '@angular/forms';
+import { inject } from '@angular/core';
 
 type Log = {
   date: string;
@@ -17,15 +18,49 @@ type Log = {
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [FormsModule, TourlogsList],
+  imports: [ReactiveFormsModule, TourlogsList, FormsModule],
   templateUrl: './tourlogs.html',
   styleUrl: './tourlogs.css',
 })
 export class Tourlogs {
+  /*
   readonly date = signal('');
   readonly time = signal('');
   readonly comment = signal('');
-  readonly difficulty = signal('');
+  readonly difficulty = signal(0);
+  readonly totalDistance = signal('');
+  readonly totalTime = signal('');
+  readonly rating = signal('');
+  readonly tourID = signal('');
+  */
+
+
+  /*  //Da viele attribute  wird FormBuilder verwendet
+  readonly logForm = new FormGroup({
+  date: new FormControl('', { nonNullable: true, [Validators.required] }),
+  time: new FormControl('', { nonNullable: true, [Validators.required] }),
+  comment: new FormControl('', { nonNullable: true, [Validators.required] }),
+  difficulty: new FormControl(0, { nonNullable: true }),
+  totalDistance: new FormControl(0, { nonNullable: true }),
+  totalTime: new FormControl(0, { nonNullable: true }),
+  rating: new FormControl(0, { nonNullable: true }),
+  tourID: new FormControl('', { nonNullable: true }),
+});
+  */
+
+private readonly fb = inject(FormBuilder);
+
+protected readonly logForm = this.fb.nonNullable.group({
+  date: ['', [Validators.required]],
+  time: ['', [Validators.required]],
+  comment: ['', [Validators.required]],
+  difficulty: [0, [Validators.required, Validators.min(0), Validators.max(5)]],
+  totalDistance: [0, [Validators.required, Validators.min(0)]],
+  totalTime: [0, [Validators.required, Validators.min(0)]],
+  rating: [0, [Validators.required, Validators.min(1), Validators.max(5)]],
+  tourID: [''],
+});
+
   readonly formSubmitted = signal(false);
 
   readonly logList = signal<Log[]>([
@@ -108,6 +143,7 @@ export class Tourlogs {
   }
   ]);
 
+  /*  //altes ohne FormBuild
   addLog(): void {
     this.formSubmitted.set(true);
 
@@ -133,6 +169,41 @@ export class Tourlogs {
     this.comment.set('');
     this.formSubmitted.set(false);
   }
+    */
+  addLog(): void {
+  this.formSubmitted.set(true);
+
+  if (this.logForm.invalid) return;
+
+  const formValue = this.logForm.getRawValue();
+
+  const newLog: Log = {
+    date: formValue.date,
+    time: formValue.time,
+    comment: formValue.comment.trim(),
+    difficulty: formValue.difficulty,
+    totalDistance: formValue.totalDistance,
+    totalTime: formValue.totalTime,
+    rating: formValue.rating,
+    tourID: formValue.tourID || `tour-${this.logList().length + 1}`,
+    logID: Date.now()
+  };
+
+  this.logList.update(logs => [newLog, ...logs]);
+
+  this.logForm.reset({
+    date: '',
+    time: '',
+    comment: '',
+    difficulty: 0,
+    totalDistance: 0,
+    totalTime: 0,
+    rating: 0,
+    tourID: ''
+  });
+
+  this.formSubmitted.set(false);
+}
 
   readonly selectedLog = signal<Log | null>(null);
 
@@ -144,6 +215,7 @@ export class Tourlogs {
   //readonly showForm = signal<boolean>(false);
   readonly showEditPopup = signal(false);
 
+  /*  //altes ohne FormBuild
   openEdit(log: Log): void {
     this.editingLog.set(log);
 
@@ -155,12 +227,33 @@ export class Tourlogs {
     //this.showForm.set(true);
     this.showEditPopup.set(true);
   }
+  */
+
+  openEdit(log: Log): void {
+  this.editingLog.set(log);
+
+  this.logForm.setValue({
+    date: log.date,
+    time: log.time,
+    comment: log.comment,
+    difficulty: log.difficulty,
+    totalDistance: log.totalDistance,
+    totalTime: log.totalTime,
+    rating: log.rating,
+    tourID: log.tourID
+  });
+
+  this.formSubmitted.set(false);
+  this.showEditPopup.set(true);
+}
+  
 
   closeEditPopup(): void {
     this.showEditPopup.set(false);
     this.editingLog.set(null);
   }
 
+  /* //altes ohne FormBuild
   saveEdit(): void {
   const currentLog = this.editingLog();
 
@@ -181,6 +274,34 @@ export class Tourlogs {
 
   this.closeEditPopup();
   }
+  */
+
+  saveEdit(): void {
+  const currentLog = this.editingLog();
+  if (!currentLog || this.logForm.invalid) return;
+
+  const formValue = this.logForm.getRawValue();
+
+  this.logList.update(logs =>
+    logs.map(log =>
+      log.logID === currentLog.logID
+        ? {
+            ...log,
+            date: formValue.date,
+            time: formValue.time,
+            comment: formValue.comment,
+            difficulty: formValue.difficulty,
+            totalDistance: formValue.totalDistance,
+            totalTime: formValue.totalTime,
+            rating: formValue.rating,
+            tourID: formValue.tourID
+          }
+        : log
+    )
+  );
+
+  this.closeEditPopup();
+}
 
   deleteLog(): void {
     const currentLog = this.selectedLog();  //holt ausgewähltes Log damit benutzt werden kann
