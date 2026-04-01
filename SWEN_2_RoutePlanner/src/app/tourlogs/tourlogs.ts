@@ -170,39 +170,59 @@ protected readonly logForm = this.fb.nonNullable.group({
     this.formSubmitted.set(false);
   }
     */
+
+  /* //add 2nd version no popup
   addLog(): void {
-  this.formSubmitted.set(true);
+    this.formSubmitted.set(true);
 
-  if (this.logForm.invalid) return;
+    if (this.logForm.invalid) return;
 
-  const formValue = this.logForm.getRawValue();
+    const formValue = this.logForm.getRawValue();
+    const newLog: Log = {
+      date: formValue.date,
+      time: formValue.time,
+      comment: formValue.comment.trim(),
+      difficulty: formValue.difficulty,
+      totalDistance: formValue.totalDistance,
+      totalTime: formValue.totalTime,
+      rating: formValue.rating,
+      tourID: formValue.tourID || `tour-${this.logList().length + 1}`,
+      logID: Date.now()
+    };
 
-  const newLog: Log = {
-    date: formValue.date,
-    time: formValue.time,
-    comment: formValue.comment.trim(),
-    difficulty: formValue.difficulty,
-    totalDistance: formValue.totalDistance,
-    totalTime: formValue.totalTime,
-    rating: formValue.rating,
-    tourID: formValue.tourID || `tour-${this.logList().length + 1}`,
-    logID: Date.now()
-  };
+    this.logList.update(logs => [newLog, ...logs]);
 
-  this.logList.update(logs => [newLog, ...logs]);
+    this.logForm.reset({
+      date: '',
+      time: '',
+      comment: '',
+      difficulty: 0,
+      totalDistance: 0,
+      totalTime: 0,
+      rating: 0,
+      tourID: ''
+    });
 
-  this.logForm.reset({
-    date: '',
-    time: '',
-    comment: '',
-    difficulty: 0,
-    totalDistance: 0,
-    totalTime: 0,
-    rating: 0,
-    tourID: ''
+    this.formSubmitted.set(false);
+  }
+    */
+  //with addPopup
+  openAdd(): void {
+    this.editingLog.set(null);
+
+    this.logForm.reset({
+      date: '',
+      time: '',
+      comment: '',
+      difficulty: 1,
+      totalDistance: 0,
+      totalTime: 0,
+      rating: 0,
+      tourID: '',
   });
 
   this.formSubmitted.set(false);
+  this.showFormPopup.set(true);
 }
 
   readonly selectedLog = signal<Log | null>(null);
@@ -213,7 +233,8 @@ protected readonly logForm = this.fb.nonNullable.group({
 
   readonly editingLog = signal<Log | null>(null);
   //readonly showForm = signal<boolean>(false);
-  readonly showEditPopup = signal(false);
+  //readonly showEditPopup = signal(false);
+  readonly showFormPopup = signal(false);
 
   /*  //altes ohne FormBuild
   openEdit(log: Log): void {
@@ -230,26 +251,25 @@ protected readonly logForm = this.fb.nonNullable.group({
   */
 
   openEdit(log: Log): void {
-  this.editingLog.set(log);
+    this.editingLog.set(log);
+    this.logForm.setValue({
+      date: log.date,
+      time: log.time,
+      comment: log.comment,
+      difficulty: log.difficulty,
+      totalDistance: log.totalDistance,
+      totalTime: log.totalTime,
+      rating: log.rating,
+      tourID: log.tourID
+    });
 
-  this.logForm.setValue({
-    date: log.date,
-    time: log.time,
-    comment: log.comment,
-    difficulty: log.difficulty,
-    totalDistance: log.totalDistance,
-    totalTime: log.totalTime,
-    rating: log.rating,
-    tourID: log.tourID
-  });
-
-  this.formSubmitted.set(false);
-  this.showEditPopup.set(true);
-}
+    this.formSubmitted.set(false);
+    this.showFormPopup.set(true);
+  }
   
 
   closeEditPopup(): void {
-    this.showEditPopup.set(false);
+    this.showFormPopup.set(false);
     this.editingLog.set(null);
   }
 
@@ -312,4 +332,84 @@ protected readonly logForm = this.fb.nonNullable.group({
 
   this.selectedLog.set(null); //wenn gelöscht wurde, wird das was im ausgewählten log ist zurückgesetzt
   }
+
+  //close the addPopup
+  closeFormPopup(): void {
+    this.showFormPopup.set(false);
+    this.editingLog.set(null);
+    this.formSubmitted.set(false);
+
+    this.logForm.reset({
+      date: '',
+      time: '',
+      comment: '',
+      difficulty: 1,
+      totalDistance: 0,
+      totalTime: 0,
+      rating: 0,
+      tourID: '',
+    });
+  }
+
+  //Damit beim popup gleichzeitig adden und editen kann
+  saveLog(): void {
+  this.formSubmitted.set(true);
+
+  if (this.logForm.invalid) {
+    return;
+  }
+
+  const formValue = this.logForm.getRawValue();
+  const currentLog = this.editingLog();
+
+  if (currentLog) {
+    this.logList.update(logs =>
+      logs.map(log =>
+        log.logID === currentLog.logID
+          ? {
+              ...log,
+              date: formValue.date,
+              time: formValue.time,
+              comment: formValue.comment,
+              difficulty: formValue.difficulty,
+              totalDistance: formValue.totalDistance,
+              totalTime: formValue.totalTime,
+              rating: formValue.rating,
+              tourID: formValue.tourID,
+            }
+          : log
+      )
+    );
+
+    this.selectedLog.set({
+      ...currentLog,
+      date: formValue.date,
+      time: formValue.time,
+      comment: formValue.comment,
+      difficulty: formValue.difficulty,
+      totalDistance: formValue.totalDistance,
+      totalTime: formValue.totalTime,
+      rating: formValue.rating,
+      tourID: formValue.tourID,
+    });
+  } else {
+    const newLog: Log = {
+      date: formValue.date,
+      time: formValue.time,
+      comment: formValue.comment,
+      difficulty: formValue.difficulty,
+      totalDistance: formValue.totalDistance,
+      totalTime: formValue.totalTime,
+      rating: formValue.rating,
+      tourID: formValue.tourID || `tour-${this.logList().length + 1}`,
+      logID: Date.now(),
+    };
+
+    this.logList.update(logs => [newLog, ...logs]);
+    this.selectedLog.set(newLog);
+  }
+
+  this.closeFormPopup();
+}
+
 }
