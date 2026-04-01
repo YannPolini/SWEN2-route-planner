@@ -6,126 +6,6 @@
         <p class="text-secondary mb-4">
           Basic protected page with local demo data for the intermediate hand-in.
         </p>
-        <!--
-        <form [formGroup]="logForm" (ngSubmit)="addLog()">
-          <div class="mb-3">
-            <label for="date" class="form-label">Date</label>
-            <input
-              id="date"
-              class="form-control"
-              type="date"
-              formControlName="date"
-            />
-            @if (formSubmitted() && logForm.controls.date.invalid) {
-              <div class="invalid-feedback d-block">Please select a date.</div>
-            }
-          </div>
-
-          <div class="mb-3">
-            <label for="time" class="form-label">Time</label>
-            <input
-              id="time"
-              class="form-control"
-              type="time"
-              formControlName="time"
-            />
-            @if (formSubmitted() && logForm.controls.time.invalid) {
-              <div class="invalid-feedback d-block">Please select a time.</div>
-            }
-          </div>
-
-          <div class="mb-3">
-            <label for="comment" class="form-label">Comment</label>
-            <textarea
-              id="comment"
-              class="form-control"
-              rows="4"
-              formControlName="comment"
-              placeholder="How did the tour go?"
-            ></textarea>
-            @if (formSubmitted() && logForm.controls.comment.invalid) {
-              <div class="invalid-feedback d-block">Please enter a comment.</div>
-            }
-          </div>
-
-          <div class="mb-3">
-            <label for="difficulty" class="form-label">Difficulty</label>
-            <input
-              id="difficulty"
-              class="form-control"
-              type="number"
-              min="1"
-              max="5"
-              formControlName="difficulty"
-            />
-            @if (formSubmitted() && logForm.controls.difficulty.invalid) {
-              <div class="invalid-feedback d-block">Please enter a difficulty.</div>
-            }
-          </div>
-
-          <div class="mb-3">
-            <label for="totalDistance" class="form-label">Total Distance (km)</label>
-            <input
-              id="totalDistance"
-              class="form-control"
-              type="number"
-              min="0.1"
-              step="0.1"
-              formControlName="totalDistance"
-            />
-            @if (formSubmitted() && logForm.controls.totalDistance.invalid) {
-              <div class="invalid-feedback d-block">Please enter a total distance (>0).</div>
-            }
-          </div>
-
-          <div class="mb-3">
-            <label for="totalTime" class="form-label">Total Time (min)</label>
-            <input
-              id="totalTime"
-              class="form-control"
-              type="number"
-              min="1"
-              formControlName="totalTime"
-            />
-             @if (formSubmitted() && logForm.controls.totalTime.invalid) {
-              <div class="invalid-feedback d-block">Please enter a total time (>0).</div>
-            }
-          </div>
-
-          <div class="mb-3">
-            <label for="rating" class="form-label">Rating</label>
-            <input
-              id="rating"
-              class="form-control"
-              type="number"
-              min="0"
-              max="5"
-              formControlName="rating"
-            />
-             @if (formSubmitted() && logForm.controls.rating.invalid) {
-              <div class="invalid-feedback d-block">Please enter a rating (0...worst, 5...best).</div>
-            }
-          </div>
-
-          <div class="mb-3">
-            <label for="tourID" class="form-label">Tour ID</label>
-            <input
-              id="tourID"
-              class="form-control"
-              type="text"
-              formControlName="tourID"
-              placeholder="Optional"
-            />
-          </div>
-        
-
-          <div class="d-grid">
-            <button type="submit" class="btn btn-primary">
-              Add log
-            </button>
-          </div>
-        -->
-      
         <button type="button" class="btn btn-primary" (click)="openAdd()">Add log</button>
       </div>
     </div>
@@ -234,15 +114,17 @@
 @if (showFormPopup()) {
   <div class="popup-backdrop">
     <div class="popup card shadow">
-      <div class="card-body">
-        <h2 class="h4 mb-3">
+      <div class="popup-header">
+        <h2 class="h4 mb-0">
           @if (editingLog()) {
             Tourlog bearbeiten
           } @else {
             Neues Tourlog anlegen
           }
         </h2>
+      </div>
 
+      <div class="popup-content">
         <form [formGroup]="logForm">
           <div class="mb-3">
             <label for="edit-date" class="form-label">Datum</label>
@@ -265,7 +147,7 @@
               type="time"
               formControlName="time"
             />
-             @if (formSubmitted() && logForm.controls.time.invalid) {
+            @if (formSubmitted() && logForm.controls.time.invalid) {
               <div class="invalid-feedback d-block">Zeit eingeben</div>
             }
           </div>
@@ -294,7 +176,9 @@
               formControlName="difficulty"
             />
             @if (formSubmitted() && logForm.controls.difficulty.invalid) {
-              <div class="invalid-feedback d-block">Please enter a difficulty. (1...leichteste Stufe, 5...schwerste Stufe)</div>
+              <div class="invalid-feedback d-block">
+                Schwierigkeitsgrad eingeben (1...leichteste Stufe, 5...schwerste Stufe), nur Nummern
+              </div>
             }
           </div>
 
@@ -309,7 +193,9 @@
               formControlName="totalDistance"
             />
             @if (formSubmitted() && logForm.controls.totalDistance.invalid) {
-              <div class="invalid-feedback d-block">Gesamtdistanz eingeben (>0).</div>
+              <div class="invalid-feedback d-block">
+                Gesamtdistanz eingeben (>0), nur Nummern
+              </div>
             }
           </div>
 
@@ -323,9 +209,10 @@
               formControlName="totalTime"
             />
             @if (formSubmitted() && logForm.controls.totalTime.invalid) {
-              <div class="invalid-feedback d-block">Gesamtzeit eingeben (>0).</div>
+              <div class="invalid-feedback d-block">
+                Gesamtzeit eingeben (>0), nur Nummern
+              </div>
             }
-
           </div>
 
           <div class="mb-3">
@@ -339,9 +226,10 @@
               formControlName="rating"
             />
             @if (formSubmitted() && logForm.controls.rating.invalid) {
-              <div class="invalid-feedback d-block">Bewertung eingeben (0 Sterne bis 5 Sterne).</div>
+              <div class="invalid-feedback d-block">
+                Bewertung eingeben (0 Sterne bis 5 Sterne), nur Nummern
+              </div>
             }
-
           </div>
 
           <div class="mb-3">
@@ -353,20 +241,21 @@
               formControlName="tourID"
             />
           </div>
-
-          <div class="d-flex gap-2 justify-content-end">
-            <button type="button" class="btn btn-primary" (click)="saveLog()">
-               @if (editingLog()) {
-                Speichern
-              } @else {
-                Hinzufügen
-              }
-            </button>
-            <button type="button" class="btn btn-secondary" (click)="closeEditPopup()">
-              Abbrechen
-            </button>
-          </div>
         </form>
+      </div>
+
+      <div class="popup-footer">
+        <button type="button" class="btn btn-primary" (click)="saveLog()">
+          @if (editingLog()) {
+            Speichern
+          } @else {
+            Hinzufügen
+          }
+        </button>
+
+        <button type="button" class="btn btn-secondary" (click)="closeFormPopup()">
+          Abbrechen
+        </button>
       </div>
     </div>
   </div>
