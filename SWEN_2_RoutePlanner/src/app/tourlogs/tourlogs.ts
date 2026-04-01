@@ -1,7 +1,6 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, computed, inject } from '@angular/core';
 import { TourlogsList } from '../tourlogs-list/tourlogs-list';
 import { FormBuilder, ReactiveFormsModule, FormControl, FormGroup, Validators, FormsModule } from '@angular/forms';
-import { inject } from '@angular/core';
 
 type Log = {
   date: string;
@@ -121,7 +120,7 @@ export class Tourlogs {
 
   //with addPopup
   openAdd(): void {
-    this.editingLog.set(null);
+    this.editingLogId.set(null);
 
     this.logForm.reset({
       date: '',
@@ -138,19 +137,27 @@ export class Tourlogs {
     this.showFormPopup.set(true);
   }
 
-  readonly selectedLog = signal<Log | null>(null);
-
-  selectLog(log: Log): void {
-    this.selectedLog.set(log);
-  }
-
-  readonly editingLog = signal<Log | null>(null);
-  //readonly showForm = signal<boolean>(false);
-  //readonly showEditPopup = signal(false);
+  //readonly selectedLog = signal<Log | null>(null);
+  //readonly editingLog = signal<Log | null>(null);
   readonly showFormPopup = signal(false);
 
+  readonly selectedLogId = signal<number | null>(null);
+  readonly editingLogId = signal<number | null>(null);
+
+  readonly selectedLog = computed(() =>
+    this.logList().find(log => log.logID === this.selectedLogId()) ?? null
+  );
+
+  readonly editingLog = computed(() =>
+    this.logList().find(log => log.logID === this.editingLogId()) ?? null
+  );
+
+  selectLog(log: Log): void {
+    this.selectedLogId.set(log.logID);  
+  }
+
   openEdit(log: Log): void {
-    this.editingLog.set(log);
+    this.editingLogId.set(log.logID);
     this.logForm.setValue({
       date: log.date,
       time: log.time,
@@ -165,13 +172,15 @@ export class Tourlogs {
     this.formSubmitted.set(false);
     this.showFormPopup.set(true);
   }
-  
 
+  //wird das noch benutzt?
+  /*
   closeEditPopup(): void {
     this.showFormPopup.set(false);
-    this.editingLog.set(null);
+    this.editingLogId.set(null);
   }
-
+    */
+  /*
   saveEdit(): void {
     const currentLog = this.editingLog();
     if (!currentLog || this.logForm.invalid) return;
@@ -198,21 +207,24 @@ export class Tourlogs {
 
     this.closeEditPopup();
   }
+    */
 
   deleteLog(): void {
     const currentLog = this.selectedLog();  //holt ausgewähltes Log damit benutzt werden kann
+    
     if (!currentLog) return;
+    
     this.logList.update(logs =>
       logs.filter(log => log.logID !== currentLog.logID)  //behält alle Logs außer dem ausgewählten.
     );
 
-    this.selectedLog.set(null); //wenn gelöscht wurde, wird das was im ausgewählten log ist zurückgesetzt
+    this.selectedLogId.set(null);//wenn gelöscht wurde, wird das was im ausgewählten log ist zurückgesetzt
   }
 
   //close the addPopup
   closeFormPopup(): void {
     this.showFormPopup.set(false);
-    this.editingLog.set(null);
+    this.editingLogId.set(null);
     this.formSubmitted.set(false);
 
     this.logForm.reset({
@@ -257,17 +269,7 @@ export class Tourlogs {
         )
       );
 
-      this.selectedLog.set({
-        ...currentLog,
-        date: formValue.date,
-        time: formValue.time,
-        comment: formValue.comment,
-        difficulty: formValue.difficulty,
-        totalDistance: formValue.totalDistance,
-        totalTime: formValue.totalTime,
-        rating: formValue.rating,
-        tourID: formValue.tourID,
-      });
+      this.selectedLogId.set(currentLog.logID);
     } else {
       const newLog: Log = {
         date: formValue.date,
@@ -282,7 +284,7 @@ export class Tourlogs {
       };
 
       this.logList.update(logs => [newLog, ...logs]);
-      this.selectedLog.set(newLog);
+      this.selectedLogId.set(newLog.logID);
     }
 
     this.closeFormPopup();
