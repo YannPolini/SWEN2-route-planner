@@ -126,4 +126,14 @@ export class Tourlogs {
 
   this.closeEditPopup();
   }
+
+  deleteLog(): void {
+    const currentLog = this.selectedLog();  //holt ausgewähltes Log damit benutzt werden kann
+    if (!currentLog) return;
+    this.logList.update(logs =>
+    logs.filter(log => log.logID !== currentLog.logID)  //behält alle Logs außer dem ausgewählten.
+  );
+
+  this.selectedLog.set(null); //wenn gelöscht wurde, wird das was im ausgewählten log ist zurückgesetzt
+  }
 }
