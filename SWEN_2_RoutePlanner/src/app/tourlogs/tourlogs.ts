@@ -1,6 +1,7 @@
 import { Component, signal, computed, inject } from '@angular/core';
 import { TourlogsList } from '../tourlogs-list/tourlogs-list';
 import { FormBuilder, ReactiveFormsModule, FormControl, FormGroup, Validators, FormsModule } from '@angular/forms';
+import { TourService } from '../services/tour.service';
 
 type Log = {
   date: string;
@@ -47,7 +48,7 @@ export class Tourlogs {
       totalDistance: 12.4,
       totalTime: 150,
       rating: 4,
-      tourID: 'tour-001',
+      tourID: '1',
       logID: 1
     },
     {
@@ -58,7 +59,7 @@ export class Tourlogs {
       totalDistance: 18.7,
       totalTime: 245,
       rating: 5,
-      tourID: 'tour-002',
+      tourID: '2',
       logID: 2
     },
     {
@@ -69,7 +70,7 @@ export class Tourlogs {
     totalDistance: 10.5,
     totalTime: 95,
     rating: 4,
-    tourID: 'tour-006',
+    tourID: '3',
     logID: 6
   },
   {
@@ -80,7 +81,7 @@ export class Tourlogs {
     totalDistance: 21.3,
     totalTime: 280,
     rating: 5,
-    tourID: 'tour-007',
+    tourID: '4',
     logID: 7
   },
   {
@@ -91,7 +92,7 @@ export class Tourlogs {
     totalDistance: 5.8,
     totalTime: 60,
     rating: 3,
-    tourID: 'tour-008',
+    tourID: '5',
     logID: 8
   },
   {
@@ -102,7 +103,7 @@ export class Tourlogs {
     totalDistance: 25.0,
     totalTime: 340,
     rating: 5,
-    tourID: 'tour-009',
+    tourID: '1',
     logID: 9
   },
   {
@@ -113,10 +114,22 @@ export class Tourlogs {
     totalDistance: 13.2,
     totalTime: 150,
     rating: 4,
-    tourID: 'tour-010',
+    tourID: '2',
     logID: 10
   }
   ]);
+
+  private readonly tourService = inject(TourService);
+
+  readonly filteredLogs = computed(() => {
+    const selectedTourId = this.tourService.selectedTourId();
+
+    if (!selectedTourId) {
+      return [];
+    }
+
+    return this.logList().filter(log => log.tourID === selectedTourId);
+  });
 
   //with addPopup
   openAdd(): void {
