@@ -111,6 +111,23 @@ export class TourService {
 
   readonly tourCount = computed(() => this._tours().length);
 
+  // ── Statistics (derived, always up-to-date) ──
+  readonly stats = computed(() => {
+    const tours = this._tours();
+    const count = tours.length;
+    const totalDistance = tours.reduce((sum, t) => sum + t.distance, 0);
+    const totalTime = tours.reduce((sum, t) => sum + t.estimatedTime, 0);
+    const avgDistance = count > 0 ? totalDistance / count : 0;
+    const avgTime = count > 0 ? totalTime / count : 0;
+
+    const byType = new Map<TransportType, number>();
+    for (const t of tours) {
+      byType.set(t.transportType, (byType.get(t.transportType) ?? 0) + 1);
+    }
+
+    return { count, totalDistance, totalTime, avgDistance, avgTime, byType };
+  });
+
   // ── Intent methods (controlled writes) ──
   selectTour(id: string | null): void {
     this._selectedTourId.set(id);
