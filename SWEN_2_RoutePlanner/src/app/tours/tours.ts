@@ -1,13 +1,15 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { DatePipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { TourService } from '../services/tour.service';
 import { Tour, TransportType, TRANSPORT_TYPES } from '../models/tour.model';
 import { SearchBarComponent } from '../shared/search-bar/search-bar';
+import { TourMapComponent } from '../shared/tour-map/tour-map';
+
 @Component({
   selector: 'app-tours',
   standalone: true,
-  imports: [FormsModule, ReactiveFormsModule, DatePipe, SearchBarComponent],
+  imports: [FormsModule, ReactiveFormsModule, DatePipe, DecimalPipe, SearchBarComponent, TourMapComponent],
   templateUrl: './tours.html',
   styleUrl: './tours.css',
 })
@@ -54,7 +56,15 @@ export class ToursComponent {
   // ── Tour CRUD ──
   protected openCreate(): void {
     this.editingTour.set(null);
-    this.tourForm.reset({ name: '', description: '', from: '', to: '', transportType: 'hike', distance: 0, estimatedTimeMinutes: 0 });
+    this.tourForm.reset({
+      name: '',
+      description: '',
+      from: '',
+      to: '',
+      transportType: 'hike',
+      distance: 0,
+      estimatedTimeMinutes: 0,
+    });
     this.formSubmitted.set(false);
     this.showForm.set(true);
   }

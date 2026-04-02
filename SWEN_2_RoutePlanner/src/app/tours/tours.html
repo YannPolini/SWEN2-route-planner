@@ -1,3 +1,60 @@
+<!-- ═══ STATISTICS DASHBOARD ═══ -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-3">
+    <div class="card shadow-sm text-center">
+      <div class="card-body py-3">
+        <div class="text-secondary small text-uppercase fw-medium">Total tours</div>
+        <div class="fs-3 fw-semibold">{{ tourService.stats().count }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card shadow-sm text-center">
+      <div class="card-body py-3">
+        <div class="text-secondary small text-uppercase fw-medium">Total distance</div>
+        <div class="fs-3 fw-semibold">
+          {{ tourService.stats().totalDistance | number: '1.1-1' }}
+          <span class="fs-6 fw-normal text-secondary">km</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card shadow-sm text-center">
+      <div class="card-body py-3">
+        <div class="text-secondary small text-uppercase fw-medium">Avg. distance</div>
+        <div class="fs-3 fw-semibold">
+          {{ tourService.stats().avgDistance | number: '1.1-1' }}
+          <span class="fs-6 fw-normal text-secondary">km</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card shadow-sm text-center">
+      <div class="card-body py-3">
+        <div class="text-secondary small text-uppercase fw-medium">Avg. duration</div>
+        <div class="fs-3 fw-semibold">{{ formatDuration(tourService.stats().avgTime) }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Tours by type breakdown -->
+<div class="card shadow-sm mb-4">
+  <div class="card-body py-2">
+    <div class="d-flex flex-wrap align-items-center gap-3">
+      <span class="small text-secondary fw-medium me-1">Tours by type:</span>
+      @for (t of transportTypes; track t.value) {
+        <span class="d-flex align-items-center gap-1">
+          <span class="badge {{ badgeClass(t.value) }}">{{ t.label }}</span>
+          <span class="fw-semibold small">{{ tourService.stats().byType.get(t.value) ?? 0 }}</span>
+        </span>
+      }
+    </div>
+  </div>
+</div>
+
 <div class="row g-4 tours-layout">
   <!-- ═══ LEFT: TOUR LIST ═══ -->
   <div class="col-12 col-lg-5">
@@ -14,6 +71,26 @@
             [value]="tourService.searchTerm()"
             (valueChange)="tourService.updateSearch($event)"
           />
+        </div>
+
+        <!-- Transport Type Filter -->
+        <div class="d-flex flex-wrap gap-1 mb-3">
+          <button
+            class="btn btn-sm"
+            [class]="tourService.filterType() === null ? 'btn-dark' : 'btn-outline-secondary'"
+            (click)="tourService.setFilterType(null)"
+          >
+            All ({{ tourService.tourCount() }})
+          </button>
+          @for (t of transportTypes; track t.value) {
+            <button
+              class="btn btn-sm"
+              [class]="tourService.filterType() === t.value ? 'btn-dark' : 'btn-outline-secondary'"
+              (click)="tourService.setFilterType(t.value)"
+            >
+              {{ t.label }}
+            </button>
+          }
         </div>
 
         <div class="tour-list">
@@ -55,11 +132,17 @@
           <div class="d-flex justify-content-between align-items-start mb-3">
             <div>
               <h2 class="h4 mb-1">{{ tour.name }}</h2>
-              <span class="badge {{ badgeClass(tour.transportType) }}">{{ tour.transportType }}</span>
+              <span class="badge {{ badgeClass(tour.transportType) }}">{{
+                tour.transportType
+              }}</span>
             </div>
             <div class="d-flex gap-2">
-              <button class="btn btn-outline-secondary btn-sm" (click)="openEdit(tour)">✏️ Edit</button>
-              <button class="btn btn-outline-danger btn-sm" (click)="confirmDelete(tour)">🗑️ Delete</button>
+              <button class="btn btn-outline-secondary btn-sm" (click)="openEdit(tour)">
+                ✏️ Edit
+              </button>
+              <button class="btn btn-outline-danger btn-sm" (click)="confirmDelete(tour)">
+                🗑️ Delete
+              </button>
             </div>
           </div>
 
@@ -84,19 +167,13 @@
             </div>
             <div class="col-6 col-md-4">
               <div class="text-uppercase small text-secondary fw-medium">Created</div>
-              <div>{{ tour.createdAt | date:'mediumDate' }}</div>
+              <div>{{ tour.createdAt | date: 'mediumDate' }}</div>
             </div>
           </div>
 
-          <!-- Map Placeholder -->
+          <!-- Route Map (Leaflet + OpenStreetMap) -->
           <h3 class="h6 mb-2">Route Map</h3>
-          <div class="map-placeholder d-flex align-items-center justify-content-center rounded-3 border bg-light">
-            <div class="text-center text-secondary">
-              <div class="fs-2 mb-1">🗺️</div>
-              <p class="small mb-0">Map will be loaded via Leaflet + OpenRouteService API</p>
-              <p class="small text-muted mb-0">{{ tour.from }} → {{ tour.to }}</p>
-            </div>
-          </div>
+          <app-tour-map [fromLocation]="tour.from" [toLocation]="tour.to" />
         </div>
       </div>
     } @else {
@@ -110,7 +187,6 @@
       </div>
     }
   </div>
-  
 </div>
 
 <!-- ═══ CREATE/EDIT MODAL ═══ -->
@@ -127,19 +203,38 @@
           <form [formGroup]="tourForm" (ngSubmit)="submitForm()" novalidate>
             <div class="mb-3">
               <label for="tourName" class="form-label">Tour Name *</label>
-              <input id="tourName" class="form-control" formControlName="name" placeholder="e.g. Donauinsel Rundweg" />
-              @if ((formSubmitted() || tourForm.controls.name.touched) && tourForm.controls.name.errors) {
+              <input
+                id="tourName"
+                class="form-control"
+                formControlName="name"
+                placeholder="e.g. Donauinsel Rundweg"
+              />
+              @if (
+                (formSubmitted() || tourForm.controls.name.touched) && tourForm.controls.name.errors
+              ) {
                 <div class="invalid-feedback d-block">
-                  @if (tourForm.controls.name.errors['required']) { <span>Name is required.</span> }
-                  @else if (tourForm.controls.name.errors['minlength']) { <span>At least 3 characters.</span> }
+                  @if (tourForm.controls.name.errors['required']) {
+                    <span>Name is required.</span>
+                  } @else if (tourForm.controls.name.errors['minlength']) {
+                    <span>At least 3 characters.</span>
+                  }
                 </div>
               }
             </div>
 
             <div class="mb-3">
               <label for="tourDesc" class="form-label">Description *</label>
-              <textarea id="tourDesc" class="form-control" rows="3" formControlName="description" placeholder="Describe the tour..."></textarea>
-              @if ((formSubmitted() || tourForm.controls.description.touched) && tourForm.controls.description.errors?.['required']) {
+              <textarea
+                id="tourDesc"
+                class="form-control"
+                rows="3"
+                formControlName="description"
+                placeholder="Describe the tour..."
+              ></textarea>
+              @if (
+                (formSubmitted() || tourForm.controls.description.touched) &&
+                tourForm.controls.description.errors?.['required']
+              ) {
                 <div class="invalid-feedback d-block">Description is required.</div>
               }
             </div>
@@ -147,15 +242,26 @@
             <div class="row g-3">
               <div class="col-6">
                 <label for="tourFrom" class="form-label">From *</label>
-                <input id="tourFrom" class="form-control" formControlName="from" placeholder="Start" />
-                @if ((formSubmitted() || tourForm.controls.from.touched) && tourForm.controls.from.errors?.['required']) {
+                <input
+                  id="tourFrom"
+                  class="form-control"
+                  formControlName="from"
+                  placeholder="Start"
+                />
+                @if (
+                  (formSubmitted() || tourForm.controls.from.touched) &&
+                  tourForm.controls.from.errors?.['required']
+                ) {
                   <div class="invalid-feedback d-block">Required.</div>
                 }
               </div>
               <div class="col-6">
                 <label for="tourTo" class="form-label">To *</label>
                 <input id="tourTo" class="form-control" formControlName="to" placeholder="End" />
-                @if ((formSubmitted() || tourForm.controls.to.touched) && tourForm.controls.to.errors?.['required']) {
+                @if (
+                  (formSubmitted() || tourForm.controls.to.touched) &&
+                  tourForm.controls.to.errors?.['required']
+                ) {
                   <div class="invalid-feedback d-block">Required.</div>
                 }
               </div>
@@ -173,21 +279,46 @@
             <div class="row g-3 mb-3">
               <div class="col-6">
                 <label for="tourDist" class="form-label">Distance (km) *</label>
-                <input id="tourDist" type="number" class="form-control" formControlName="distance" step="0.1" min="0" />
-                @if ((formSubmitted() || tourForm.controls.distance.touched) && tourForm.controls.distance.errors) {
+                <input
+                  id="tourDist"
+                  type="number"
+                  class="form-control"
+                  formControlName="distance"
+                  step="0.1"
+                  min="0"
+                />
+                @if (
+                  (formSubmitted() || tourForm.controls.distance.touched) &&
+                  tourForm.controls.distance.errors
+                ) {
                   <div class="invalid-feedback d-block">
-                    @if (tourForm.controls.distance.errors['required']) { <span>Required.</span> }
-                    @else if (tourForm.controls.distance.errors['min']) { <span>Must be > 0.</span> }
+                    @if (tourForm.controls.distance.errors['required']) {
+                      <span>Required.</span>
+                    } @else if (tourForm.controls.distance.errors['min']) {
+                      <span>Must be > 0.</span>
+                    }
                   </div>
                 }
               </div>
               <div class="col-6">
                 <label for="tourTime" class="form-label">Est. Time (min) *</label>
-                <input id="tourTime" type="number" class="form-control" formControlName="estimatedTimeMinutes" min="1" />
-                @if ((formSubmitted() || tourForm.controls.estimatedTimeMinutes.touched) && tourForm.controls.estimatedTimeMinutes.errors) {
+                <input
+                  id="tourTime"
+                  type="number"
+                  class="form-control"
+                  formControlName="estimatedTimeMinutes"
+                  min="1"
+                />
+                @if (
+                  (formSubmitted() || tourForm.controls.estimatedTimeMinutes.touched) &&
+                  tourForm.controls.estimatedTimeMinutes.errors
+                ) {
                   <div class="invalid-feedback d-block">
-                    @if (tourForm.controls.estimatedTimeMinutes.errors['required']) { <span>Required.</span> }
-                    @else if (tourForm.controls.estimatedTimeMinutes.errors['min']) { <span>At least 1 min.</span> }
+                    @if (tourForm.controls.estimatedTimeMinutes.errors['required']) {
+                      <span>Required.</span>
+                    } @else if (tourForm.controls.estimatedTimeMinutes.errors['min']) {
+                      <span>At least 1 min.</span>
+                    }
                   </div>
                 }
               </div>
@@ -217,7 +348,10 @@
           <button type="button" class="btn-close" (click)="cancelDelete()"></button>
         </div>
         <div class="modal-body">
-          <p>Delete <strong>{{ target.name }}</strong>? This cannot be undone.</p>
+          <p>
+            Delete <strong>{{ target.name }}</strong
+            >? This cannot be undone.
+          </p>
         </div>
         <div class="modal-footer">
           <button class="btn btn-secondary btn-sm" (click)="cancelDelete()">Cancel</button>
