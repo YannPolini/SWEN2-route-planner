@@ -2,10 +2,62 @@
   <div class="card-body">
     <div class="d-flex justify-content-between align-items-center mb-2">
       <h3 class="h6 mb-0">Tour log</h3>
-      <span class="badge text-bg-secondary">{{ log.date }}</span>
     </div>
 
-    <div class="small text-secondary mb-2">Time: {{ log.time }}</div>
-    <div class="mb-0">{{ log.comment }}</div>
+    <div class="card-body">
+          <h2 class="h5 mb-3">Tourlog Details</h2>
+
+          <div class="row g-3">
+            <div class="col-12 col-md-6">
+              <strong>Datum:</strong>
+              <div>{{ log.date }}</div>
+            </div>
+
+            <div class="col-12 col-md-6">
+              <strong>Zeit:</strong>
+              <div>{{ log.time }}</div>
+            </div>
+
+            <div class="col-12">
+              <strong>Kommentar:</strong>
+              <div>{{ log.comment }}</div>
+            </div>
+
+            <div class="col-6 col-md-4">
+              <strong>Schwierigkeit:</strong>
+              <div>{{ log.difficulty }}</div>
+            </div>
+
+            <div class="col-6 col-md-4">
+              <strong>Gesamtdistanz:</strong>
+              <div>{{ log.totalDistance }} km</div>
+            </div>
+
+            <div class="col-6 col-md-4">
+              <strong>Gesamtzeit:</strong>
+              <div>{{ log.totalTime }} minute(n)</div>
+            </div>
+
+            <div class="col-6 col-md-4">
+              <strong>Bewertung:</strong>
+              <div>{{ log.rating }}</div>
+            </div>
+
+            <div class="col-6 col-md-4">
+              <strong>Tour-ID:</strong>
+              <div>{{ log.tourID }}</div>
+            </div>
+
+            <div class="col-6 col-md-4">
+              <strong>Log-ID:</strong>
+              <div>{{ log.logID }}</div>
+            </div>
+            
+             <div class="col-6 col-md-4">
+              <strong>Creator:</strong>
+              <div>{{ log.creatorName }}</div>
+            </div>
+          </div>
+        </div>
   </div>
 </article>

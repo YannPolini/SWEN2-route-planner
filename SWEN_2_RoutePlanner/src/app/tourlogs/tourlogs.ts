@@ -148,8 +148,15 @@ export class Tourlogs {
     return this.logList().filter(log => log.tourID === selectedTourId && log.creatorName === currentUsername);
   });
 
+  readonly canAddLog = computed(() => this.tourService.selectedTourId() !== null);
+
   //with addPopup
   openAdd(): void {
+    //damit nicht wenn kein tour ausgewählt trotzdem tourlog adden kann
+    if (!this.tourService.selectedTour()) {
+      return;
+    }
+
     this.editingLogId.set(null);
 
     this.logForm.reset({
@@ -160,7 +167,6 @@ export class Tourlogs {
       totalDistance: 0,
       totalTime: 0,
       rating: 0,
-      tourID: '',
     });
 
     this.formSubmitted.set(false);

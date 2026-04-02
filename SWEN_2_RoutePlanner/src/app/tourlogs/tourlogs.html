@@ -7,7 +7,10 @@
         <p class="text-secondary mb-4">
           Basic protected page with local demo data for the intermediate hand-in.
         </p>
-        <button type="button" class="btn btn-primary" (click)="openAdd()">Add log</button>
+        <button type="button" class="btn btn-primary" (click)="openAdd()"  [disabled]="!canAddLog()">Add log</button>
+        @if (!canAddLog()) {
+          <div class="alert alert-warning mt-2 mb-0">Bitte zuerst eine Tour auswählen.</div>
+}
       </div>
     </div>
   </div>
