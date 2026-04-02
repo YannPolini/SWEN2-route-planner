@@ -280,8 +280,9 @@ export class Tourlogs {
     const formValue = this.logForm.getRawValue();
     const currentLog = this.editingLog();
     const currentUsername = this.authService.currentUser()?.name;
+    const selectedTourId = this.tourService.selectedTourId();
 
-    if (!currentUsername) {
+    if (!currentUsername || !selectedTourId) {
       return;
     }
 
@@ -299,7 +300,6 @@ export class Tourlogs {
               totalDistance: formValue.totalDistance,
               totalTime: formValue.totalTime,
               rating: formValue.rating,
-              tourID: formValue.tourID,
               }
             : log
         )
@@ -315,7 +315,7 @@ export class Tourlogs {
         totalDistance: formValue.totalDistance,
         totalTime: formValue.totalTime,
         rating: formValue.rating,
-        tourID: formValue.tourID || `tour-${this.logList().length + 1}`,
+        tourID: selectedTourId,
         logID: Date.now(),
         creatorName: currentUsername,
       };
