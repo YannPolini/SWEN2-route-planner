@@ -70,25 +70,38 @@ export class TourService {
   private readonly _tours = signal<Tour[]>(MOCK_TOURS);
   private readonly _selectedTourId = signal<string | null>(null);
   private readonly _searchTerm = signal<string>('');
+  private readonly _filterType = signal<TransportType | null>(null);
 
   // ── Public readonly signals (View binds to these) ──
   readonly tours = this._tours.asReadonly();
   readonly selectedTourId = this._selectedTourId.asReadonly();
   readonly searchTerm = this._searchTerm.asReadonly();
+  readonly filterType = this._filterType.asReadonly();
 
   // ── Derived state (computed signals) ──
   readonly filteredTours = computed(() => {
     const term = this._searchTerm().toLowerCase().trim();
-    const all = this._tours();
-    if (!term) return all;
-    return all.filter(
-      (t) =>
-        t.name.toLowerCase().includes(term) ||
-        t.description.toLowerCase().includes(term) ||
-        t.from.toLowerCase().includes(term) ||
-        t.to.toLowerCase().includes(term) ||
-        t.transportType.toLowerCase().includes(term),
-    );
+    const type = this._filterType();
+    let result = this._tours();
+
+    // Filter by transport type
+    if (type) {
+      result = result.filter((t) => t.transportType === type);
+    }
+
+    // Filter by search term
+    if (term) {
+      result = result.filter(
+        (t) =>
+          t.name.toLowerCase().includes(term) ||
+          t.description.toLowerCase().includes(term) ||
+          t.from.toLowerCase().includes(term) ||
+          t.to.toLowerCase().includes(term) ||
+          t.transportType.toLowerCase().includes(term),
+      );
+    }
+
+    return result;
   });
 
   readonly selectedTour = computed(() => {
@@ -105,6 +118,10 @@ export class TourService {
 
   updateSearch(term: string): void {
     this._searchTerm.set(term);
+  }
+
+  setFilterType(type: TransportType | null): void {
+    this._filterType.set(type);
   }
 
   addTour(data: Omit<Tour, 'id' | 'createdAt'>): void {
