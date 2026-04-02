@@ -3,8 +3,7 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angu
 import { DatePipe } from '@angular/common';
 import { TourService } from '../services/tour.service';
 import { Tour, TransportType, TRANSPORT_TYPES } from '../models/tour.model';
-import { SearchBarComponent } from '../search-bar/search-bar';
-
+import { SearchBarComponent } from '../shared/search-bar/search-bar';
 @Component({
   selector: 'app-tours',
   standalone: true,

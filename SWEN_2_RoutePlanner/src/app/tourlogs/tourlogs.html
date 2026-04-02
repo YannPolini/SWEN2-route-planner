@@ -3,6 +3,7 @@
     <div class="card shadow-sm">
       <div class="card-body">
         <h1 class="h3 mb-3">Tour Logs</h1>
+        <!--<h2>{{ currentUsername() }}</h2>-->
         <p class="text-secondary mb-4">
           Basic protected page with local demo data for the intermediate hand-in.
         </p>
@@ -99,6 +100,12 @@
               <strong>Log-ID:</strong>
               <div>{{ log.logID }}</div>
             </div>
+            
+             <div class="col-6 col-md-4">
+              <strong>Creator:</strong>
+              <div>{{ log.creatorName }}</div>
+            </div>
+
           </div>
         </div>
       </div>

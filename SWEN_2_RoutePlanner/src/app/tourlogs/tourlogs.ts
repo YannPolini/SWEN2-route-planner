@@ -2,6 +2,7 @@ import { Component, signal, computed, inject } from '@angular/core';
 import { TourlogsList } from '../tourlogs-list/tourlogs-list';
 import { FormBuilder, ReactiveFormsModule, FormControl, FormGroup, Validators, FormsModule } from '@angular/forms';
 import { TourService } from '../services/tour.service';
+import { AuthService } from '../auth/auth.service';
 
 type Log = {
   date: string;
@@ -13,6 +14,7 @@ type Log = {
   rating: number;
   tourID: string;
   logID: number;
+  creatorName: string;
 };
 
 @Component({
@@ -49,7 +51,8 @@ export class Tourlogs {
       totalTime: 150,
       rating: 4,
       tourID: '1',
-      logID: 1
+      logID: 1,
+      creatorName: 'Klaxx'
     },
     {
       date: '2026-03-21',
@@ -60,7 +63,8 @@ export class Tourlogs {
       totalTime: 245,
       rating: 5,
       tourID: '2',
-      logID: 2
+      logID: 2,
+      creatorName: 'Demo User'
     },
     {
     date: '2026-04-01',
@@ -71,7 +75,8 @@ export class Tourlogs {
     totalTime: 95,
     rating: 4,
     tourID: '3',
-    logID: 6
+    logID: 6,
+    creatorName: 'Demo User'
   },
   {
     date: '2026-04-02',
@@ -82,7 +87,8 @@ export class Tourlogs {
     totalTime: 280,
     rating: 5,
     tourID: '4',
-    logID: 7
+    logID: 7,
+    creatorName: 'Demo User'
   },
   {
     date: '2026-04-03',
@@ -93,7 +99,8 @@ export class Tourlogs {
     totalTime: 60,
     rating: 3,
     tourID: '5',
-    logID: 8
+    logID: 8,
+    creatorName: 'Demo User'
   },
   {
     date: '2026-04-04',
@@ -104,7 +111,8 @@ export class Tourlogs {
     totalTime: 340,
     rating: 5,
     tourID: '1',
-    logID: 9
+    logID: 9,
+    creatorName: 'Demo User'
   },
   {
     date: '2026-04-05',
@@ -115,20 +123,29 @@ export class Tourlogs {
     totalTime: 150,
     rating: 4,
     tourID: '2',
-    logID: 10
+    logID: 10,
+    creatorName: 'Demo User'
   }
   ]);
 
   private readonly tourService = inject(TourService);
+  private readonly authService = inject(AuthService);
+
+  /*  //only visual verification during initial testing
+  readonly currentUsername = computed(() =>
+    this.authService.currentUser()?.name ?? ''
+  );
+  */
 
   readonly filteredLogs = computed(() => {
     const selectedTourId = this.tourService.selectedTourId();
+    const currentUsername = this.authService.currentUser()?.name;
 
     if (!selectedTourId) {
       return [];
     }
 
-    return this.logList().filter(log => log.tourID === selectedTourId);
+    return this.logList().filter(log => log.tourID === selectedTourId && log.creatorName === currentUsername);
   });
 
   //with addPopup
@@ -262,6 +279,12 @@ export class Tourlogs {
 
     const formValue = this.logForm.getRawValue();
     const currentLog = this.editingLog();
+    const currentUsername = this.authService.currentUser()?.name;
+
+    if (!currentUsername) {
+      return;
+    }
+
 
     if (currentLog) {
       this.logList.update(logs =>
@@ -294,6 +317,7 @@ export class Tourlogs {
         rating: formValue.rating,
         tourID: formValue.tourID || `tour-${this.logList().length + 1}`,
         logID: Date.now(),
+        creatorName: currentUsername,
       };
 
       this.logList.update(logs => [newLog, ...logs]);

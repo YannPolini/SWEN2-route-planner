@@ -10,6 +10,7 @@ type Log = {
   rating: number;
   tourID: string;
   logID: number;
+  creatorName: string;
 };
 
 @Component({
