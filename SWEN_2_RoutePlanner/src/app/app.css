@@ -5,3 +5,7 @@
 .app-content {
   max-width: 960px;
 }
+
+.profile-nav-link {
+  font-weight: 600;
+}

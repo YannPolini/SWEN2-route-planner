@@ -1,0 +1,157 @@
+<section class="profile-page">
+  <div class="row g-4 align-items-start">
+    <div class="col-12 col-lg-4">
+      <div class="card shadow-sm border-0 profile-summary">
+        <div class="card-body p-4">
+          <div class="profile-avatar">{{ userInitials() || 'U' }}</div>
+          <h1 class="h3 mb-1">{{ authService.currentUser()?.name }}</h1>
+          <p class="text-secondary mb-4">{{ authService.currentUser()?.email }}</p>
+
+          <div class="small text-secondary">
+            <div class="summary-row">
+              <span>Account type</span>
+              <strong>Local demo user</strong>
+            </div>
+            <div class="summary-row">
+              <span>Profile access</span>
+              <strong>Authenticated only</strong>
+            </div>
+            <div class="summary-row">
+              <span>Password security</span>
+              <strong>Manual update</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-8">
+      <div class="card shadow-sm border-0">
+        <div class="card-body p-4 p-md-5">
+          <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-4">
+            <div>
+              <h2 class="h4 mb-1">Profile settings</h2>
+              <p class="text-secondary mb-0">
+                Update your username, email address, and password.
+              </p>
+            </div>
+            <button type="button" class="btn btn-outline-secondary btn-sm" (click)="resetForm()">
+              Reset
+            </button>
+          </div>
+
+          @if (errorMessage()) {
+            <div class="alert alert-danger">{{ errorMessage() }}</div>
+          }
+
+          @if (successMessage()) {
+            <div class="alert alert-success">{{ successMessage() }}</div>
+          }
+
+          <form [formGroup]="profileForm" (ngSubmit)="submit()" novalidate>
+            <div class="row g-3">
+              <div class="col-12 col-md-6">
+                <label for="name" class="form-label">Username</label>
+                <input id="name" type="text" class="form-control" formControlName="name" />
+                @if ((submitted() || profileForm.controls.name.touched) && profileForm.controls.name.errors) {
+                  <div class="invalid-feedback d-block">
+                    @if (profileForm.controls.name.errors['required']) {
+                      <span>Username is required.</span>
+                    } @else if (profileForm.controls.name.errors['minlength']) {
+                      <span>Username must be at least 2 characters long.</span>
+                    }
+                  </div>
+                }
+              </div>
+
+              <div class="col-12 col-md-6">
+                <label for="email" class="form-label">Email</label>
+                <input id="email" type="email" class="form-control" formControlName="email" />
+                @if ((submitted() || profileForm.controls.email.touched) && profileForm.controls.email.errors) {
+                  <div class="invalid-feedback d-block">
+                    @if (profileForm.controls.email.errors['required']) {
+                      <span>Email is required.</span>
+                    } @else if (profileForm.controls.email.errors['email']) {
+                      <span>Please enter a valid email address.</span>
+                    }
+                  </div>
+                }
+              </div>
+
+              <div class="col-12">
+                <hr class="my-2" />
+              </div>
+
+              <div class="col-12 col-md-6">
+                <label for="currentPassword" class="form-label">Current password</label>
+                <input
+                  id="currentPassword"
+                  type="password"
+                  class="form-control"
+                  formControlName="currentPassword"
+                />
+                <div class="form-text">Required to save any profile changes.</div>
+                @if ((submitted() || profileForm.controls.currentPassword.touched) && profileForm.controls.currentPassword.errors) {
+                  <div class="invalid-feedback d-block">
+                    @if (profileForm.controls.currentPassword.errors['required']) {
+                      <span>Current password is required.</span>
+                    } @else if (profileForm.controls.currentPassword.errors['minlength']) {
+                      <span>Current password must be at least 6 characters long.</span>
+                    }
+                  </div>
+                }
+              </div>
+
+              <div class="col-12 col-md-6">
+                <div class="password-tip rounded-3 p-3">
+                  <h3 class="h6 mb-2">Optional password change</h3>
+                  <p class="small text-secondary mb-0">
+                    Leave the next two fields empty if you only want to update your username or
+                    email.
+                  </p>
+                </div>
+              </div>
+
+              <div class="col-12 col-md-6">
+                <label for="newPassword" class="form-label">New password</label>
+                <input
+                  id="newPassword"
+                  type="password"
+                  class="form-control"
+                  formControlName="newPassword"
+                />
+                @if ((submitted() || profileForm.controls.newPassword.touched) && profileForm.controls.newPassword.errors?.['minlength']) {
+                  <div class="invalid-feedback d-block">
+                    New password must be at least 6 characters long.
+                  </div>
+                }
+              </div>
+
+              <div class="col-12 col-md-6">
+                <label for="confirmNewPassword" class="form-label">Confirm new password</label>
+                <input
+                  id="confirmNewPassword"
+                  type="password"
+                  class="form-control"
+                  formControlName="confirmNewPassword"
+                />
+                @if (passwordChangeIncomplete()) {
+                  <div class="invalid-feedback d-block">
+                    Fill in both new password fields to change your password.
+                  </div>
+                }
+                @if (passwordMismatch()) {
+                  <div class="invalid-feedback d-block">New passwords do not match.</div>
+                }
+              </div>
+            </div>
+
+            <div class="d-flex justify-content-end mt-4">
+              <button type="submit" class="btn btn-primary">Save changes</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

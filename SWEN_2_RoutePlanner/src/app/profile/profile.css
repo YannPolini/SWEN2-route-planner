@@ -1,0 +1,44 @@
+.profile-page {
+  padding-top: 1rem;
+}
+
+.profile-summary {
+  position: sticky;
+  top: 1.5rem;
+}
+
+.profile-avatar {
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  margin-bottom: 1rem;
+  background: linear-gradient(135deg, #0d6efd, #6ea8fe);
+  color: #fff;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.summary-row:last-child {
+  border-bottom: 0;
+}
+
+.password-tip {
+  background-color: #f8f9fa;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+@media (max-width: 991.98px) {
+  .profile-summary {
+    position: static;
+  }
+}

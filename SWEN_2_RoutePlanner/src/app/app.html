@@ -6,9 +6,13 @@
       <div class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
         @if (authService.isAuthenticated()) {
           <a class="nav-link" routerLink="/tourlogs" routerLinkActive="active">Tour Logs</a>
-          <span class="navbar-text text-secondary">
+          <a
+            class="nav-link profile-nav-link"
+            routerLink="/profile"
+            routerLinkActive="active"
+          >
             {{ authService.currentUser()?.name }}
-          </span>
+          </a>
           <button type="button" class="btn btn-outline-secondary btn-sm" (click)="logout()">
             Logout
           </button>

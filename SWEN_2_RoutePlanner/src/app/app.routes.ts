@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { authGuard } from './auth/auth.guard';
 import { LoginComponent } from './login/login';
 import { RegisterComponent } from './register/register';
+import { ProfileComponent } from './profile/profile';
 import { Tourlogs } from './tourlogs/tourlogs';
 import { ToursComponent } from './tours/tours';
 
@@ -27,6 +28,11 @@ export const routes: Routes = [
   {
     path: 'tourlogs',
     component: Tourlogs,
+    canActivate: [authGuard],
+  },
+  {
+    path: 'profile',
+    component: ProfileComponent,
     canActivate: [authGuard],
   },
   {

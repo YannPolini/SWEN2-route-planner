@@ -1,6 +1,6 @@
-import { isPlatformBrowser } from '@angular/common';
-import { Injectable, PLATFORM_ID, computed, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import {isPlatformBrowser} from '@angular/common';
+import {Injectable, PLATFORM_ID, computed, inject, signal} from '@angular/core';
+import {Router} from '@angular/router';
 
 type StoredUser = {
   name: string;
@@ -18,6 +18,13 @@ type AuthResult = {
   message?: string;
 };
 
+type ProfileUpdate = {
+  name: string;
+  email: string;
+  currentPassword: string;
+  newPassword?: string;
+};
+
 @Injectable({
   providedIn: 'root',
 })
@@ -30,7 +37,7 @@ export class AuthService {
   private readonly usersSignal = signal<StoredUser[]>([]);
   private readonly currentUserSignal = signal<SessionUser | null>(null);
 
-  readonly currentUser = computed(() => this.currentUserSignal());
+  readonly currentUser = this.currentUserSignal.asReadonly();
   readonly isAuthenticated = computed(() => this.currentUserSignal() !== null);
 
   constructor() {
@@ -43,18 +50,18 @@ export class AuthService {
     const password = user.password.trim();
 
     if (!name || !email || !password) {
-      return { success: false, message: 'Please fill in all fields.' };
+      return {success: false, message: 'Please fill in all fields.'};
     }
 
     if (this.usersSignal().some((existingUser) => existingUser.email === email)) {
-      return { success: false, message: 'An account with this email already exists.' };
+      return {success: false, message: 'An account with this email already exists.'};
     }
 
-    this.usersSignal.set([...this.usersSignal(), { name, email, password }]);
-    this.currentUserSignal.set({ name, email });
+    this.usersSignal.set([...this.usersSignal(), {name, email, password}]);
+    this.currentUserSignal.set({name, email});
     this.persistState();
 
-    return { success: true };
+    return {success: true};
   }
 
   login(email: string, password: string): AuthResult {
@@ -66,13 +73,66 @@ export class AuthService {
     );
 
     if (!user) {
-      return { success: false, message: 'Invalid email or password.' };
+      return {success: false, message: 'Invalid email or password.'};
     }
 
-    this.currentUserSignal.set({ name: user.name, email: user.email });
+    this.currentUserSignal.set({name: user.name, email: user.email});
     this.persistState();
 
-    return { success: true };
+    return {success: true};
+  }
+
+  updateProfile(update: ProfileUpdate): AuthResult {
+    const activeUser = this.currentUserSignal();
+
+    if (!activeUser) {
+      return {success: false, message: 'You must be logged in to update your profile.'};
+    }
+
+    const name = update.name.trim();
+    const email = update.email.trim().toLowerCase();
+    const currentPassword = update.currentPassword.trim();
+    const newPassword = update.newPassword?.trim();
+
+    if (!name || !email || !currentPassword) {
+      return {success: false, message: 'Please fill in all required fields.'};
+    }
+
+    const currentUserIndex = this.usersSignal().findIndex(
+      (user) => user.email === activeUser.email,
+    );
+
+    if (currentUserIndex === -1) {
+      return {success: false, message: 'Current account could not be found.'};
+    }
+
+    const currentUser = this.usersSignal()[currentUserIndex];
+
+    if (currentUser.password !== currentPassword) {
+      return {success: false, message: 'Current password is incorrect.'};
+    }
+
+    const emailTaken = this.usersSignal().some(
+      (user, index) => index !== currentUserIndex && user.email === email,
+    );
+
+    if (emailTaken) {
+      return {success: false, message: 'Another account already uses this email address.'};
+    }
+
+    const updatedUser: StoredUser = {
+      name,
+      email,
+      password: newPassword || currentUser.password,
+    };
+
+    this.usersSignal.update((users) =>
+      users.map((user, index) => (index === currentUserIndex ? updatedUser : user)),
+    );
+    this.currentUserSignal.set({name: updatedUser.name, email: updatedUser.email});
+    this.persistState();
+
+    return {success: true};
   }
 
   logout(): void {
