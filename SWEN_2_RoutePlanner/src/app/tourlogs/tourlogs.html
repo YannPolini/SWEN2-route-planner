@@ -20,7 +20,13 @@
   <div class="col-12">
     <h1 class="h3 mb-3">Tour Logs</h1>
     <button type="button" class="btn btn-primary" (click)="openAdd()"  [disabled]="!canAddLog()">Add log</button>
-      <span class="badge text-bg-light">{{ logList().length }} entries</span>
+      <span class="badge text-bg-light">{{ logList().length }} total entries</span>
+      <span class="badge text-bg-light">{{ filteredLogs().length }} total entries on this tour</span>
+      @if (selectedLog(); as log) {
+        <button type="button" class="btn btn-outline-primary me-3" (click)="openEdit(log)">Bearbeiten</button>
+        <button type="button" class="btn btn-outline-danger" (click)="deleteLog()">Delete</button>
+    }
+      
     <div class="list d-flex flex-column gap-2 mt-3">
       @for (log of filteredLogs(); track log.logID) {
         <div
@@ -37,6 +43,7 @@
       }
     </div>
 
+    <!--
     @if (selectedLog(); as log) {
       <div class="d-flex gap-2 mt-3">
         <button
@@ -54,6 +61,7 @@
         </button>
       </div>
     }
+    -->
     </div>
     </section>
       <!--
