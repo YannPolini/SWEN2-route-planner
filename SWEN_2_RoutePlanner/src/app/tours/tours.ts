@@ -4,11 +4,13 @@ import { DatePipe, DecimalPipe } from '@angular/common';
 import { TourService } from '../services/tour.service';
 import { SearchBarComponent } from '../shared/search-bar/search-bar';
 import { TourMapComponent } from '../shared/tour-map/tour-map';
+import { App } from "../app";
+import { Tourlogs } from '../tourlogs/tourlogs';
 
 @Component({
   selector: 'app-tours',
   standalone: true,
-  imports: [ReactiveFormsModule, DatePipe, DecimalPipe, SearchBarComponent, TourMapComponent],
+  imports: [ReactiveFormsModule, DatePipe, DecimalPipe, SearchBarComponent, TourMapComponent, App, Tourlogs],
   templateUrl: './tours.html',
   styleUrl: './tours.css',
 })

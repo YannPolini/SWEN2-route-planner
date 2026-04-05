@@ -52,7 +52,7 @@ export class Tourlogs {
       rating: 4,
       tourID: '1',
       logID: 1,
-      creatorName: 'Klaxx'
+      creatorName: 'Demo User 2'
     },
     {
       date: '2026-03-21',
