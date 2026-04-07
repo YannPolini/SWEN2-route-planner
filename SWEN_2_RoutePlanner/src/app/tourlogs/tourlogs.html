@@ -27,27 +27,17 @@
           <app-tourlogs-list [log]="log"></app-tourlogs-list>
         </div>
       } @empty {
-        <div class="alert alert-light border mb-0">
-          No logs available yet.
-        </div>
+        <div class="alert alert-light border mb-0">No logs available yet.</div>
       }
     </div>
 
     @if (selectedLog(); as log) {
       <div class="d-flex gap-2 mt-3">
-        <button
-          type="button"
-          class="btn btn-outline-primary"
-          (click)="openEdit(log)"
-        >Bearbeiten
+        <button type="button" class="btn btn-outline-primary" (click)="openEdit(log)">
+          Bearbeiten
         </button>
 
-        <button
-          type="button"
-          class="btn btn-outline-danger"
-          (click)="deleteLog()"
-        >Delete
-        </button>
+        <button type="button" class="btn btn-outline-danger" (click)="deleteLog()">Delete</button>
       </div>
 
       <div class="card shadow-sm mt-4">
@@ -103,9 +93,7 @@
         </div>
       </div>
     } @else {
-      <div class="alert alert-secondary mt-3 mb-0">
-        Bitte ein Tourlog auswählen.
-      </div>
+      <div class="alert alert-secondary mt-3 mb-0">Bitte ein Tourlog auswählen.</div>
     }
   </div>
 </section>
@@ -128,12 +116,7 @@
         <form [formGroup]="logForm">
           <div class="mb-3">
             <label for="edit-date" class="form-label">Datum</label>
-            <input
-              id="edit-date"
-              class="form-control"
-              type="date"
-              formControlName="date"
-            />
+            <input id="edit-date" class="form-control" type="date" formControlName="date" />
             @if (formSubmitted() && logForm.controls.date.invalid) {
               <div class="invalid-feedback d-block">Datum eingeben</div>
             }
@@ -141,12 +124,7 @@
 
           <div class="mb-3">
             <label for="edit-time" class="form-label">Zeit</label>
-            <input
-              id="edit-time"
-              class="form-control"
-              type="time"
-              formControlName="time"
-            />
+            <input id="edit-time" class="form-control" type="time" formControlName="time" />
             @if (formSubmitted() && logForm.controls.time.invalid) {
               <div class="invalid-feedback d-block">Zeit eingeben</div>
             }
@@ -193,9 +171,7 @@
               formControlName="totalDistance"
             />
             @if (formSubmitted() && logForm.controls.totalDistance.invalid) {
-              <div class="invalid-feedback d-block">
-                Gesamtdistanz eingeben (>0), nur Nummern
-              </div>
+              <div class="invalid-feedback d-block">Gesamtdistanz eingeben (>0), nur Nummern</div>
             }
           </div>
 
@@ -209,9 +185,7 @@
               formControlName="totalTime"
             />
             @if (formSubmitted() && logForm.controls.totalTime.invalid) {
-              <div class="invalid-feedback d-block">
-                Gesamtzeit eingeben (>0), nur Nummern
-              </div>
+              <div class="invalid-feedback d-block">Gesamtzeit eingeben (>0), nur Nummern</div>
             }
           </div>
 
@@ -234,12 +208,7 @@
 
           <div class="mb-3">
             <label for="edit-tourID" class="form-label">Tour ID</label>
-            <input
-              id="edit-tourID"
-              class="form-control"
-              type="text"
-              formControlName="tourID"
-            />
+            <input id="edit-tourID" class="form-control" type="text" formControlName="tourID" />
           </div>
         </form>
       </div>
