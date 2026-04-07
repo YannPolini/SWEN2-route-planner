@@ -5,7 +5,6 @@ import { TourService } from '../services/tour.service';
 import { Tour, TransportType, TRANSPORT_TYPES } from '../models/tour.model';
 import { SearchBarComponent } from '../shared/search-bar/search-bar';
 import { TourMapComponent } from '../shared/tour-map/tour-map';
-import { App } from '../app';
 import { Tourlogs } from '../tourlogs/tourlogs';
 
 // ═══════════════════════════════════════════════════════
@@ -21,7 +20,6 @@ import { Tourlogs } from '../tourlogs/tourlogs';
     DecimalPipe,
     SearchBarComponent,
     TourMapComponent,
-    App,
     Tourlogs,
   ],
   templateUrl: './tours.html',
