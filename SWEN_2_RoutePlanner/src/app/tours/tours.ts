@@ -5,7 +5,7 @@ import { TourService } from '../services/tour.service';
 import { Tour, TransportType, TRANSPORT_TYPES } from '../models/tour.model';
 import { SearchBarComponent } from '../shared/search-bar/search-bar';
 import { TourMapComponent } from '../shared/tour-map/tour-map';
-import { Tourlogs } from '../tourlogs/tourlogs';
+import { TourlogsComponent } from '../tourlogs/tourlogs';
 
 // ═══════════════════════════════════════════════════════
 // VIEW-MODEL (Component) — UI state, UI logic, actions
@@ -20,7 +20,7 @@ import { Tourlogs } from '../tourlogs/tourlogs';
     DecimalPipe,
     SearchBarComponent,
     TourMapComponent,
-    Tourlogs,
+    TourlogsComponent,
   ],
   templateUrl: './tours.html',
   styleUrl: './tours.css',

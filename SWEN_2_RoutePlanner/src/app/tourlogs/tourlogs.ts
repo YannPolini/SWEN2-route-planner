@@ -12,7 +12,7 @@ import { TourlogsModel, Log } from '../tourlogs.model/tourlogs.model';
   templateUrl: './tourlogs.html',
   styleUrl: './tourlogs.css',
 })
-export class Tourlogs {
+export class TourlogsComponent {
   private readonly fb = inject(FormBuilder);
   private readonly tourlogsModel = inject(TourlogsModel);
 
@@ -67,7 +67,7 @@ export class Tourlogs {
   readonly showFormPopup = signal(false);
 
   readonly selectedLogId = signal<number | null>(null);
-  readonly editingLogId = signal<number | null>(null);
+  readonly editingLogId = signal<number | null>(null);    //das bruach ich glaub ich garnichtmehr
 
   readonly selectedLog = computed(
     () => this.tourlogsModel.logList().find((log) => log.logID === this.selectedLogId()) ?? null,
