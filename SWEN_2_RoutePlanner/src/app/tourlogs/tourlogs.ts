@@ -66,8 +66,8 @@ export class TourlogsComponent {
   //readonly editingLog = signal<Log | null>(null);
   readonly showFormPopup = signal(false);
 
-  readonly selectedLogId = signal<number | null>(null);
-  readonly editingLogId = signal<number | null>(null);    //das bruach ich glaub ich garnichtmehr
+  readonly selectedLogId = signal<number | null>(null);   //welches Log gerade selected ist
+  readonly editingLogId = signal<number | null>(null);    //welches Log gerade bearbeitet wird, wenn edit will dann bekommt nummer von dem was edited wird
 
   readonly selectedLog = computed(
     () => this.tourlogsModel.logList().find((log) => log.logID === this.selectedLogId()) ?? null,
