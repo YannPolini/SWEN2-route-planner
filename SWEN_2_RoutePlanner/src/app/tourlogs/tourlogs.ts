@@ -25,7 +25,7 @@ export class TourlogsComponent {
     difficulty: [0, [Validators.required, Validators.min(0), Validators.max(5)]],
     totalDistance: [0, [Validators.required, Validators.min(0)]],
     totalTime: [0, [Validators.required, Validators.min(0)]],
-    rating: [0, [Validators.required, Validators.min(1), Validators.max(5)]],
+    rating: [0, [Validators.required, Validators.min(0), Validators.max(5)]],
     tourID: [''],
   });
 
@@ -78,6 +78,17 @@ export class TourlogsComponent {
       this.selectedLogId.set(null);
       this.editingLogId.set(null);
       this.showFormPopup.set(false);
+
+      this.logForm.reset({
+        date: '',
+        time: '',
+        comment: '',
+        difficulty: 1,
+        totalDistance: 0,
+        totalTime: 0,
+        rating: 0,
+        tourID: '',
+      });
     });
   }
 
