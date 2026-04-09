@@ -21,8 +21,8 @@
     <button type="button" class="btn btn-primary" (click)="openAdd()" [disabled]="!canAddLog()">
       Add log
     </button>
-    <span class="badge text-bg-light">{{ logList().length }} Einträge gesamt</span>
-    <span class="badge text-bg-light">{{ filteredLogs().length }} Einträge für diese Tour</span>
+    <span class="badge text-bg-light">{{ logList().length }} total entries</span>
+    <span class="badge text-bg-light">{{ filteredLogs().length }} total entries on this tour</span>
     @if (selectedLog(); as log) {
       <button type="button" class="btn btn-outline-primary me-3" (click)="openEdit(log)">Bearbeiten</button>
       <button type="button" class="btn btn-outline-danger" (click)="deleteLog()">Delete</button>
@@ -136,10 +136,16 @@
       <div class="popup-content">
         <form [formGroup]="logForm">
           <div class="mb-3">
-            <label for="edit-date" class="form-label">Datum</label>
-            <input id="edit-date" class="form-control" type="date" formControlName="date" />
-            @if (formSubmitted() && logForm.controls.date.invalid) {
+            <label for="edit-date" class="form-label">Datum (Frühestens heute)</label>
+            <input id="edit-date" class="form-control" type="date" formControlName="date" [max]="today"/>
+            @if (formSubmitted() && logForm.controls.date.hasError('required')) {
               <div class="invalid-feedback d-block">Datum eingeben</div>
+            }
+            @if (formSubmitted() && logForm.controls.date.hasError('maxDate')) {
+              <div class="invalid-feedback d-block">Datum darf nicht in der Zukunft liegen</div>
+            }
+            @if (formSubmitted() && logForm.controls.date.hasError('minDate')) {
+              <div class="invalid-feedback d-block">Datum ist zu weit in der Vergangenheit</div>
             }
           </div>
 

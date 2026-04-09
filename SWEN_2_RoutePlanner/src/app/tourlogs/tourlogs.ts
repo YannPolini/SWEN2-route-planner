@@ -1,6 +1,6 @@
 import { Component, signal, computed, inject, effect } from '@angular/core';
 import { TourlogsList } from '../tourlogs-list/tourlogs-list';
-import { FormBuilder, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { TourService } from '../services/tour.service';
 import { AuthService } from '../auth/auth.service';
 import { TourlogsModel, Log } from '../tourlogs.model/tourlogs.model';
@@ -8,7 +8,7 @@ import { TourlogsModel, Log } from '../tourlogs.model/tourlogs.model';
 @Component({
   selector: 'app-tourlogs',
   standalone: true,
-  imports: [ReactiveFormsModule, TourlogsList, FormsModule],
+  imports: [ReactiveFormsModule, TourlogsList],
   templateUrl: './tourlogs.html',
   styleUrl: './tourlogs.css',
 })
@@ -16,10 +16,27 @@ export class TourlogsComponent {
   private readonly fb = inject(FormBuilder);
   private readonly tourlogsModel = inject(TourlogsModel);
 
-  readonly logList = this.tourlogsModel.logList;    //Ganze liste der TourLogs
+  protected readonly logList = this.tourlogsModel.logList;    //Ganze liste der TourLogs, nicht private da in html benutzt
 
-  protected readonly logForm = this.fb.nonNullable.group({
-    date: ['', [Validators.required]],
+  protected readonly today = new Date().toISOString().split('T')[0]; //Heutige Datum, new Date().toISOString() → "2026-04-09T12:34:56.000Z", .split('T')[0] → "2026-04-09"
+  protected readonly minDate = '1900-01-01';
+
+  private maxDateValidator(maxDate: string): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      if (!control.value) return null;
+      return control.value > maxDate ? { maxDate: true } : null;
+    };
+  }
+
+  private minDateValidator(minDate: string): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      if (!control.value) return null;
+        return control.value < minDate ? { minDate: true } : null;
+    };
+  }
+
+  readonly logForm = this.fb.nonNullable.group({
+    date: ['', [Validators.required, this.maxDateValidator(this.today), this.minDateValidator(this.minDate)]],
     time: ['', [Validators.required]],
     comment: ['', [Validators.required]],
     difficulty: [0, [Validators.required, Validators.min(0), Validators.max(5)]],
@@ -29,18 +46,20 @@ export class TourlogsComponent {
     tourID: [''],
   });
 
-  readonly formSubmitted = signal(false);
+  
+
+  protected readonly formSubmitted = signal(false);
 
   private readonly tourService = inject(TourService);
   private readonly authService = inject(AuthService);
 
   //ausgelagert zu tourlogs.model.ts
-  readonly filteredLogs = this.tourlogsModel.filteredLogs;    //Filtered Liste der Tourlogs, mit UserName und 
+  protected readonly filteredLogs = this.tourlogsModel.filteredLogs;    //Filtered Liste der Tourlogs, mit UserName und 
 
-  readonly canAddLog = computed(() => this.tourService.selectedTourId() !== null);  //Wenn eine Tour ausgewählt ist, dann hat es eine ID
+  protected readonly canAddLog = computed(() => this.tourService.selectedTourId() !== null);  //Wenn eine Tour ausgewählt ist, dann hat es eine ID
 
   //with addPopup
-  openAdd(): void {
+  protected openAdd(): void {
     //damit nicht wenn kein tour ausgewählt trotzdem tourlog adden kann
     if (!this.tourService.selectedTour()) {
       return;
@@ -62,12 +81,12 @@ export class TourlogsComponent {
     this.showFormPopup.set(true);
   }
 
-  readonly showFormPopup = signal(false);
+  protected readonly showFormPopup = signal(false);
 
-  readonly selectedLogId = signal<number | null>(null);   //welches Log gerade selected ist
-  readonly editingLogId = signal<number | null>(null);    //welches Log gerade bearbeitet wird, wenn edit will dann bekommt nummer von dem was edited wird
+  private readonly selectedLogId = signal<number | null>(null);   //welches Log gerade selected ist
+  private readonly editingLogId = signal<number | null>(null);    //welches Log gerade bearbeitet wird, wenn edit will dann bekommt nummer von dem was edited wird
 
-  readonly selectedLog = computed(
+  protected readonly selectedLog = computed(
     () => this.tourlogsModel.logList().find((log) => log.logID === this.selectedLogId()) ?? null,
   );
 
@@ -87,20 +106,19 @@ export class TourlogsComponent {
         totalDistance: 0,
         totalTime: 0,
         rating: 0,
-        tourID: '',
       });
     });
   }
 
-  readonly editingLog = computed(
+  protected readonly editingLog = computed(
     () => this.tourlogsModel.logList().find((log) => log.logID === this.editingLogId()) ?? null,
   );
 
-  selectLog(log: Log): void {
+  protected selectLog(log: Log): void {
     this.selectedLogId.set(log.logID);
   }
 
-  openEdit(log: Log): void {
+  protected openEdit(log: Log): void {
     this.editingLogId.set(log.logID);
     this.logForm.setValue({
       date: log.date,
@@ -117,7 +135,7 @@ export class TourlogsComponent {
     this.showFormPopup.set(true);
   }
 
-  deleteLog(): void {
+  protected deleteLog(): void {
     const currentLog = this.selectedLog(); //holt ausgewähltes Log damit benutzt werden kann
 
     if (!currentLog) return;
@@ -127,7 +145,7 @@ export class TourlogsComponent {
   }
 
   //close the addPopup
-  closeFormPopup(): void {
+  protected closeFormPopup(): void {
     this.showFormPopup.set(false);
     this.editingLogId.set(null);
     this.formSubmitted.set(false);
@@ -140,12 +158,11 @@ export class TourlogsComponent {
       totalDistance: 0,
       totalTime: 0,
       rating: 0,
-      tourID: '',
     });
   }
 
   //Damit beim popup gleichzeitig adden und editen kann
-  saveLog(): void {
+  protected saveLog(): void {
     this.formSubmitted.set(true);
 
     if (this.logForm.invalid) {
