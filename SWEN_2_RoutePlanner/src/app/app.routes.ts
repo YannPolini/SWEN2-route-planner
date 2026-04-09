@@ -3,7 +3,7 @@ import { authGuard } from './auth/auth.guard';
 import { LoginComponent } from './login/login';
 import { RegisterComponent } from './register/register';
 import { ProfileComponent } from './profile/profile';
-import { Tourlogs } from './tourlogs/tourlogs';
+import { TourlogsComponent } from './tourlogs/tourlogs';
 import { ToursComponent } from './tours/tours';
 
 export const routes: Routes = [
@@ -27,7 +27,7 @@ export const routes: Routes = [
   },
   {
     path: 'tourlogs',
-    component: Tourlogs,
+    component: TourlogsComponent,
     canActivate: [authGuard],
   },
   {

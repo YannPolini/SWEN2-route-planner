@@ -6,16 +6,15 @@ import { AuthService } from '../auth/auth.service';
 import { TourlogsModel, Log } from '../tourlogs.model/tourlogs.model';
 
 @Component({
-  selector: 'app-home',
+  selector: 'app-tourlogs',
   standalone: true,
   imports: [ReactiveFormsModule, TourlogsList, FormsModule],
   templateUrl: './tourlogs.html',
   styleUrl: './tourlogs.css',
 })
-export class Tourlogs {
-
+export class TourlogsComponent {
   private readonly fb = inject(FormBuilder);
-  private readonly tourlogsModel = inject(TourlogsModel); 
+  private readonly tourlogsModel = inject(TourlogsModel);
 
   readonly logList = this.tourlogsModel.logList;
 
@@ -68,25 +67,26 @@ export class Tourlogs {
   readonly showFormPopup = signal(false);
 
   readonly selectedLogId = signal<number | null>(null);
-  readonly editingLogId = signal<number | null>(null);
+  readonly editingLogId = signal<number | null>(null);    //das bruach ich glaub ich garnichtmehr
 
-  readonly selectedLog = computed(() =>
-    this.tourlogsModel.logList().find(log => log.logID === this.selectedLogId()) ?? null
+  readonly selectedLog = computed(
+    () => this.tourlogsModel.logList().find((log) => log.logID === this.selectedLogId()) ?? null,
   );
 
   constructor() {
-    effect(() => {      //damit wenn sich die tour wechselt das selectedLog auf null gesetzt wird
+    effect(() => {
+      //damit wenn sich die tour wechselt das selectedLog auf null gesetzt wird
       this.tourService.selectedTourId();
       this.selectedLogId.set(null);
     });
-}
+  }
 
-  readonly editingLog = computed(() =>
-    this.tourlogsModel.logList().find(log => log.logID === this.editingLogId()) ?? null
+  readonly editingLog = computed(
+    () => this.tourlogsModel.logList().find((log) => log.logID === this.editingLogId()) ?? null,
   );
 
   selectLog(log: Log): void {
-    this.selectedLogId.set(log.logID);  
+    this.selectedLogId.set(log.logID);
   }
 
   openEdit(log: Log): void {
@@ -99,7 +99,7 @@ export class Tourlogs {
       totalDistance: log.totalDistance,
       totalTime: log.totalTime,
       rating: log.rating,
-      tourID: log.tourID
+      tourID: log.tourID,
     });
 
     this.formSubmitted.set(false);
@@ -107,12 +107,12 @@ export class Tourlogs {
   }
 
   deleteLog(): void {
-    const currentLog = this.selectedLog();  //holt ausgewähltes Log damit benutzt werden kann
-    
+    const currentLog = this.selectedLog(); //holt ausgewähltes Log damit benutzt werden kann
+
     if (!currentLog) return;
-    
+
     this.tourlogsModel.deleteLog(currentLog.logID);
-    this.selectedLogId.set(null);//wenn gelöscht wurde, wird das was im ausgewählten log ist zurückgesetzt
+    this.selectedLogId.set(null); //wenn gelöscht wurde, wird das was im ausgewählten log ist zurückgesetzt
   }
 
   //close the addPopup

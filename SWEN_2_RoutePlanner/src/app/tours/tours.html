@@ -4,7 +4,7 @@
     <div class="card shadow-sm text-center">
       <div class="card-body py-3">
         <div class="text-secondary small text-uppercase fw-medium">Total tours</div>
-        <div class="fs-3 fw-semibold">{{ vm.stats().count }}</div>
+        <div class="fs-3 fw-semibold">{{ stats().count }}</div>
       </div>
     </div>
   </div>
@@ -13,7 +13,7 @@
       <div class="card-body py-3">
         <div class="text-secondary small text-uppercase fw-medium">Total distance</div>
         <div class="fs-3 fw-semibold">
-          {{ vm.stats().totalDistance | number: '1.1-1' }}
+          {{ stats().totalDistance | number: '1.1-1' }}
           <span class="fs-6 fw-normal text-secondary">km</span>
         </div>
       </div>
@@ -24,7 +24,7 @@
       <div class="card-body py-3">
         <div class="text-secondary small text-uppercase fw-medium">Avg. distance</div>
         <div class="fs-3 fw-semibold">
-          {{ vm.stats().avgDistance | number: '1.1-1' }}
+          {{ stats().avgDistance | number: '1.1-1' }}
           <span class="fs-6 fw-normal text-secondary">km</span>
         </div>
       </div>
@@ -34,12 +34,11 @@
     <div class="card shadow-sm text-center">
       <div class="card-body py-3">
         <div class="text-secondary small text-uppercase fw-medium">Avg. duration</div>
-        <div class="fs-3 fw-semibold">{{ vm.formatDuration(vm.stats().avgTime) }}</div>
+        <div class="fs-3 fw-semibold">{{ formatDuration(stats().avgTime) }}</div>
       </div>
     </div>
   </div>
 </div>
-
 
 <div class="row g-4 tours-layout">
   <!-- ═══ LEFT: TOUR LIST ═══ -->
@@ -48,14 +47,14 @@
       <div class="card-body">
         <div class="d-flex justify-content-between align-items-center mb-3">
           <h1 class="h4 mb-0">Tours</h1>
-          <button class="btn btn-primary btn-sm" (click)="vm.openCreateForm()">+ New Tour</button>
+          <button class="btn btn-primary btn-sm" (click)="openCreateForm()">+ New Tour</button>
         </div>
 
         <div class="mb-3">
           <app-search-bar
             placeholder="Search tours..."
-            [value]="vm.searchTerm()"
-            (valueChange)="vm.updateSearch($event)"
+            [value]="searchTerm()"
+            (valueChange)="updateSearch($event)"
           />
         </div>
 
@@ -63,16 +62,16 @@
         <div class="d-flex flex-wrap gap-1 mb-3">
           <button
             class="btn btn-sm"
-            [class]="vm.filterType() === null ? 'btn-dark' : 'btn-outline-secondary'"
-            (click)="vm.setFilterType(null)"
+            [class]="filterType() === null ? 'btn-dark' : 'btn-outline-secondary'"
+            (click)="setFilterType(null)"
           >
-            All ({{ vm.tourCount() }})
+            All ({{ tourCount() }})
           </button>
-          @for (t of vm.transportTypes; track t.value) {
+          @for (t of transportTypes; track t.value) {
             <button
               class="btn btn-sm"
-              [class]="vm.filterType() === t.value ? 'btn-dark' : 'btn-outline-secondary'"
-              (click)="vm.setFilterType(t.value)"
+              [class]="filterType() === t.value ? 'btn-dark' : 'btn-outline-secondary'"
+              (click)="setFilterType(t.value)"
             >
               {{ t.label }}
             </button>
@@ -80,21 +79,21 @@
         </div>
 
         <div class="tour-list">
-          @for (tour of vm.filteredTours(); track tour.id) {
+          @for (tour of filteredTours(); track tour.id) {
             <div
               class="tour-item p-3 rounded-3 mb-2"
-              [class.active]="tour.id === vm.selectedTourId()"
-              (click)="vm.selectTour(tour.id)"
+              [class.active]="tour.id === selectedTourId()"
+              (click)="selectTour(tour.id)"
             >
               <div class="d-flex justify-content-between align-items-start mb-1">
                 <strong class="tour-item-name">{{ tour.name }}</strong>
-                <span class="badge {{ vm.badgeClass(tour.transportType) }} ms-2">
+                <span class="badge {{ badgeClass(tour.transportType) }} ms-2">
                   {{ tour.transportType }}
                 </span>
               </div>
               <div class="small text-secondary">{{ tour.from }} → {{ tour.to }}</div>
               <div class="small text-secondary mt-1">
-                {{ tour.distance }} km · {{ vm.formatDuration(tour.estimatedTime) }}
+                {{ tour.distance }} km · {{ formatDuration(tour.estimatedTime) }}
               </div>
             </div>
           } @empty {
@@ -111,21 +110,21 @@
 
   <!-- ═══ RIGHT: TOUR DETAIL ═══ -->
   <div class="col-12 col-lg-7">
-    @if (vm.selectedTour(); as tour) {
+    @if (selectedTour(); as tour) {
       <div class="card shadow-sm mb-4">
         <div class="card-body">
           <div class="d-flex justify-content-between align-items-start mb-3">
             <div>
               <h2 class="h4 mb-1">{{ tour.name }}</h2>
-              <span class="badge {{ vm.badgeClass(tour.transportType) }}">{{
+              <span class="badge {{ badgeClass(tour.transportType) }}">{{
                 tour.transportType
               }}</span>
             </div>
             <div class="d-flex gap-2">
-              <button class="btn btn-outline-secondary btn-sm" (click)="vm.openEditForm(tour)">
+              <button class="btn btn-outline-secondary btn-sm" (click)="openEditForm(tour)">
                 ✏️ Edit
               </button>
-              <button class="btn btn-outline-danger btn-sm" (click)="vm.confirmDelete(tour)">
+              <button class="btn btn-outline-danger btn-sm" (click)="confirmDelete(tour)">
                 🗑️ Delete
               </button>
             </div>
@@ -148,7 +147,7 @@
             </div>
             <div class="col-6 col-md-4">
               <div class="text-uppercase small text-secondary fw-medium">Est. time</div>
-              <div>{{ vm.formatDuration(tour.estimatedTime) }}</div>
+              <div>{{ formatDuration(tour.estimatedTime) }}</div>
             </div>
             <div class="col-6 col-md-4">
               <div class="text-uppercase small text-secondary fw-medium">Created</div>
@@ -159,7 +158,11 @@
           <h3 class="h6 mb-2">Route Map</h3>
           <app-tour-map [fromLocation]="tour.from" [toLocation]="tour.to" />
         </div>
-      </div><app-home></app-home>
+      </div>
+
+      <!-- Tour Logs for selected tour -->
+      <app-tourlogs></app-tourlogs>
+
     } @else {
       <div class="card shadow-sm">
         <div class="card-body text-center text-secondary py-5">
@@ -173,17 +176,17 @@
 </div>
 
 <!-- ═══ CREATE/EDIT MODAL ═══ -->
-@if (vm.showForm()) {
+@if (showForm()) {
   <div class="modal-backdrop fade show"></div>
-  <div class="modal fade show d-block" tabindex="-1" (click)="vm.closeForm()">
+  <div class="modal fade show d-block" tabindex="-1" (click)="closeForm()">
     <div class="modal-dialog" (click)="$event.stopPropagation()">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">{{ vm.editingTour() ? 'Edit Tour' : 'Create New Tour' }}</h5>
-          <button type="button" class="btn-close" (click)="vm.closeForm()"></button>
+          <h5 class="modal-title">{{ editingTour() ? 'Edit Tour' : 'Create New Tour' }}</h5>
+          <button type="button" class="btn-close" (click)="closeForm()"></button>
         </div>
         <div class="modal-body">
-          <form [formGroup]="vm.tourForm" (ngSubmit)="vm.submitForm()" novalidate>
+          <form [formGroup]="tourForm" (ngSubmit)="submitForm()" novalidate>
             <div class="mb-3">
               <label for="tourName" class="form-label">Tour Name *</label>
               <input
@@ -193,13 +196,12 @@
                 placeholder="e.g. Donauinsel Rundweg"
               />
               @if (
-                (vm.formSubmitted() || vm.tourForm.controls.name.touched) &&
-                vm.tourForm.controls.name.errors
+                (formSubmitted() || tourForm.controls.name.touched) && tourForm.controls.name.errors
               ) {
                 <div class="invalid-feedback d-block">
-                  @if (vm.tourForm.controls.name.errors['required']) {
+                  @if (tourForm.controls.name.errors['required']) {
                     <span>Name is required.</span>
-                  } @else if (vm.tourForm.controls.name.errors['minlength']) {
+                  } @else if (tourForm.controls.name.errors['minlength']) {
                     <span>At least 3 characters.</span>
                   }
                 </div>
@@ -216,8 +218,8 @@
                 placeholder="Describe the tour..."
               ></textarea>
               @if (
-                (vm.formSubmitted() || vm.tourForm.controls.description.touched) &&
-                vm.tourForm.controls.description.errors?.['required']
+                (formSubmitted() || tourForm.controls.description.touched) &&
+                tourForm.controls.description.errors?.['required']
               ) {
                 <div class="invalid-feedback d-block">Description is required.</div>
               }
@@ -233,8 +235,8 @@
                   placeholder="Start"
                 />
                 @if (
-                  (vm.formSubmitted() || vm.tourForm.controls.from.touched) &&
-                  vm.tourForm.controls.from.errors?.['required']
+                  (formSubmitted() || tourForm.controls.from.touched) &&
+                  tourForm.controls.from.errors?.['required']
                 ) {
                   <div class="invalid-feedback d-block">Required.</div>
                 }
@@ -243,8 +245,8 @@
                 <label for="tourTo" class="form-label">To *</label>
                 <input id="tourTo" class="form-control" formControlName="to" placeholder="End" />
                 @if (
-                  (vm.formSubmitted() || vm.tourForm.controls.to.touched) &&
-                  vm.tourForm.controls.to.errors?.['required']
+                  (formSubmitted() || tourForm.controls.to.touched) &&
+                  tourForm.controls.to.errors?.['required']
                 ) {
                   <div class="invalid-feedback d-block">Required.</div>
                 }
@@ -254,7 +256,7 @@
             <div class="mb-3 mt-3">
               <label for="tourType" class="form-label">Transport Type *</label>
               <select id="tourType" class="form-select" formControlName="transportType">
-                @for (t of vm.transportTypes; track t.value) {
+                @for (t of transportTypes; track t.value) {
                   <option [value]="t.value">{{ t.label }}</option>
                 }
               </select>
@@ -272,13 +274,13 @@
                   min="0"
                 />
                 @if (
-                  (vm.formSubmitted() || vm.tourForm.controls.distance.touched) &&
-                  vm.tourForm.controls.distance.errors
+                  (formSubmitted() || tourForm.controls.distance.touched) &&
+                  tourForm.controls.distance.errors
                 ) {
                   <div class="invalid-feedback d-block">
-                    @if (vm.tourForm.controls.distance.errors['required']) {
+                    @if (tourForm.controls.distance.errors['required']) {
                       <span>Required.</span>
-                    } @else if (vm.tourForm.controls.distance.errors['min']) {
+                    } @else if (tourForm.controls.distance.errors['min']) {
                       <span>Must be > 0.</span>
                     }
                   </div>
@@ -294,13 +296,13 @@
                   min="1"
                 />
                 @if (
-                  (vm.formSubmitted() || vm.tourForm.controls.estimatedTimeMinutes.touched) &&
-                  vm.tourForm.controls.estimatedTimeMinutes.errors
+                  (formSubmitted() || tourForm.controls.estimatedTimeMinutes.touched) &&
+                  tourForm.controls.estimatedTimeMinutes.errors
                 ) {
                   <div class="invalid-feedback d-block">
-                    @if (vm.tourForm.controls.estimatedTimeMinutes.errors['required']) {
+                    @if (tourForm.controls.estimatedTimeMinutes.errors['required']) {
                       <span>Required.</span>
-                    } @else if (vm.tourForm.controls.estimatedTimeMinutes.errors['min']) {
+                    } @else if (tourForm.controls.estimatedTimeMinutes.errors['min']) {
                       <span>At least 1 min.</span>
                     }
                   </div>
@@ -309,11 +311,9 @@
             </div>
 
             <div class="d-flex justify-content-end gap-2">
-              <button type="button" class="btn btn-secondary" (click)="vm.closeForm()">
-                Cancel
-              </button>
+              <button type="button" class="btn btn-secondary" (click)="closeForm()">Cancel</button>
               <button type="submit" class="btn btn-primary">
-                {{ vm.editingTour() ? 'Save Changes' : 'Create Tour' }}
+                {{ editingTour() ? 'Save Changes' : 'Create Tour' }}
               </button>
             </div>
           </form>
@@ -324,14 +324,14 @@
 }
 
 <!-- ═══ DELETE CONFIRM MODAL ═══ -->
-@if (vm.deleteTarget(); as target) {
+@if (deleteTarget(); as target) {
   <div class="modal-backdrop fade show"></div>
-  <div class="modal fade show d-block" tabindex="-1" (click)="vm.cancelDelete()">
+  <div class="modal fade show d-block" tabindex="-1" (click)="cancelDelete()">
     <div class="modal-dialog modal-sm" (click)="$event.stopPropagation()">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title">Delete Tour</h5>
-          <button type="button" class="btn-close" (click)="vm.cancelDelete()"></button>
+          <button type="button" class="btn-close" (click)="cancelDelete()"></button>
         </div>
         <div class="modal-body">
           <p>
@@ -340,8 +340,8 @@
           </p>
         </div>
         <div class="modal-footer">
-          <button class="btn btn-secondary btn-sm" (click)="vm.cancelDelete()">Cancel</button>
-          <button class="btn btn-danger btn-sm" (click)="vm.executeDelete()">Delete</button>
+          <button class="btn btn-secondary btn-sm" (click)="cancelDelete()">Cancel</button>
+          <button class="btn btn-danger btn-sm" (click)="executeDelete()">Delete</button>
         </div>
       </div>
     </div>
