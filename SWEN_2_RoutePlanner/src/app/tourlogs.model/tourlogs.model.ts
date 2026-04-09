@@ -1,4 +1,4 @@
-import { Component, signal, computed, inject, Injectable } from '@angular/core';
+import { signal, computed, inject, Injectable } from '@angular/core';
 import { AuthService } from '../auth/auth.service';
 import { TourService } from '../services/tour.service';
 
@@ -110,7 +110,7 @@ export class TourlogsModel {
 
   readonly filteredLogs = computed(() => {
     const selectedTourId = this.tourService.selectedTourId();
-    const currentUsername = this.authService.currentUser()?.name;
+    const currentUsername = this.authService.currentUser()?.name; 
 
     if (!selectedTourId) {
       return [];

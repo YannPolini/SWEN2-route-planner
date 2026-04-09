@@ -16,7 +16,7 @@ export class TourlogsComponent {
   private readonly fb = inject(FormBuilder);
   private readonly tourlogsModel = inject(TourlogsModel);
 
-  readonly logList = this.tourlogsModel.logList;
+  readonly logList = this.tourlogsModel.logList;    //Ganze liste der TourLogs
 
   protected readonly logForm = this.fb.nonNullable.group({
     date: ['', [Validators.required]],
@@ -35,9 +35,9 @@ export class TourlogsComponent {
   private readonly authService = inject(AuthService);
 
   //ausgelagert zu tourlogs.model.ts
-  readonly filteredLogs = this.tourlogsModel.filteredLogs;
+  readonly filteredLogs = this.tourlogsModel.filteredLogs;    //Filtered Liste der Tourlogs, mit UserName und 
 
-  readonly canAddLog = computed(() => this.tourService.selectedTourId() !== null);
+  readonly canAddLog = computed(() => this.tourService.selectedTourId() !== null);  //Wenn eine Tour ausgewählt ist, dann hat es eine ID
 
   //with addPopup
   openAdd(): void {
@@ -62,8 +62,6 @@ export class TourlogsComponent {
     this.showFormPopup.set(true);
   }
 
-  //readonly selectedLog = signal<Log | null>(null);
-  //readonly editingLog = signal<Log | null>(null);
   readonly showFormPopup = signal(false);
 
   readonly selectedLogId = signal<number | null>(null);   //welches Log gerade selected ist
@@ -78,6 +76,8 @@ export class TourlogsComponent {
       //damit wenn sich die tour wechselt das selectedLog auf null gesetzt wird
       this.tourService.selectedTourId();
       this.selectedLogId.set(null);
+      this.editingLogId.set(null);
+      this.showFormPopup.set(false);
     });
   }
 

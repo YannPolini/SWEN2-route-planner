@@ -22,11 +22,9 @@
       Add log
     </button>
     <span class="badge text-bg-light">{{ logList().length }} total entries</span>
-    <span class="badge text-bg-light">{{ filteredLogs().length }} total entries on this tour</span>
+    <span class="badge text-bg-light">{{ filteredLogs().length }} total entrie(s) on this tour</span>
     @if (selectedLog(); as log) {
-      <button type="button" class="btn btn-outline-primary me-3" (click)="openEdit(log)">
-        Bearbeiten
-      </button>
+      <button type="button" class="btn btn-outline-primary me-3" (click)="openEdit(log)">Bearbeiten</button>
       <button type="button" class="btn btn-outline-danger" (click)="deleteLog()">Delete</button>
     }
 
