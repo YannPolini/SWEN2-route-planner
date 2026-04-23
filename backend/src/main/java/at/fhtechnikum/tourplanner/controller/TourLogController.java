@@ -1,9 +1,18 @@
+package at.fhtechnikum.tourplanner.controller;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+
 @RestController
 @RequestMapping("/api/tours/{tourId}/logs")
 public class TourLogController {
 
     @GetMapping
-    public ResponseEntity<String> getAll(@PathVariable Long tourId) { return ResponseEntity.ok("get logs"); }
+    public ResponseEntity<String> getAll(@PathVariable Long tourId) {
+        System.out.println("here");
+        return ResponseEntity.ok("get logs");
+    }
 
     @GetMapping("/{logId}")
     public ResponseEntity<String> getOne(@PathVariable Long tourId, @PathVariable Long logId) { return ResponseEntity.ok("get log"); }
