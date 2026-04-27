@@ -4,6 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators, AbstractControl, Validati
 import { TourService } from '../services/tour.service';
 import { AuthService } from '../auth/auth.service';
 import { TourlogsModel, Log } from '../tourlogs.model/tourlogs.model';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-tourlogs',
@@ -90,7 +91,7 @@ export class TourlogsComponent {
     () => this.tourlogsModel.logList().find((log) => log.logID === this.selectedLogId()) ?? null,
   );
 
-  constructor() {
+  constructor(private http: HttpClient) {
     effect(() => {
       //damit wenn sich die tour wechselt das selectedLog auf null gesetzt wird
       this.tourService.selectedTourId();
@@ -200,5 +201,9 @@ export class TourlogsComponent {
     }
 
     this.closeFormPopup();
+  }
+
+  getTry(): void {
+    this.http.get('http://localhost:8080/try', { responseType: 'text' });  
   }
 }
