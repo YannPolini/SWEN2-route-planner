@@ -4,8 +4,6 @@ import { FormBuilder, ReactiveFormsModule, Validators, AbstractControl, Validati
 import { TourService } from '../services/tour.service';
 import { AuthService } from '../auth/auth.service';
 import { TourlogsModel, Log } from '../tourlogs.model/tourlogs.model';
-import { HttpClient } from '@angular/common/http';
-import { TourLogApiService } from './TourLogApiService';
 
 @Component({
   selector: 'app-tourlogs',
@@ -92,8 +90,7 @@ export class TourlogsComponent {
     () => this.tourlogsModel.logList().find((log) => log.logID === this.selectedLogId()) ?? null,
   );
 
-  constructor(private http: HttpClient) {
-    this.loadLogs();            //load logs from backend
+  constructor() {
 
     effect(() => {
       //damit wenn sich die tour wechselt das selectedLog auf null gesetzt wird
@@ -183,8 +180,9 @@ export class TourlogsComponent {
     }
 
     if (currentLog) {
-      this.tourlogsModel.updateLog({ ...currentLog, ...formValue });
+      this.tourlogsModel.updateLog({ ...currentLog, ...formValue }); 
       this.selectedLogId.set(currentLog.logID);
+      //this.updateBackendLog(currentLog);    //gehört das hierher ins viewmodel oder ins model? 
     } else {
       const newLog: Log = {
         date: formValue.date,
@@ -199,40 +197,11 @@ export class TourlogsComponent {
         creatorName: currentUsername,
       };
 
-      this.tourlogsModel.addLog(newLog);
+      //this.saveToBackend(newLog);
+      this.tourlogsModel.addLog(newLog);    
       this.selectedLogId.set(newLog.logID);
     }
 
     this.closeFormPopup();
-  }
-
-  //backendfronted:
-
-  getTry(): void {
-  this.http.get('http://localhost:8080/try', { responseType: 'text' })
-    .subscribe(response => {
-      console.log(response);
-    });
-  }
-
-  protected readonly api = inject(TourLogApiService);
-
-  loadLogs(): void {
-    this.api.getAll().subscribe({
-      next: logs => {
-        console.log('Logs vom Backend:', logs);
-        this.tourlogsModel.setLogs(logs);
-        console.log('Signal danach:', this.logList());
-      },
-      error: err => {
-        console.error('API Fehler:', err);
-      }
-    });
-  }
-
-  saveToBackend(log: Log): void {
-    this.api.create(log).subscribe(savedLog => {
-      this.logList.update(logs => [...logs, savedLog]);
-    });
   }
 }

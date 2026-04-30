@@ -1,6 +1,7 @@
 import { signal, computed, inject, Injectable } from '@angular/core';
 import { AuthService } from '../auth/auth.service';
 import { TourService } from '../services/tour.service';
+import { TourLogApiService } from './TourLogApiService';
 
 export type Log = {
   date: string;
@@ -108,6 +109,10 @@ export class TourlogsModel {
   ]);
   */
 
+  constructor() {
+    this.loadLogs();
+  }
+
   private readonly authService = inject(AuthService);
   private readonly tourService = inject(TourService);
 
@@ -123,22 +128,83 @@ export class TourlogsModel {
   });
 
   addLog(newLog: Log): void {
-    this.logList.update(logs => [newLog, ...logs]);     //newLog ist erstes im Array
+    //this.logList.update(logs => [newLog, ...logs]);     //newLog ist erstes im Array
+    //this.saveToBackend(newLog);
+    this.api.create(newLog).subscribe({
+      next: () => this.loadLogs(),
+      error: err => console.error('POST error:', err)
+    });
   }
 
   updateLog(updatedLog: Log): void {
+    /*
     this.logList.update(logs =>
       logs.map(log => log.logID === updatedLog.logID ? updatedLog : log)  //wenn logID gleich updaeteLog hier speichern, sonst das alte log
     );
+    */
+    //this.updateBackendLog(updatedLog);
+    this.api.update(updatedLog).subscribe({
+      next: () => this.loadLogs(),
+      error: err => console.error('PUT error:', err)
+    });
   }
 
   deleteLog(logID: number): void {
-    this.logList.update(logs => logs.filter(log => log.logID !== logID));
+    //this.logList.update(logs => logs.filter(log => log.logID !== logID));
+    this.api.delete(logID).subscribe({
+      next: () => this.loadLogs(),
+      error: err => console.error('DELETE error:', err)
+    });
   }
 
   //um am anfang die logs aus dem backend zu laden
+  //brauche ich glaub ich garnicht mehr wegen contructor
   setLogs(logs: Log[]) {
     this.logList.set(logs);
+  }
+
+
+  //backend frontend
+
+  protected readonly api = inject(TourLogApiService);
+
+  loadLogs(): void {
+    this.api.getAll().subscribe({
+      next: logs => {
+        console.log('Logs vom Backend:', logs);
+
+        this.logList.set(logs);
+
+        console.log('Signal danach:', this.logList());
+      },
+      error: err => {
+        console.error('API Fehler:', err);
+      }
+    });
+  }
+
+  saveToBackend(log: Log): void {
+    this.api.create(log).subscribe({
+      next: (response) => {
+        console.log('created:', response);
+        this.logList.update(logs => [log, ...logs]);
+      },
+      error: (err) => {
+        console.error('POST error:', err);
+      }
+    });
+  }
+
+  updateBackendLog(log: Log): void {
+    this.api.update(log).subscribe({
+      next: (response) => {
+        console.log('updated:', response);
+        //this.addLog(log); //damit es auch auf der Website aufscheint, sonst müsste man die website neu laden oder loadlogs() auruft
+      },
+      error: (err) => {
+        console.error('PUT error:', err);
+      }
+    });
   }
 
 }

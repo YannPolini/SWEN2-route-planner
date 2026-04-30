@@ -1,5 +1,6 @@
 package at.fhtechnikum.tourplanner.dto.tourlog;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -11,6 +12,8 @@ import lombok.*;
 public class TourLog {
 
     @Id
+    @Column(name = "logid", nullable = false)
+    @JsonProperty("logID")
     private Long logID;
 
     @Column(nullable = false)
@@ -34,7 +37,8 @@ public class TourLog {
     @Column(nullable = false)
     private int rating;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "tourid")
+    @JsonProperty("tourID")
     private String tourID;
 
     @Column(nullable = false)

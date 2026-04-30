@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS tour_log (
-    logid BIGSERIAL PRIMARY KEY,
+    logid BIGINT PRIMARY KEY,
     date VARCHAR(255),
     time VARCHAR(255),
     comment TEXT,
