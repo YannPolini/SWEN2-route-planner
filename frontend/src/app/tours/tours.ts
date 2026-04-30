@@ -6,6 +6,7 @@ import { Tour, TransportType, TRANSPORT_TYPES } from '../models/tour.model';
 import { SearchBarComponent } from '../shared/search-bar/search-bar';
 import { TourMapComponent } from '../shared/tour-map/tour-map';
 import { TourlogsComponent } from '../tourlogs/tourlogs';
+import { TourlogsModel } from '../tourlogs.model/tourlogs.model';
 
 // ═══════════════════════════════════════════════════════
 // VIEW-MODEL (Component) — UI state, UI logic, actions
@@ -194,4 +195,7 @@ export class ToursComponent {
     };
     return map[type] ?? 'text-bg-secondary';
   }
+
+  //popularity
+  protected readonly tourlogsModel = inject(TourlogsModel);
 }

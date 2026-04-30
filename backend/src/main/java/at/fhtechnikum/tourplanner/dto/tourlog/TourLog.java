@@ -12,7 +12,7 @@ import lombok.*;
 public class TourLog {
 
     @Id
-    @Column(name = "logid", nullable = false)
+    @Column(nullable = false)
     @JsonProperty("logID")
     private Long logID;
 
@@ -37,7 +37,7 @@ public class TourLog {
     @Column(nullable = false)
     private int rating;
 
-    @Column(nullable = false, name = "tourid")
+    @Column(nullable = false)
     @JsonProperty("tourID")
     private String tourID;
 

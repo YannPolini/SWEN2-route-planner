@@ -207,4 +207,7 @@ export class TourlogsModel {
     });
   }
 
+  getPopularity(tourID: string): number {
+    return this.logList().filter(log => log.tourID === tourID).length;
+  }
 }

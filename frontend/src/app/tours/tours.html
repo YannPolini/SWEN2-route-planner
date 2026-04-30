@@ -153,6 +153,10 @@
               <div class="text-uppercase small text-secondary fw-medium">Created</div>
               <div>{{ tour.createdAt | date: 'mediumDate' }}</div>
             </div>
+            <div class="col-6 col-md-4">
+              <div class="text-uppercase small text-secondary fw-medium">Popularity</div>
+              <div>{{ tourlogsModel.getPopularity(selectedTourId()!) }}</div>
+            </div>
           </div>
 
           <h3 class="h6 mb-2">Route Map</h3>
