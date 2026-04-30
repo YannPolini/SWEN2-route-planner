@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: tourlog-postgres
+    environment:
+      POSTGRES_DB: tourlogdb
+      POSTGRES_USER: tourlog_user
+      POSTGRES_PASSWORD: tourlog_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

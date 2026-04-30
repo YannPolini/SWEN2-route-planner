@@ -5,6 +5,7 @@ import { TourService } from '../services/tour.service';
 import { AuthService } from '../auth/auth.service';
 import { TourlogsModel, Log } from '../tourlogs.model/tourlogs.model';
 import { HttpClient } from '@angular/common/http';
+import { TourLogApiService } from './TourLogApiService';
 
 @Component({
   selector: 'app-tourlogs',
@@ -92,6 +93,8 @@ export class TourlogsComponent {
   );
 
   constructor(private http: HttpClient) {
+    this.loadLogs();            //load logs from backend
+
     effect(() => {
       //damit wenn sich die tour wechselt das selectedLog auf null gesetzt wird
       this.tourService.selectedTourId();
@@ -203,7 +206,33 @@ export class TourlogsComponent {
     this.closeFormPopup();
   }
 
+  //backendfronted:
+
   getTry(): void {
-    this.http.get('http://localhost:8080/try', { responseType: 'text' });  
+  this.http.get('http://localhost:8080/try', { responseType: 'text' })
+    .subscribe(response => {
+      console.log(response);
+    });
+  }
+
+  protected readonly api = inject(TourLogApiService);
+
+  loadLogs(): void {
+    this.api.getAll().subscribe({
+      next: logs => {
+        console.log('Logs vom Backend:', logs);
+        this.tourlogsModel.setLogs(logs);
+        console.log('Signal danach:', this.logList());
+      },
+      error: err => {
+        console.error('API Fehler:', err);
+      }
+    });
+  }
+
+  saveToBackend(log: Log): void {
+    this.api.create(log).subscribe(savedLog => {
+      this.logList.update(logs => [...logs, savedLog]);
+    });
   }
 }

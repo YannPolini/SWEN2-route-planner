@@ -18,6 +18,8 @@ export type Log = {
 @Injectable({ providedIn: 'root' })
 export class TourlogsModel {
 
+  readonly logList = signal<Log[]>([]);
+  /*
   readonly logList = signal<Log[]>([
     {
       date: '2026-03-20',
@@ -104,6 +106,7 @@ export class TourlogsModel {
     creatorName: 'Demo User'
   }
   ]);
+  */
 
   private readonly authService = inject(AuthService);
   private readonly tourService = inject(TourService);
@@ -131,6 +134,11 @@ export class TourlogsModel {
 
   deleteLog(logID: number): void {
     this.logList.update(logs => logs.filter(log => log.logID !== logID));
+  }
+
+  //um am anfang die logs aus dem backend zu laden
+  setLogs(logs: Log[]) {
+    this.logList.set(logs);
   }
 
 }

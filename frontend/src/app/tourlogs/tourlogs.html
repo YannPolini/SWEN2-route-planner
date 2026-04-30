@@ -56,6 +56,32 @@
   </div>
       <button type="button" class="btn btn-outline-danger" (click)="getTry()">Try</button>
 
+      <div class="mt-3">
+  <p>{{ logList().length }} Logs geladen</p>
+
+  @for (log of logList(); track log.logID) {
+    <div class="card mb-2">
+      <div class="card-body">
+        <h5 class="card-title">Log #{{ log.logID }}</h5>
+
+        <p><strong>Datum:</strong> {{ log.date }}</p>
+        <p><strong>Zeit:</strong> {{ log.time }}</p>
+        <p><strong>Kommentar:</strong> {{ log.comment }}</p>
+        <p><strong>Schwierigkeit:</strong> {{ log.difficulty }}</p>
+        <p><strong>Distanz:</strong> {{ log.totalDistance }} km</p>
+        <p><strong>Zeit gesamt:</strong> {{ log.totalTime }} min</p>
+        <p><strong>Bewertung:</strong> {{ log.rating }}</p>
+        <p><strong>Tour-ID:</strong> {{ log.tourID }}</p>
+        <p><strong>Creator:</strong> {{ log.creatorName }}</p>
+      </div>
+    </div>
+  } @empty {
+    <div class="alert alert-warning">
+      Keine Logs vorhanden.
+    </div>
+  }
+</div>
+
 </section>
 <!--
       <div class="card shadow-sm mt-4">

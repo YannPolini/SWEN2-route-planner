@@ -1,17 +1,28 @@
 package at.fhtechnikum.tourplanner.controller;
 
+import at.fhtechnikum.tourplanner.dto.tourlog.TourLog;
+import at.fhtechnikum.tourplanner.service.TourLogService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 
 @RestController
 @RequestMapping("/api/tours/{tourId}/logs")
+@CrossOrigin(origins = "http://localhost:4200")
 public class TourLogController {
 
-    @GetMapping
-    public ResponseEntity<String> getAll(@PathVariable Long tourId) {
-        System.out.println("here");
-        return ResponseEntity.ok("get logs");
+    private final TourLogService service;
+
+    public TourLogController(TourLogService service) {
+        this.service = service;
+    }
+
+    @GetMapping("")
+    public List<TourLog> getAllTourLogs() {
+        System.out.println("Getting all tour logs");
+        return service.getAllTourLogs();
     }
 
     @GetMapping("/{logId}")
@@ -26,5 +37,9 @@ public class TourLogController {
     @DeleteMapping("/{logId}")
     public ResponseEntity<String> delete(@PathVariable Long tourId, @PathVariable Long logId) { return ResponseEntity.ok("deleted"); }
 
+    @GetMapping("/test")
+    public String test() {
+        return "controller works";
+    }
 
 }
