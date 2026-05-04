@@ -1,34 +1,34 @@
 import { Injectable } from '@angular/core';
-import { Log } from './tourlogs.model';
 import { HttpClient } from '@angular/common/http';
+import { Tour } from './tour.model';
 
 
 @Injectable({
   providedIn: 'root'
 })
 
-export class TourLogApiService {
+export class TourApiService {
   //private apiUrl = 'http://localhost:8080/all';
-    private apiUrl = 'http://localhost:8080/api/logs';
+    private apiUrl = 'http://localhost:8080/api/tours';
 
 
   constructor(private http: HttpClient) {}
 
   getAll() {
-    console.log("getting all logs");
-    return this.http.get<Log[]>(this.apiUrl);
+    console.log("getting all tours");
+    return this.http.get<Tour[]>(this.apiUrl);
   }
 
-  create(log: Log) {
-    console.log("sending",log);
-    return this.http.post(this.apiUrl, log, {
+  create(tour: Tour) {
+    console.log("sending", tour);
+    return this.http.post(this.apiUrl, tour, {
         responseType: 'text'
     });
   }
 
-  update(log: Log) {
-    console.log("updating tours", log);
-    return this.http.put(`${this.apiUrl}/${log.logID}`, log, {
+  update(tour: Tour) {
+    console.log("updating", tour);
+    return this.http.put(`${this.apiUrl}/${tour.id}`, tour, {
         responseType: 'text'
     });
   }

@@ -1,6 +1,8 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
 import { Tour, TransportType } from '../models/tour.model';
+import { TourApiService } from '../models/tour.model.api';
 
+/*
 const MOCK_TOURS: Tour[] = [
   {
     id: '1',
@@ -63,6 +65,7 @@ const MOCK_TOURS: Tour[] = [
     createdAt: new Date('2026-03-05'),
   },
 ];
+*/
 
 // ═══════════════════════════════════════════════════════
 // MODEL (Service) — domain data + business logic ONLY
@@ -71,7 +74,8 @@ const MOCK_TOURS: Tour[] = [
 @Injectable({ providedIn: 'root' })
 export class TourService {
   // ── Domain state (Single Source of Truth) ──
-  private readonly _tours = signal<Tour[]>(MOCK_TOURS);
+  //old:   private readonly _tours = signal<Tour[]>(MOCK_TOURS);
+  private readonly _tours = signal<Tour[]>([]);
 
   private readonly _selectedTourId = signal<string | null>(null);
 
@@ -124,4 +128,28 @@ export class TourService {
   getTourById(id: string): Tour | undefined {
     return this._tours().find((t) => t.id === id);
   }
+
+
+  //added for backend integration
+  constructor() {
+    this.loadLogs();
+  }
+
+  protected readonly api = inject(TourApiService);
+
+  loadLogs(): void {
+    this.api.getAll().subscribe({
+      next: tours => {
+        console.log('Tours vom Backend:', tours);
+
+        this._tours.set(tours);
+
+        console.log('Signal danach:', this._tours());
+      },
+      error: err => {
+        console.error('API Fehler:', err);
+      }
+    });
+  }
+
 }
