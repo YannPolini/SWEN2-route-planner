@@ -5,6 +5,7 @@ import at.fhtechnikum.tourplanner.repository.TourLogRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class TourLogService {
@@ -21,9 +22,8 @@ public class TourLogService {
         return logs;
     }
 
-    public TourLog getTourLogById(Long id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("TourLog nicht gefunden"));
+    public Optional<TourLog> getTourLogById(Long id) {
+        return repository.findById(id);
     }
 
     public TourLog createTourLog(TourLog tourLog) {
@@ -31,11 +31,15 @@ public class TourLogService {
         return repository.save(tourLog);
     }
 
-    public void deleteTourLog(Long id) {
+    public boolean deleteTourLog(Long id) {
+        if(!repository.existsById(id)) {
+            return false;
+        }
         repository.deleteById(id);
+        return true;
     }
 
-    public TourLog updateTourLog(Long logID, TourLog log) {
+    public Optional<TourLog> updateTourLog(Long logID, TourLog log) {
         //damit falls es nicht existiert nich ausversehen neues erstellen
         System.out.println("Updating a tour log_service");
         if (!repository.existsById(logID)) {
@@ -64,6 +68,6 @@ public class TourLogService {
         return repository.save(existing);
         }
          */
-        return saved;
+        return Optional.of(saved);
     }
 }
