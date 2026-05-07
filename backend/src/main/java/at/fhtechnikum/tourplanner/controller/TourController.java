@@ -29,7 +29,7 @@ public class TourController {
 
     //not sure if works or even needed
     @GetMapping("/{tourId}")
-    public ResponseEntity<Tour> getById(@PathVariable Long tourId) {
+    public ResponseEntity<Tour> getById(@PathVariable String tourId) {
         ResponseEntity.ok("get tour " + tourId);
         return service.getTourById(tourId)
                 .map(ResponseEntity::ok)    //Wenn Update erfolgreich war, gib 200 OK mit dem aktualisierten Contact zurück.
@@ -47,13 +47,15 @@ public class TourController {
     }
 
     @PutMapping("/{tourId}")
-    public ResponseEntity<String> update(@PathVariable Long tourId, @RequestBody Tour dto) {
+    public ResponseEntity<String> update(@PathVariable String tourId, @RequestBody Tour dto) {
+        System.out.println("trying update");
         service.updateTour(tourId, dto);
         return ResponseEntity.ok("update tour");
     }
 
     @DeleteMapping("/{tourId}")
-    public ResponseEntity<String> delete(@PathVariable Long tourId) {
+    public ResponseEntity<String> delete(@PathVariable String tourId) {
+        System.out.println("delete: " + tourId);
         service.deleteTour(tourId);
         return ResponseEntity.ok("deleted");
     }

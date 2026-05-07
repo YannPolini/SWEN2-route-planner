@@ -21,22 +21,22 @@ export class TourLogApiService {
 
   create(log: Log) {
     console.log("sending",log);
-    return this.http.post(this.apiUrl, log, {
-        responseType: 'text'
+    return this.http.post<string>(this.apiUrl, log, {
+        responseType: 'text' as 'json'
     });
   }
 
   update(log: Log) {
-    console.log("updating tours", log);
-    return this.http.put(`${this.apiUrl}/${log.logID}`, log, {
-        responseType: 'text'
+    console.log("updating log", log);
+    return this.http.put<string>(`${this.apiUrl}/${log.logID}`, log, {
+      responseType: 'text' as 'json'
     });
   }
 
   delete(id: number) {
     console.log("delete:" ,id);
-    return this.http.delete(`${this.apiUrl}/${id}`, {
-        responseType: 'text'
+    return this.http.delete<string>(`${this.apiUrl}/${id}`, {
+        responseType: 'text' as 'json'
     });
   }
 }

@@ -23,7 +23,7 @@ public class TourService {
         return tours;
     }
 
-    public Optional<Tour> getTourById(Long id) {
+    public Optional<Tour> getTourById(String id) {
         return repository.findById(id);
     }
 
@@ -32,7 +32,8 @@ public class TourService {
         return repository.save(tour);
     }
 
-    public boolean deleteTour(Long id) {
+    public boolean deleteTour(String id) {
+        System.out.println("Service delete: "+id);
         if(!repository.existsById(id)) {
             return false;
         }
@@ -40,35 +41,15 @@ public class TourService {
         return true;
     }
 
-    public Optional<Tour> updateTour(Long logID, Tour tour) {
+    public Optional<Tour> updateTour(String tourID, Tour tour) {
         //damit falls es nicht existiert nich ausversehen neues erstellen
         System.out.println("Updating a tour service");
-        if (!repository.existsById(logID)) {
+        if (!repository.existsById(tourID)) {
             throw new RuntimeException("tour not found");
         }
-
-        //log.setLogID(logID);
+        System.out.println("tour exists, updating");
         Tour saved = repository.save(tour);
         System.out.println("Saved Tour: " + saved.getDescription());
-
-        /*
-        public TourLog updateTourLog(Long logID, TourLog dto) {
-            TourLog existing = repository.findById(logID)
-            .orElseThrow(() -> new RuntimeException("Log not found"));
-
-        existing.setDate(dto.getDate());
-        existing.setTime(dto.getTime());
-        existing.setComment(dto.getComment());
-        existing.setDifficulty(dto.getDifficulty());
-        existing.setTotalDistance(dto.getTotalDistance());
-        existing.setTotalTime(dto.getTotalTime());
-        existing.setRating(dto.getRating());
-        existing.setTourID(dto.getTourID());
-        existing.setCreatorName(dto.getCreatorName());
-
-        return repository.save(existing);
-        }
-         */
         return Optional.of(saved);
     }
 }

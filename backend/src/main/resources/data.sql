@@ -1,16 +1,3 @@
-CREATE TABLE IF NOT EXISTS tour_log (
-    logid BIGINT PRIMARY KEY,
-    date VARCHAR(255),
-    time VARCHAR(255),
-    comment TEXT,
-    difficulty INTEGER,
-    total_distance DOUBLE PRECISION,
-    total_time DOUBLE PRECISION,
-    rating INTEGER,
-    tourid VARCHAR(255),
-    creator_name VARCHAR(255)
-    );
-
 
 INSERT INTO tour_log (
     logid,
@@ -30,8 +17,8 @@ INSERT INTO tour_log (
       (7, '2026-04-02', '13:40', 'Heißes Wetter, aber tolle Aussicht auf den Bergen.', 4, 21.3, 280, 5, '4', 'Demo User'),
       (8, '2026-04-03', '17:20', 'Kurze Feierabendtour, entspannend und ruhig.', 1, 5.8, 60, 3, '5', 'Demo User'),
       (9, '2026-04-04', '08:00', 'Sehr anspruchsvoll, viele steile Abschnitte.', 5, 25.0, 340, 5, '1', 'Demo User'),
-      (10, '2026-04-05', '11:10', 'Gemütliche Tour durch den Wald, ideal zum Abschalten.', 2, 13.2, 150, 4, '2', 'Demo User');
-
+      (10, '2026-04-05', '11:10', 'Gemütliche Tour durch den Wald, ideal zum Abschalten.', 2, 13.2, 150, 4, '2', 'Demo User')
+ON CONFLICT (logid) DO NOTHING;
 
 INSERT INTO tour (
     id,
@@ -104,5 +91,5 @@ INSERT INTO tour (
           10800,
           '',
           '2026-03-05 00:00:00'
-      );
-
+      )
+ON CONFLICT (id) DO NOTHING;

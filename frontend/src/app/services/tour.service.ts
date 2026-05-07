@@ -108,17 +108,84 @@ export class TourService {
 
   // ── CRUD operations (business logic) ──
   addTour(data: Omit<Tour, 'id' | 'createdAt'>): Tour {
-    const newTour: Tour = { ...data, id: crypto.randomUUID(), createdAt: new Date() };
-    this._tours.update((tours) => [newTour, ...tours]);
+    //this._tours.update((tours) => [newTour, ...tours]); //old code no db
+    //create a new Tour
+    const newTour: Tour = {
+      ...data,
+      id: crypto.randomUUID(),
+      createdAt: new Date()
+    };
+    //send to backend
+    this.api.create(newTour).subscribe({
+      //then reload Tours
+      next: () => {
+        this.loadTours();
+      },
+      //if error dont reload but give error in console
+      error: err => {
+        console.error('API Fehler beim Create:', err);
+      }
+    });
     return newTour;
   }
 
-  updateTour(id: string, changes: Partial<Tour>): void {
-    this._tours.update((tours) => tours.map((t) => (t.id === id ? { ...t, ...changes } : t)));
+
+  updateTour(id: string, changes: Partial<Tour>): void {    
+    //this._tours.update((tours) => tours.map((t) => (t.id === id ? { ...t, ...changes } : t)));  //old code for no db
+    
+    // Find the current tour in the local signal state by its id
+    const existingTour = this._tours().find(tour => tour.id === id);
+
+    // If no tour with this id exists locally, stop the update, so no incomplete Tour send to backend
+    if (!existingTour) {
+      console.error('Tour not found:', id);
+      return;
+    }
+
+    // Create the updated Tour
+    const updatedTour: Tour = {
+      ...existingTour,
+      ...changes,
+    };
+
+    // Send the full updated tour to the backend.
+    this.api.update(updatedTour).subscribe({
+      // Only update the local signal after the backend confirms success.
+      //Should i do this or not? Just do loadTours?
+      //next: () => {
+      //  this._tours.update(tours =>
+      //    // Replace only the tour with the matching id.
+      //    // All other tours stay unchanged.
+      //    tours.map(tour => tour.id === id ? updatedTour : tour)
+      //  );
+      //},
+      next: () => {
+        this.loadTours();
+      },
+
+      // If the backend update fails, keep local state unchanged.
+      error: err => {
+        console.error('API Fehler beim Update:', err);
+      }
+    });
   }
 
   deleteTour(id: string): void {
-    this._tours.update((tours) => tours.filter((t) => t.id !== id));
+    
+    //this._tours.update((tours) => tours.filter((t) => t.id !== id)); //old code for no db
+    this.api.delete(id).subscribe({
+      next: () => {
+        console.log('Tour deleted successfully');
+        this.loadTours();
+
+        if (this._selectedTourId() === id) {
+          this._selectedTourId.set(null);
+        }
+      },
+      error: err => {
+        console.error('API Fehler beim Delete:', err);
+      }
+    });
   }
 
   selectTour(id: string | null): void {
@@ -132,12 +199,12 @@ export class TourService {
 
   //added for backend integration
   constructor() {
-    this.loadLogs();
+    this.loadTours();
   }
 
   protected readonly api = inject(TourApiService);
 
-  loadLogs(): void {
+  loadTours(): void {
     this.api.getAll().subscribe({
       next: tours => {
         console.log('Tours vom Backend:', tours);

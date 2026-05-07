@@ -8,7 +8,6 @@ import { Tour } from './tour.model';
 })
 
 export class TourApiService {
-  //private apiUrl = 'http://localhost:8080/all';
     private apiUrl = 'http://localhost:8080/api/tours';
 
 
@@ -33,7 +32,7 @@ export class TourApiService {
     });
   }
 
-  delete(id: number) {
+  delete(id: string) {
     console.log("delete:" ,id);
     return this.http.delete(`${this.apiUrl}/${id}`, {
         responseType: 'text'
