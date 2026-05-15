@@ -2,6 +2,7 @@ package at.fhtechnikum.tourplanner.controller;
 
 import at.fhtechnikum.tourplanner.dto.tourlog.TourLog;
 import at.fhtechnikum.tourplanner.service.TourLogService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,15 +30,14 @@ public class TourLogController {
         return ResponseEntity.ok( service.getAllTourLogs());
     }
 
-    //brauch ich das überhaupt?
+    //brauch ich das überhaupt? --> nein, da immer getAllTourLogs
     @GetMapping("/{tourId}/{user}")
-    public ResponseEntity<String> getOne(@PathVariable Long tourId, @PathVariable String user) {
+    public ResponseEntity<String> getOne(@Valid @PathVariable Long tourId, @PathVariable String user) {
         return ResponseEntity.ok("get log");
     }
 
-    //funktioniert
     @PostMapping("")
-    public ResponseEntity<String> create(@RequestBody TourLog dto) {
+    public ResponseEntity<String> create(@Valid @RequestBody TourLog dto) {
         System.out.println("Creating a new tour log");
         service.createTourLog(dto);
         //return ResponseEntity.ok("create log");
@@ -46,7 +46,7 @@ public class TourLogController {
 
 
     @PutMapping("/{logId}")
-    public ResponseEntity<TourLog> update(@PathVariable Long logId, @RequestBody TourLog dto) {
+    public ResponseEntity<TourLog> update(@Valid @PathVariable Long logId, @RequestBody TourLog dto) {
         service.updateTourLog(logId, dto);
         //return ResponseEntity.ok("update log");
         return service.updateTourLog(logId, dto)
@@ -55,7 +55,7 @@ public class TourLogController {
     }
 
     @DeleteMapping("/{logId}")
-    public ResponseEntity<String> delete(@PathVariable Long logId) {
+    public ResponseEntity<String> delete(@Valid @PathVariable Long logId) {
         System.out.println("Deleting a tour log");
         service.deleteTourLog(logId);
         return ResponseEntity.ok("deleted");

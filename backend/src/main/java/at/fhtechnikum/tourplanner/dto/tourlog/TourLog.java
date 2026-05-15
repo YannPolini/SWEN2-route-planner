@@ -1,9 +1,8 @@
 package at.fhtechnikum.tourplanner.dto.tourlog;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import lombok.*;
 
 @Getter
@@ -16,9 +15,11 @@ public class TourLog {
     @JsonProperty("logID")
     private Long logID;
 
+    //maybe use localdate type?
     @Column(nullable = false)
     private String date;
 
+    //time type?
     @Column(nullable = false)
     private String time;
 
@@ -26,15 +27,21 @@ public class TourLog {
     private String comment;
 
     @Column(nullable = false)
+    @Min(value = 0, message = "Difficulty should not be less than 0")
+    @Max(value = 5, message = "Difficulty should not be more than 5")
     private int difficulty;
 
     @Column(nullable = false)
+    @Min(value = 0, message = "Total distance should not be less than 0")
     private double totalDistance;
 
     @Column(nullable = false)
+    @Min(value = 0, message = "Total time taken should not be less than 0")
     private double totalTime;
 
     @Column(nullable = false)
+    @Min(value = 0, message = "Rating should not be less than 0")
+    @Max(value = 5, message = "Rating should not be more than 5")
     private int rating;
 
     @Column(nullable = false)
@@ -42,6 +49,8 @@ public class TourLog {
     private String tourID;
 
     @Column(nullable = false)
+    //@ManyToOne                //does not work with string, maybe make a user type?
+    //@JoinColumn(name = "??")  //user DB does not exist yet
     private String creatorName;
 
 }

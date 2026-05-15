@@ -3,6 +3,7 @@ package at.fhtechnikum.tourplanner.service;
 import at.fhtechnikum.tourplanner.dto.tourlog.TourLog;
 import at.fhtechnikum.tourplanner.repository.TourLogRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -26,11 +27,13 @@ public class TourLogService {
         return repository.findById(id);
     }
 
-    public TourLog createTourLog(TourLog tourLog) {
+    @Transactional
+    public void createTourLog(TourLog tourLog) {
         System.out.println("Creating a new tour log_service");
-        return repository.save(tourLog);
+        repository.save(tourLog);
     }
 
+    @Transactional
     public boolean deleteTourLog(Long id) {
         if(!repository.existsById(id)) {
             return false;
@@ -39,6 +42,7 @@ public class TourLogService {
         return true;
     }
 
+    @Transactional
     public Optional<TourLog> updateTourLog(Long logID, TourLog log) {
         //damit falls es nicht existiert nich ausversehen neues erstellen
         System.out.println("Updating a tour log_service");
