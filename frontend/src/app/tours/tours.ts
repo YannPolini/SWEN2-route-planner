@@ -52,6 +52,7 @@ export class ToursComponent {
     transportType: ['hike' as TransportType, [Validators.required]],
     distance: [0, [Validators.required, Validators.min(0.1)]],
     estimatedTimeMinutes: [0, [Validators.required, Validators.min(1)]],
+    childFriendliness: [0, [Validators.required, Validators.min(0), Validators.max(5)]],
   });
 
   // ── Derived state (combines Model data + UI state) ──
@@ -67,7 +68,8 @@ export class ToursComponent {
           t.description.toLowerCase().includes(term) ||
           t.from.toLowerCase().includes(term) ||
           t.to.toLowerCase().includes(term) ||
-          t.transportType.toLowerCase().includes(term),
+          t.transportType.toLowerCase().includes(term) ||
+          String(t.childFriendliness).includes(term),
       );
     }
     return result;
@@ -105,6 +107,7 @@ export class ToursComponent {
       transportType: 'hike',
       distance: 0,
       estimatedTimeMinutes: 0,
+      childFriendliness: 0,
     });
     this.formSubmitted.set(false);
     this.showForm.set(true);
@@ -120,6 +123,7 @@ export class ToursComponent {
       transportType: tour.transportType,
       distance: tour.distance,
       estimatedTimeMinutes: Math.round(tour.estimatedTime / 60),
+      childFriendliness: tour.childFriendliness,
     });
     this.formSubmitted.set(false);
     this.showForm.set(true);
@@ -146,6 +150,7 @@ export class ToursComponent {
       transportType: v.transportType,
       distance: +v.distance,
       estimatedTime: +v.estimatedTimeMinutes * 60,
+      childFriendliness: +v.childFriendliness,
       routeImagePath: this.editingTour()?.routeImagePath ?? '',
     };
 

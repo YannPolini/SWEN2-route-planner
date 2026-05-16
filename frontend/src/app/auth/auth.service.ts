@@ -1,19 +1,27 @@
-import {isPlatformBrowser} from '@angular/common';
-import {Injectable, PLATFORM_ID, computed, inject, signal} from '@angular/core';
-import {Router} from '@angular/router';
+import { isPlatformBrowser } from '@angular/common';
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
+import { Injectable, PLATFORM_ID, computed, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
+import { Observable, catchError, map, of, tap } from 'rxjs';
 
-type StoredUser = {
+type RegisterUser = {
   name: string;
   email: string;
   password: string;
 };
 
 type SessionUser = {
+  id: number;
   name: string;
   email: string;
 };
 
-type AuthResult = {
+type AuthResponse = {
+  token: string;
+  user: SessionUser;
+};
+
+export type AuthResult = {
   success: boolean;
   message?: string;
 };
@@ -31,10 +39,12 @@ type ProfileUpdate = {
 export class AuthService {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly router = inject(Router);
-  private readonly usersKey = 'tour-planner-users';
-  private readonly sessionKey = 'tour-planner-session';
+  private readonly http = inject(HttpClient);
+  private readonly apiUrl = 'http://localhost:8080/api/auth';
+  private readonly tokenKey = 'tour-planner-token';
+  private readonly sessionKey = 'tour-planner-session-user';
 
-  private readonly usersSignal = signal<StoredUser[]>([]);
+  private readonly tokenSignal = signal<string | null>(null);
   private readonly currentUserSignal = signal<SessionUser | null>(null);
 
   readonly currentUser = this.currentUserSignal.asReadonly();
@@ -44,100 +54,42 @@ export class AuthService {
     this.loadState();
   }
 
-  register(user: StoredUser): AuthResult {
-    const email = user.email.trim().toLowerCase();
-    const name = user.name.trim();
-    const password = user.password.trim();
-
-    if (!name || !email || !password) {
-      return {success: false, message: 'Please fill in all fields.'};
-    }
-
-    if (this.usersSignal().some((existingUser) => existingUser.email === email)) {
-      return {success: false, message: 'An account with this email already exists.'};
-    }
-
-    this.usersSignal.set([...this.usersSignal(), {name, email, password}]);
-    this.currentUserSignal.set({name, email});
-    this.persistState();
-
-    return {success: true};
+  register(user: RegisterUser): Observable<AuthResult> {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/register`, user).pipe(
+      tap((response) => this.setSession(response)),
+      map(() => ({ success: true })),
+      catchError((error) => of(this.toAuthResult(error, 'Registration failed.'))),
+    );
   }
 
-  login(email: string, password: string): AuthResult {
-    const normalizedEmail = email.trim().toLowerCase();
-    const normalizedPassword = password.trim();
-    const user = this.usersSignal().find(
-      (existingUser) =>
-        existingUser.email === normalizedEmail && existingUser.password === normalizedPassword,
+  login(email: string, password: string): Observable<AuthResult> {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/login`, { email, password }).pipe(
+      tap((response) => this.setSession(response)),
+      map(() => ({ success: true })),
+      catchError((error) => of(this.toAuthResult(error, 'Login failed.'))),
     );
-
-    if (!user) {
-      return {success: false, message: 'Invalid email or password.'};
-    }
-
-    this.currentUserSignal.set({name: user.name, email: user.email});
-    this.persistState();
-
-    return {success: true};
   }
 
-  updateProfile(update: ProfileUpdate): AuthResult {
-    const activeUser = this.currentUserSignal();
-
-    if (!activeUser) {
-      return {success: false, message: 'You must be logged in to update your profile.'};
-    }
-
-    const name = update.name.trim();
-    const email = update.email.trim().toLowerCase();
-    const currentPassword = update.currentPassword.trim();
-    const newPassword = update.newPassword?.trim();
-
-    if (!name || !email || !currentPassword) {
-      return {success: false, message: 'Please fill in all required fields.'};
-    }
-
-    const currentUserIndex = this.usersSignal().findIndex(
-      (user) => user.email === activeUser.email,
+  updateProfile(update: ProfileUpdate): Observable<AuthResult> {
+    return this.http.put<SessionUser>(`${this.apiUrl}/editUser`, update, {
+      headers: this.authHeaders(),
+    }).pipe(
+      tap((user) => this.setCurrentUser(user)),
+      map(() => ({ success: true })),
+      catchError((error) => of(this.toAuthResult(error, 'Profile update failed.'))),
     );
-
-    if (currentUserIndex === -1) {
-      return {success: false, message: 'Current account could not be found.'};
-    }
-
-    const currentUser = this.usersSignal()[currentUserIndex];
-
-    if (currentUser.password !== currentPassword) {
-      return {success: false, message: 'Current password is incorrect.'};
-    }
-
-    const emailTaken = this.usersSignal().some(
-      (user, index) => index !== currentUserIndex && user.email === email,
-    );
-
-    if (emailTaken) {
-      return {success: false, message: 'Another account already uses this email address.'};
-    }
-
-    const updatedUser: StoredUser = {
-      name,
-      email,
-      password: newPassword || currentUser.password,
-    };
-
-    this.usersSignal.update((users) =>
-      users.map((user, index) => (index === currentUserIndex ? updatedUser : user)),
-    );
-    this.currentUserSignal.set({name: updatedUser.name, email: updatedUser.email});
-    this.persistState();
-
-    return {success: true};
   }
 
   logout(): void {
-    this.currentUserSignal.set(null);
-    this.persistState();
+    const headers = this.authHeaders();
+    this.clearSession();
+
+    if (headers.has('Authorization')) {
+      this.http.post<void>(`${this.apiUrl}/logout`, {}, { headers }).subscribe({
+        error: () => undefined,
+      });
+    }
+
     void this.router.navigate(['/login']);
   }
 
@@ -146,33 +98,70 @@ export class AuthService {
       return;
     }
 
-    const storedUsers = localStorage.getItem(this.usersKey);
+    const token = localStorage.getItem(this.tokenKey);
     const storedSession = localStorage.getItem(this.sessionKey);
-
-    const users = storedUsers ? (JSON.parse(storedUsers) as StoredUser[]) : this.getSeedUsers();
     const session = storedSession ? (JSON.parse(storedSession) as SessionUser | null) : null;
 
-    this.usersSignal.set(users);
+    this.tokenSignal.set(token);
     this.currentUserSignal.set(session);
-    this.persistState();
+
+    if (token) {
+      this.http.get<SessionUser>(`${this.apiUrl}/me`, { headers: this.authHeaders(token) }).subscribe({
+        next: (user) => this.setCurrentUser(user),
+        error: () => this.clearSession(),
+      });
+    }
   }
 
-  private persistState(): void {
+  private setSession(response: AuthResponse): void {
+    this.tokenSignal.set(response.token);
+    this.setCurrentUser(response.user);
+
     if (!isPlatformBrowser(this.platformId)) {
       return;
     }
 
-    localStorage.setItem(this.usersKey, JSON.stringify(this.usersSignal()));
-    localStorage.setItem(this.sessionKey, JSON.stringify(this.currentUserSignal()));
+    localStorage.setItem(this.tokenKey, response.token);
   }
 
-  private getSeedUsers(): StoredUser[] {
-    return [
-      {
-        name: 'Demo User',
-        email: 'demo@tourplanner.local',
-        password: 'demo1234',
-      },
-    ];
+  private setCurrentUser(user: SessionUser): void {
+    this.currentUserSignal.set(user);
+
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
+    localStorage.setItem(this.sessionKey, JSON.stringify(user));
+  }
+
+  private clearSession(): void {
+    this.tokenSignal.set(null);
+    this.currentUserSignal.set(null);
+
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
+    localStorage.removeItem(this.tokenKey);
+    localStorage.removeItem(this.sessionKey);
+  }
+
+  private authHeaders(token = this.tokenSignal()): HttpHeaders {
+    return token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : new HttpHeaders();
+  }
+
+  private toAuthResult(error: unknown, fallback: string): AuthResult {
+    if (error instanceof HttpErrorResponse) {
+      if (typeof error.error === 'string') {
+        return { success: false, message: error.error || fallback };
+      }
+
+      return {
+        success: false,
+        message: error.error?.detail ?? error.error?.message ?? error.error?.error ?? fallback,
+      };
+    }
+
+    return { success: false, message: fallback };
   }
 }

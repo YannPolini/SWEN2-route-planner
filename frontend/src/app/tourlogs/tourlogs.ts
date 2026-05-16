@@ -4,11 +4,12 @@ import { FormBuilder, ReactiveFormsModule, Validators, AbstractControl, Validati
 import { TourService } from '../services/tour.service';
 import { AuthService } from '../auth/auth.service';
 import { TourlogsModel, Log } from '../tourlogs.model/tourlogs.model';
+import { SearchBarComponent } from '../shared/search-bar/search-bar';
 
 @Component({
   selector: 'app-tourlogs',
   standalone: true,
-  imports: [ReactiveFormsModule, TourlogsList],
+  imports: [ReactiveFormsModule, TourlogsList, SearchBarComponent],
   templateUrl: './tourlogs.html',
   styleUrl: './tourlogs.css',
 })
@@ -55,8 +56,13 @@ export class TourlogsComponent {
 
   //ausgelagert zu tourlogs.model.ts
   protected readonly filteredLogs = this.tourlogsModel.filteredLogs;    //Filtered Liste der Tourlogs, mit UserName und 
+  protected readonly searchTerm = this.tourlogsModel.searchTerm;
 
   protected readonly canAddLog = computed(() => this.tourService.selectedTourId() !== null);  //Wenn eine Tour ausgewählt ist, dann hat es eine ID
+
+  protected updateSearch(term: string): void {
+    this.tourlogsModel.setSearchTerm(term);
+  }
 
   //with addPopup
   protected openAdd(): void {

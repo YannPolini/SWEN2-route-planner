@@ -1,15 +1,19 @@
 package at.fhtechnikum.tourplanner.dto.tour;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "tour")
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -20,7 +24,7 @@ public class Tour {
     private String id;
 
     @Column(nullable = false)
-    @Min(value = 3, message = "Name should be at least 3 characters long")
+    @Size(min = 3, message = "Name should be at least 3 characters long")
     private String name;
 
     @Column(nullable = false)
@@ -47,6 +51,11 @@ public class Tour {
     @Column(nullable = false)
     @Min(value=1, message = "Estimated Time must at least be 1 Minutes")
     private double estimatedTime;
+
+    @Column(nullable = false)
+    @Min(value = 0, message = "Child friendliness should not be less than 0")
+    @Max(value = 5, message = "Child friendliness should not be more than 5")
+    private int childFriendliness;
 
     @Column(nullable = false)
     private String routeImagePath;

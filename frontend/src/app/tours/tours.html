@@ -95,6 +95,7 @@
               <div class="small text-secondary mt-1">
                 {{ tour.distance }} km · {{ formatDuration(tour.estimatedTime) }}
               </div>
+              <div class="small text-secondary">Child friendly: {{ tour.childFriendliness }}/5</div>
             </div>
           } @empty {
             <div class="text-center text-secondary py-5">
@@ -156,6 +157,10 @@
             <div class="col-6 col-md-4">
               <div class="text-uppercase small text-secondary fw-medium">Popularity</div>
               <div>{{ tourlogsModel.getPopularity(selectedTourId()!) }}</div>
+            </div>
+            <div class="col-6 col-md-4">
+              <div class="text-uppercase small text-secondary fw-medium">Child friendly</div>
+              <div>{{ tour.childFriendliness }}/5</div>
             </div>
           </div>
 
@@ -308,6 +313,31 @@
                       <span>Required.</span>
                     } @else if (tourForm.controls.estimatedTimeMinutes.errors['min']) {
                       <span>At least 1 min.</span>
+                    }
+                  </div>
+                }
+              </div>
+              <div class="col-12">
+                <label for="tourChildFriendliness" class="form-label">
+                  Child friendliness (0...not suitable, 5...very suitable) *
+                </label>
+                <input
+                  id="tourChildFriendliness"
+                  type="number"
+                  class="form-control"
+                  formControlName="childFriendliness"
+                  min="0"
+                  max="5"
+                />
+                @if (
+                  (formSubmitted() || tourForm.controls.childFriendliness.touched) &&
+                  tourForm.controls.childFriendliness.errors
+                ) {
+                  <div class="invalid-feedback d-block">
+                    @if (tourForm.controls.childFriendliness.errors['required']) {
+                      <span>Required.</span>
+                    } @else {
+                      <span>Must be between 0 and 5.</span>
                     }
                   </div>
                 }

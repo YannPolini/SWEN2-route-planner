@@ -50,13 +50,13 @@ export class RegisterComponent {
     }
 
     const {name, email, password} = this.registerForm.getRawValue();
-    const result = this.authService.register({name, email, password});
+    this.authService.register({name, email, password}).subscribe((result) => {
+      if (!result.success) {
+        this.errorMessage.set(result.message ?? 'Registration failed.');
+        return;
+      }
 
-    if (!result.success) {
-      this.errorMessage.set(result.message ?? 'Registration failed.');
-      return;
-    }
-
-    void this.router.navigate(['/tourlogs']);
+      void this.router.navigate(['/tourlogs']);
+    });
   }
 }

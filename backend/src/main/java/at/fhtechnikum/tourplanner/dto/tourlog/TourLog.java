@@ -1,5 +1,6 @@
 package at.fhtechnikum.tourplanner.dto.tourlog;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
@@ -8,6 +9,7 @@ import lombok.*;
 @Getter
 @Setter
 @Entity
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class TourLog {
 
     @Id

@@ -53,7 +53,7 @@ public class TourService {
         }
         System.out.println("tour exists, updating");
         Tour saved = repository.save(tour);
-        System.out.println("Saved Tour: " + saved.getDescription());
+        System.out.println("Saved Tour");
         return Optional.of(saved);
     }
 }

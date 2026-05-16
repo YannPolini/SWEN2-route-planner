@@ -1,3 +1,32 @@
+CREATE TABLE IF NOT EXISTS tour (
+    id VARCHAR(255) PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT NOT NULL,
+    start_location VARCHAR(255) NOT NULL,
+    end_location VARCHAR(255) NOT NULL,
+    transport_type VARCHAR(255) NOT NULL,
+    distance DOUBLE PRECISION NOT NULL,
+    estimated_time DOUBLE PRECISION NOT NULL,
+    child_friendliness INTEGER NOT NULL DEFAULT 0,
+    route_image_path VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS app_user (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS user_session (
+    token VARCHAR(255) PRIMARY KEY,
+    user_id BIGINT NOT NULL REFERENCES app_user(id) ON DELETE CASCADE,
+    created_at TIMESTAMP NOT NULL,
+    expires_at TIMESTAMP NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS tour_log (
     logid BIGINT PRIMARY KEY,
     date VARCHAR(255),
@@ -42,6 +71,7 @@ INSERT INTO tour (
     transport_type,
     distance,
     estimated_time,
+    child_friendliness,
     route_image_path,
     created_at
 ) VALUES
@@ -54,6 +84,7 @@ INSERT INTO tour (
           'BIKE',
           21.5,
           4200,
+          5,
           '',
           '2026-03-01 00:00:00'
       ),
@@ -66,6 +97,7 @@ INSERT INTO tour (
           'HIKE',
           12.8,
           18000,
+          2,
           '',
           '2026-02-15 00:00:00'
       ),
@@ -78,6 +110,7 @@ INSERT INTO tour (
           'RUNNING',
           8.2,
           2700,
+          4,
           '',
           '2026-03-10 00:00:00'
       ),
@@ -90,6 +123,7 @@ INSERT INTO tour (
           'BIKE',
           36.0,
           7200,
+          4,
           '',
           '2026-02-28 00:00:00'
       ),
@@ -102,6 +136,7 @@ INSERT INTO tour (
           'VACATION',
           4.5,
           10800,
+          5,
           '',
           '2026-03-05 00:00:00'
       );

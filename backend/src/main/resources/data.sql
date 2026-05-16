@@ -29,6 +29,7 @@ INSERT INTO tour (
     transport_type,
     distance,
     estimated_time,
+    child_friendliness,
     route_image_path,
     created_at
 ) VALUES
@@ -41,6 +42,7 @@ INSERT INTO tour (
           'BIKE',
           21.5,
           4200,
+          5,
           '',
           '2026-03-01 00:00:00'
       ),
@@ -53,6 +55,7 @@ INSERT INTO tour (
           'HIKE',
           12.8,
           18000,
+          2,
           '',
           '2026-02-15 00:00:00'
       ),
@@ -65,6 +68,7 @@ INSERT INTO tour (
           'RUNNING',
           8.2,
           2700,
+          4,
           '',
           '2026-03-10 00:00:00'
       ),
@@ -77,6 +81,7 @@ INSERT INTO tour (
           'BIKE',
           36.0,
           7200,
+          4,
           '',
           '2026-02-28 00:00:00'
       ),
@@ -89,6 +94,7 @@ INSERT INTO tour (
           'VACATION',
           4.5,
           10800,
+          5,
           '',
           '2026-03-05 00:00:00'
       )

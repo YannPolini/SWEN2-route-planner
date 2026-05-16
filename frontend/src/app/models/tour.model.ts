@@ -9,6 +9,7 @@ export interface Tour {
   transportType: TransportType;
   distance: number;
   estimatedTime: number;
+  childFriendliness: number;
   routeImagePath: string;
   createdAt: Date;
 }

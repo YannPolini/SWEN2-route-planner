@@ -52,7 +52,7 @@ public class TourLogService {
 
         //log.setLogID(logID);
         TourLog saved = repository.save(log);
-        System.out.println("Saved log: " + saved.getComment());
+        System.out.println("Saved log");
 
         /*
         public TourLog updateTourLog(Long logID, TourLog dto) {

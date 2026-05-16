@@ -32,13 +32,13 @@ export class LoginComponent {
     }
 
     const { email, password } = this.loginForm.getRawValue();
-    const result = this.authService.login(email, password);
+    this.authService.login(email, password).subscribe((result) => {
+      if (!result.success) {
+        this.errorMessage.set(result.message ?? 'Login failed.');
+        return;
+      }
 
-    if (!result.success) {
-      this.errorMessage.set(result.message ?? 'Login failed.');
-      return;
-    }
-
-    void this.router.navigate(['/tourlogs']);
+      void this.router.navigate(['/tourlogs']);
+    });
   }
 }

@@ -20,6 +20,7 @@ export type Log = {
 export class TourlogsModel {
 
   readonly logList = signal<Log[]>([]);
+  readonly searchTerm = signal<string>('');
   /*
   readonly logList = signal<Log[]>([
     {
@@ -119,13 +120,32 @@ export class TourlogsModel {
   readonly filteredLogs = computed(() => {
     const selectedTourId = this.tourService.selectedTourId();
     const currentUsername = this.authService.currentUser()?.name; 
+    const term = this.searchTerm().toLowerCase().trim();
 
     if (!selectedTourId) {
       return [];
     }
 
-    return this.logList().filter(log => log.tourID === selectedTourId && log.creatorName === currentUsername);
+    let result = this.logList().filter(log => log.tourID === selectedTourId && log.creatorName === currentUsername);
+
+    if (term) {
+      result = result.filter(log =>
+        log.date.toLowerCase().includes(term) ||
+        log.time.toLowerCase().includes(term) ||
+        log.comment.toLowerCase().includes(term) ||
+        String(log.difficulty).includes(term) ||
+        String(log.totalDistance).includes(term) ||
+        String(log.totalTime).includes(term) ||
+        String(log.rating).includes(term)
+      );
+    }
+
+    return result;
   });
+
+  setSearchTerm(term: string): void {
+    this.searchTerm.set(term);
+  }
 
   addLog(newLog: Log): void {
     //this.logList.update(logs => [newLog, ...logs]);     //newLog ist erstes im Array

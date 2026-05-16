@@ -81,21 +81,21 @@ export class ProfileComponent {
     }
 
     const { name, email, currentPassword, newPassword } = this.profileForm.getRawValue();
-    const result = this.authService.updateProfile({
+    this.authService.updateProfile({
       name,
       email,
       currentPassword,
       newPassword,
+    }).subscribe((result) => {
+      if (!result.success) {
+        this.errorMessage.set(result.message ?? 'Profile update failed.');
+        return;
+      }
+
+      this.successMessage.set('Profile updated successfully.');
+      this.submitted.set(false);
+      this.resetForm();
     });
-
-    if (!result.success) {
-      this.errorMessage.set(result.message ?? 'Profile update failed.');
-      return;
-    }
-
-    this.successMessage.set('Profile updated successfully.');
-    this.submitted.set(false);
-    this.resetForm();
   }
 
   protected resetForm(): void {
