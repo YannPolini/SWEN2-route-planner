@@ -3,7 +3,6 @@ package at.fhtechnikum.tourplanner.dto.tour;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
@@ -45,11 +44,9 @@ public class Tour {
     private TransportType transportType;
 
     @Column(nullable = false)
-    @DecimalMin(value = "0.1", message = "Value must be at least 0.1")  //inclusive 0.1
     private double distance;
 
     @Column(nullable = false)
-    @Min(value=1, message = "Estimated Time must at least be 1 Minutes")
     private double estimatedTime;
 
     @Column(nullable = false)
@@ -59,6 +56,10 @@ public class Tour {
 
     @Column(nullable = false)
     private String routeImagePath;
+
+    // ORS route polyline stored as JSON string: [[lat,lng],[lat,lng],...]
+    @Column(columnDefinition = "TEXT")
+    private String routeGeometry;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;

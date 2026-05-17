@@ -1,3 +1,7 @@
+-- Drop legacy check constraints left over from old @Min/@DecimalMin annotations.
+-- Hibernate ddl-auto=update never removes constraints, so we do it here.
+ALTER TABLE IF EXISTS tour DROP CONSTRAINT IF EXISTS tour_estimated_time_check;
+ALTER TABLE IF EXISTS tour DROP CONSTRAINT IF EXISTS tour_distance_check;
 
 INSERT INTO tour_log (
     logid,

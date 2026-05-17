@@ -165,7 +165,11 @@
           </div>
 
           <h3 class="h6 mb-2">Route Map</h3>
-          <app-tour-map [fromLocation]="tour.from" [toLocation]="tour.to" />
+          <app-tour-map
+            [fromLocation]="tour.from"
+            [toLocation]="tour.to"
+            [routeGeometry]="tour.routeGeometry"
+          />
         </div>
       </div>
 
@@ -236,12 +240,13 @@
 
             <div class="row g-3">
               <div class="col-6">
-                <label for="tourFrom" class="form-label">From *</label>
-                <input
-                  id="tourFrom"
-                  class="form-control"
-                  formControlName="from"
-                  placeholder="Start"
+                <label class="form-label">From *</label>
+                <app-address-input
+                  placeholder="Start location"
+                  [value]="tourForm.controls.from.value"
+                  [invalid]="(formSubmitted() || tourForm.controls.from.touched) && !!tourForm.controls.from.errors"
+                  (valueChange)="tourForm.controls.from.setValue($event)"
+                  (blur)="tourForm.controls.from.markAsTouched()"
                 />
                 @if (
                   (formSubmitted() || tourForm.controls.from.touched) &&
@@ -251,8 +256,14 @@
                 }
               </div>
               <div class="col-6">
-                <label for="tourTo" class="form-label">To *</label>
-                <input id="tourTo" class="form-control" formControlName="to" placeholder="End" />
+                <label class="form-label">To *</label>
+                <app-address-input
+                  placeholder="End location"
+                  [value]="tourForm.controls.to.value"
+                  [invalid]="(formSubmitted() || tourForm.controls.to.touched) && !!tourForm.controls.to.errors"
+                  (valueChange)="tourForm.controls.to.setValue($event)"
+                  (blur)="tourForm.controls.to.markAsTouched()"
+                />
                 @if (
                   (formSubmitted() || tourForm.controls.to.touched) &&
                   tourForm.controls.to.errors?.['required']
@@ -271,52 +282,12 @@
               </select>
             </div>
 
+            <div class="alert alert-info py-2 px-3 mb-3 small">
+              🗺️ <strong>Distance and estimated time</strong> are calculated automatically
+              via OpenRouteService when you save.
+            </div>
+
             <div class="row g-3 mb-3">
-              <div class="col-6">
-                <label for="tourDist" class="form-label">Distance (km) *</label>
-                <input
-                  id="tourDist"
-                  type="number"
-                  class="form-control"
-                  formControlName="distance"
-                  step="0.1"
-                  min="0"
-                />
-                @if (
-                  (formSubmitted() || tourForm.controls.distance.touched) &&
-                  tourForm.controls.distance.errors
-                ) {
-                  <div class="invalid-feedback d-block">
-                    @if (tourForm.controls.distance.errors['required']) {
-                      <span>Required.</span>
-                    } @else if (tourForm.controls.distance.errors['min']) {
-                      <span>Must be > 0.</span>
-                    }
-                  </div>
-                }
-              </div>
-              <div class="col-6">
-                <label for="tourTime" class="form-label">Est. Time (min) *</label>
-                <input
-                  id="tourTime"
-                  type="number"
-                  class="form-control"
-                  formControlName="estimatedTimeMinutes"
-                  min="1"
-                />
-                @if (
-                  (formSubmitted() || tourForm.controls.estimatedTimeMinutes.touched) &&
-                  tourForm.controls.estimatedTimeMinutes.errors
-                ) {
-                  <div class="invalid-feedback d-block">
-                    @if (tourForm.controls.estimatedTimeMinutes.errors['required']) {
-                      <span>Required.</span>
-                    } @else if (tourForm.controls.estimatedTimeMinutes.errors['min']) {
-                      <span>At least 1 min.</span>
-                    }
-                  </div>
-                }
-              </div>
               <div class="col-12">
                 <label for="tourChildFriendliness" class="form-label">
                   Child friendliness (0...not suitable, 5...very suitable) *
