@@ -15,7 +15,7 @@ public class TourLog {
     @Id
     @Column(nullable = false)
     @JsonProperty("logID")
-    private Long logID;
+    private String logID;
 
     //maybe use localdate type?
     @Column(nullable = false)

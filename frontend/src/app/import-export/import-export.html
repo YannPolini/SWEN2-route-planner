@@ -1,0 +1,44 @@
+<div class="importExport-actions">
+
+  <!-- Export buttons — each triggers a different file format download -->
+  <!--<button (click)="exportTours('excel')">Export Excel</button>-->
+  <button (click)="exportTours('csv')">Export CSV</button>
+  <!--<button (click)="exportTours('json')">Export JSON</button>-->
+
+  <!--Import file input — hidden by default, triggered by clicking the label. accept restricts the file picker to only show supported formats.-->
+  <label>
+    Import Tours
+    <input
+      type="file"
+      accept=".xlsx,.csv,.json"
+      (change)="onFileSelected($event)"
+      hidden>
+  </label>
+
+   <div *ngIf="selectedFile">Selected file: {{ selectedFile.name }} </div>
+
+  <button
+    type="button"
+    (click)="importTours()"
+    [disabled]="!selectedFile || isImporting"
+  >Import</button>
+
+
+  <!-- Show a loading message while the import request is in flight -->
+  <div *ngIf="isImporting">Importing, please wait...</div>
+
+  <!-- Show the import result summary once the backend responds-->
+  <div *ngIf="importResult as result">
+  <p>
+    {{ result.importedRows }} imported,
+    {{ result.failedRows }} failed
+  </p>
+
+  <!-- List any per-row errors returned by the backend -->
+  <ul *ngIf="result.errors.length > 0">
+    <li *ngFor="let err of result.errors">
+      {{ err }}
+    </li>
+  </ul>
+</div>
+

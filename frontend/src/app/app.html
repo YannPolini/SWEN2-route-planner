@@ -5,6 +5,7 @@
 
       <div class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
         @if (authService.isAuthenticated()) {
+          <import-export></import-export>
           <a class="nav-link" routerLink="/tourlogs" routerLinkActive="active">Tour Logs</a>
           <a
             class="nav-link profile-nav-link"

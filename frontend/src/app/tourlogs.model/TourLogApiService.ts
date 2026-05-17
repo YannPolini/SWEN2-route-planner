@@ -8,7 +8,6 @@ import { HttpClient } from '@angular/common/http';
 })
 
 export class TourLogApiService {
-  //private apiUrl = 'http://localhost:8080/all';
     private apiUrl = 'http://localhost:8080/api/logs';
 
 
