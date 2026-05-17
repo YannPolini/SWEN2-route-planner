@@ -7,6 +7,7 @@ import { SearchBarComponent } from '../shared/search-bar/search-bar';
 import { TourMapComponent } from '../shared/tour-map/tour-map';
 import { TourlogsComponent } from '../tourlogs/tourlogs';
 import { TourlogsModel } from '../tourlogs.model/tourlogs.model';
+import { AddressInputComponent } from '../shared/address-input/address-input';
 
 // ═══════════════════════════════════════════════════════
 // VIEW-MODEL (Component) — UI state, UI logic, actions
@@ -22,6 +23,7 @@ import { TourlogsModel } from '../tourlogs.model/tourlogs.model';
     SearchBarComponent,
     TourMapComponent,
     TourlogsComponent,
+    AddressInputComponent,
   ],
   templateUrl: './tours.html',
   styleUrl: './tours.css',
@@ -44,14 +46,13 @@ export class ToursComponent {
   protected readonly formSubmitted = signal(false);
 
   // ── Reactive Form (owned by ViewModel) ──
+  // distance + estimatedTime removed: backend computes them via ORS
   protected readonly tourForm = this.fb.nonNullable.group({
-    name: ['', [Validators.required, Validators.minLength(3)]],
-    description: ['', [Validators.required]],
-    from: ['', [Validators.required]],
-    to: ['', [Validators.required]],
+    name:          ['', [Validators.required, Validators.minLength(3)]],
+    description:   ['', [Validators.required]],
+    from:          ['', [Validators.required]],
+    to:            ['', [Validators.required]],
     transportType: ['hike' as TransportType, [Validators.required]],
-    distance: [0, [Validators.required, Validators.min(0.1)]],
-    estimatedTimeMinutes: [0, [Validators.required, Validators.min(1)]],
     childFriendliness: [0, [Validators.required, Validators.min(0), Validators.max(5)]],
   });
 
@@ -100,13 +101,11 @@ export class ToursComponent {
   protected openCreateForm(): void {
     this.editingTour.set(null);
     this.tourForm.reset({
-      name: '',
-      description: '',
-      from: '',
-      to: '',
+      name:          '',
+      description:   '',
+      from:          '',
+      to:            '',
       transportType: 'hike',
-      distance: 0,
-      estimatedTimeMinutes: 0,
       childFriendliness: 0,
     });
     this.formSubmitted.set(false);
@@ -116,13 +115,11 @@ export class ToursComponent {
   protected openEditForm(tour: Tour): void {
     this.editingTour.set(tour);
     this.tourForm.setValue({
-      name: tour.name,
-      description: tour.description,
-      from: tour.from,
-      to: tour.to,
+      name:          tour.name,
+      description:   tour.description,
+      from:          tour.from,
+      to:            tour.to,
       transportType: tour.transportType,
-      distance: tour.distance,
-      estimatedTimeMinutes: Math.round(tour.estimatedTime / 60),
       childFriendliness: tour.childFriendliness,
     });
     this.formSubmitted.set(false);
@@ -142,16 +139,18 @@ export class ToursComponent {
     }
 
     const v = this.tourForm.getRawValue();
+    // distance/estimatedTime/routeGeometry: placeholders, backend fills via ORS
     const data: Omit<Tour, 'id' | 'createdAt'> = {
-      name: v.name.trim(),
-      description: v.description.trim(),
-      from: v.from.trim(),
-      to: v.to.trim(),
+      name:          v.name.trim(),
+      description:   v.description.trim(),
+      from:          v.from.trim(),
+      to:            v.to.trim(),
       transportType: v.transportType,
-      distance: +v.distance,
-      estimatedTime: +v.estimatedTimeMinutes * 60,
+      distance:      0,
+      estimatedTime: 0,
       childFriendliness: +v.childFriendliness,
       routeImagePath: this.editingTour()?.routeImagePath ?? '',
+      routeGeometry:  null,
     };
 
     const editing = this.editingTour();

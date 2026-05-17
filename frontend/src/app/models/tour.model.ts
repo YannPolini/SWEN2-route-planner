@@ -8,9 +8,10 @@ export interface Tour {
   to: string;
   transportType: TransportType;
   distance: number;
-  estimatedTime: number;
+  estimatedTime: number;      // seconds — formatDuration() converts to h/min display
   childFriendliness: number;
   routeImagePath: string;
+  routeGeometry: string | null; // [[lat,lng],...] as JSON — null if ORS failed
   createdAt: Date;
 }
 
