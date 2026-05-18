@@ -38,9 +38,7 @@ public class ImportExportController {
         byte[] csvFile = importExportService.exportAsCsv();
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=export.csv"
-                )
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=export.csv")
                 .contentType(MediaType.parseMediaType("text/csv"))
                 .body(csvFile);
     }

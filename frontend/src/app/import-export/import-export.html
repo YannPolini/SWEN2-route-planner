@@ -15,8 +15,6 @@
       hidden>
   </label>
 
-   <div *ngIf="selectedFile">Selected file: {{ selectedFile.name }} </div>
-
   <button
     type="button"
     (click)="importTours()"
@@ -24,21 +22,21 @@
   >Import</button>
 
 
-  <!-- Show a loading message while the import request is in flight -->
-  <div *ngIf="isImporting">Importing, please wait...</div>
+  <!-- Show a loading message while the import request is in flight 
+  <div *ngIf="isImporting">Importing, please wait...</div>-->
 
-  <!-- Show the import result summary once the backend responds-->
+  <!-- Show the import result summary once the backend responds
   <div *ngIf="importResult as result">
   <p>
     {{ result.importedRows }} imported,
     {{ result.failedRows }} failed
-  </p>
+  </p>-->
 
-  <!-- List any per-row errors returned by the backend -->
+  <!-- List any per-row errors returned by the backend 
   <ul *ngIf="result.errors.length > 0">
     <li *ngFor="let err of result.errors">
       {{ err }}
     </li>
-  </ul>
+  </ul>-->
 </div>
 
