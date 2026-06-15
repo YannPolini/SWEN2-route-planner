@@ -1,1 +1,0 @@
-//(Basically a list of TourSearchDtos and TourLogSearchDtos)
