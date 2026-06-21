@@ -38,7 +38,7 @@ public class ImportExportService {
         this.tourLogRepository = tourLogRepository;
     }
 
-     //Importiert aus einer CSV-Datei.
+    //Importiert aus einer CSV-Datei.
     @Transactional
     public ImportResultDto importTours(MultipartFile file) {
         System.out.println("importing");

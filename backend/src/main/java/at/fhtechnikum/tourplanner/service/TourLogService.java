@@ -23,7 +23,8 @@ public class TourLogService {
         return logs;
     }
 
-    public Optional<TourLog> getTourLogById(Long id) {
+    //Long?
+    public Optional<TourLog> getTourLogById(String id) {
         return repository.findById(id);
     }
 
@@ -34,7 +35,7 @@ public class TourLogService {
     }
 
     @Transactional
-    public boolean deleteTourLog(Long id) {
+    public boolean deleteTourLog(String id) {
         if(!repository.existsById(id)) {
             return false;
         }
@@ -43,10 +44,11 @@ public class TourLogService {
     }
 
     @Transactional
-    public Optional<TourLog> updateTourLog(Long logID, TourLog log) {
+    public Optional<TourLog> updateTourLog(String logID, TourLog log) {
         //damit falls es nicht existiert nich ausversehen neues erstellen
         System.out.println("Updating a tour log_service");
         if (!repository.existsById(logID)) {
+            //need to get some real exception here
             throw new RuntimeException("Log not found");
         }
 

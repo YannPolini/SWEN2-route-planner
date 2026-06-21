@@ -46,7 +46,7 @@ public class TourLogController {
 
 
     @PutMapping("/{logId}")
-    public ResponseEntity<TourLog> update(@Valid @PathVariable Long logId, @RequestBody TourLog dto) {
+    public ResponseEntity<TourLog> update(@Valid @PathVariable String logId, @RequestBody TourLog dto) {
         service.updateTourLog(logId, dto);
         //return ResponseEntity.ok("update log");
         return service.updateTourLog(logId, dto)
@@ -55,7 +55,7 @@ public class TourLogController {
     }
 
     @DeleteMapping("/{logId}")
-    public ResponseEntity<String> delete(@Valid @PathVariable Long logId) {
+    public ResponseEntity<String> delete(@Valid @PathVariable String logId) {
         System.out.println("Deleting a tour log");
         service.deleteTourLog(logId);
         return ResponseEntity.ok("deleted");

@@ -8,6 +8,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface TourLogRepository extends JpaRepository<TourLog, Long> {
+public interface TourLogRepository extends JpaRepository<TourLog, String> {
     List<TourLog> findByTourID(String tourID);
 }

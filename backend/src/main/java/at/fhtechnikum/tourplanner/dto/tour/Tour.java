@@ -12,14 +12,16 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "tour")
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)    //vllt weggeben
 @Getter
 @Setter
 @NoArgsConstructor
 public class Tour {
 
     @Id
-    @Column(nullable = false)
+    @Column(nullable = false, updatable = false)
+    //@Setter(AccessLevel.NONE) // damit nicht manuell gesetzt werden kann aber id wird ium frontenfd erzeugt ode?
+    //@JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private String id;
 
     @Column(nullable = false)
