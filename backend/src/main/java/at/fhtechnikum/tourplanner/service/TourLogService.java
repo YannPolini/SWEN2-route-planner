@@ -1,6 +1,7 @@
 package at.fhtechnikum.tourplanner.service;
 
 import at.fhtechnikum.tourplanner.dto.tourlog.TourLog;
+import at.fhtechnikum.tourplanner.exception.ResourceNotFoundException;
 import at.fhtechnikum.tourplanner.repository.TourLogRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,7 +48,7 @@ public class TourLogService {
         //damit falls es nicht existiert nich ausversehen neues erstellen
         System.out.println("Updating a tour log_service");
         if (!repository.existsById(logID)) {
-            throw new RuntimeException("Log not found");
+            throw new ResourceNotFoundException("Log not found: " + logID);
         }
 
         //log.setLogID(logID);
