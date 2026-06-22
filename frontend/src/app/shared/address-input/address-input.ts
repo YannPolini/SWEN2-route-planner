@@ -11,30 +11,19 @@ import {
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 
-const ORS_KEY =
-  'eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjhiNTM2ZTk5OGRhNzQ0NGNiNTUyOTBmMzE2YTEwMmM2IiwiaCI6Im11cm11cjY0In0=';
-
-/** Vienna — biases (does not restrict) the autocomplete ranking toward the app's home region. */
-const FOCUS_POINT = { lat: 48.2082, lon: 16.3738 };
+// Backend proxy — the ORS key lives only on the server, never in the browser.
+const AUTOCOMPLETE_URL = 'http://localhost:8080/api/geocode/autocomplete';
 
 export interface Coordinates {
   lat: number;
   lng: number;
 }
 
-/** A geocoded address: the human-readable label plus the exact ORS coordinates. */
+/** A geocoded address: the human-readable label plus exact coordinates. */
 interface AddressSuggestion {
   label: string;
   lat: number;
   lng: number;
-}
-
-/** Subset of the ORS Pelias GeoJSON response we actually read. */
-interface OrsAutocompleteResponse {
-  features: {
-    properties: { label: string };
-    geometry: { coordinates: [number, number] };
-  }[];
 }
 
 @Component({
@@ -155,25 +144,13 @@ export class AddressInputComponent implements OnDestroy {
     this.loading.set(true);
     this.isOpen.set(true);
 
-    // focus.point biases the ranking toward the home region but does NOT
-    // restrict results — international addresses are still returned.
-    const url =
-      `https://api.heigit.org/pelias/v1/autocomplete` +
-      `?api_key=${ORS_KEY}&text=${encodeURIComponent(text)}&size=5` +
-      `&focus.point.lat=${FOCUS_POINT.lat}&focus.point.lon=${FOCUS_POINT.lon}`;
+    const url = `${AUTOCOMPLETE_URL}?text=${encodeURIComponent(text)}`;
 
     this.http
-      .get<OrsAutocompleteResponse>(url)
+      .get<AddressSuggestion[]>(url)
       .subscribe({
-        next: res => {
-          const items = (res.features ?? [])
-            .filter(f => f.properties?.label && f.geometry?.coordinates?.length === 2)
-            .map(f => ({
-              label: f.properties.label,
-              lng: f.geometry.coordinates[0], // ORS order: [lng, lat]
-              lat: f.geometry.coordinates[1],
-            }));
-          this.suggestions.set(items);
+        next: items => {
+          this.suggestions.set(items ?? []);
           this.loading.set(false);
         },
         error: () => {

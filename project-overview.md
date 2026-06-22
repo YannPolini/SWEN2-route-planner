@@ -1,6 +1,6 @@
 # TourPlanner — Projektüberblick
 
-> SWEN2 Universitätsprojekt, FH Technikum Wien
+> SWEN2
 > Stack: Spring Boot 3.3 / Java 22 · Angular 21 (SSR) · PostgreSQL · OpenRouteService API
 
 ---
@@ -168,6 +168,35 @@ als JSON gespeichert wird. Das Frontend kann sie direkt an Leaflet geben.
 
 ---
 
+## Design Patterns
+
+Mindestens ein Pattern ist gefordert. Implementiert (und im Protokoll belegbar):
+
+### Facade — `OrsService` (Haupt-Pattern)
+`OrsService` kapselt die komplette OpenRouteService-REST-API hinter einer
+einfachen Schnittstelle. Der Business-Layer (`TourService`) ruft nur
+`getRoute(...)` bzw. `autocomplete(...)` auf und weiß nichts von HTTP, URLs,
+JSON-Parsing, Koordinaten-Reihenfolge oder API-Key. Alle technischen Details
+und Fehler (`OrsServiceException`) bleiben hinter der Facade.
+
+```
+TourService ─► OrsService (Facade) ─► HTTP/JSON ─► ORS-API
+   weiß nur          versteckt:
+   "route mir A→B"   URLs, Key, Parsing, Fehler
+```
+
+### Observer — Angular Signals (Frontend)
+Der Zustand liegt in `signal()`s; `computed()` und `effect()` sind die
+Observer, die sich automatisch neu berechnen, wenn sich ein Signal ändert
+(z.B. `filteredTours` reagiert auf `searchTerm` + `tours`). Die View wird
+dadurch reaktiv aktualisiert, ohne manuelles Eventhandling.
+
+### Repository — Spring Data JPA
+`TourRepository`/`TourLogRepository` (`extends JpaRepository`) abstrahieren den
+Datenzugriff. Der Service kennt keine SQL-Details, nur `findAll()`, `save()` usw.
+
+---
+
 ## Backend
 
 ### Technologie
@@ -248,6 +277,11 @@ at.fhtechnikum.tourplanner
 > Die vier Koordinaten-Felder sind **nullable**: Bei frei getippten Adressen
 > bleiben sie leer und das Backend geocodiert die Strings (Fallback).
 
+> **Zur Checkliste „incl. Image / map image":** Das Karten-Bild der Tour ist die
+> **live gerenderte Leaflet-Karte** (`TourMapComponent`), gezeichnet aus
+> `routeGeometry`. Sie erscheint in den Tour-Details. Das Feld `routeImagePath`
+> ist ein ungenutztes Alt-Feld (immer Leer-String) — die Karte ersetzt es.
+
 ### TourLog Entity (dto/tourlog/TourLog.java)
 
 | Feld | Typ | Besonderheit |
@@ -265,14 +299,25 @@ at.fhtechnikum.tourplanner
 
 ### OrsService.java — Methodenübersicht
 
+`OrsService` ist die **Facade** über die ORS-REST-API: er versteckt HTTP/JSON
+und bietet dem Business-Layer nur Geocoding, Autocomplete und Routing. Alle
+Fehler werden als eigene `OrsServiceException` geworfen (keine rohen HTTP-/
+JSON-Exceptions nach außen).
+
 ```
+autocomplete(text) → List<AddressSuggestion>       /pelias/v1/autocomplete (Backend-Proxy)
 geocode(name) → [lng,lat]                          Fallback: /pelias/v1/search
 getRoute(double[] from, double[] to, type)         Primär: routet aus Koordinaten
 getRoute(String from, String to, type)             Fallback: geocodet, dann routet
 requestDirections(from, to, profile)               POST /openrouteservice/v2/directions
 parseRoute(json) → OrsRouteResult                  dreht Geometrie auf [lat,lng]
+send(request) → HttpResponse                        HTTP-Helper, wrappt IO-Fehler
 toOrsProfile(type) → "cycling-regular" | …         Enum → ORS-Profilname
 ```
+
+Der Autocomplete läuft bewusst **über das Backend** (`GeocodeController` →
+`/api/geocode/autocomplete`): so liegt der ORS-Key nur in `application.properties`
+und gelangt nie in den Browser.
 
 ### TourService.enrichWithOrsData — Entscheidungslogik
 
@@ -297,9 +342,10 @@ Bei ORS-Fehler: Warning loggen, Tour trotzdem mit distance/time = 0 speichern
 - Session-basiert (kein JWT sichtbar)
 
 ### Bekannte Backend-Probleme / Tech-Debt
-- ⚠️ **Doppelte Klassen**: `model/Tour.java` und `dto/tour/Tour.java` — welche wird wo verwendet?
-- ⚠️ **SearchController** ist nur ein Stub (gibt Strings zurück, keine echte Implementierung)
-- ⚠️ `TourLogController.update()` ruft `service.updateTourLog()` zweimal auf (Zeilen 52–53)
+- ✅ **Eigene Layer-Exceptions** (`ResourceNotFoundException`, `OrsServiceException`) — gelöst
+- ✅ **SearchController** ist jetzt implementiert (`SearchService`, Volltextsuche) — gelöst
+- ⚠️ **Leere Gerüstdateien** in `model/` (`Tour`, `TransportType`, `TourLog`, `Search`) — 0 Bytes, kein echtes Duplikat, sollten gelöscht werden (main hat einen Teil schon entfernt)
+- ⚠️ `TourLogController.update()` ruft `service.updateTourLog()` zweimal auf (wird vom Kollegen auf main bearbeitet)
 - ⚠️ `ImportExportService.validateTour()` und `validateTourBusinessRules()` sind identisch — Duplikat
 - ⚠️ `Tour.id` wird vom Frontend als UUID generiert — unüblich, normalerweise Backend-Aufgabe
 - ⚠️ TourLog → Tour: kein echter FK-Constraint in JPA (`tourID` als String, nicht `@ManyToOne`)
@@ -392,11 +438,11 @@ ToursComponent (ViewModel)
 
 ### AddressInputComponent — Details
 
-- ORS `/pelias/v1/autocomplete?text=&size=5&focus.point.lat/lon` (Bias auf Wien, keine Länder-Sperre)
+- Ruft den **Backend-Proxy** `GET /api/geocode/autocomplete?text=` auf (kein ORS-Key im Frontend!)
+- Bekommt fertige `{label, lat, lng}[]` zurück — kein GeoJSON-Parsing nötig
 - Debounce: 300ms · Mindest-Eingabelänge: 3 Zeichen
 - Dropdown: `mousedown` statt `click` (verhindert blur-vor-select)
 - blur-Event: 150ms Delay vor Schließen des Dropdowns
-- **Behält die Koordinaten** jedes Vorschlags (`geometry.coordinates`)
 - Zwei Outputs:
   - `valueChange: string` — Label-Text (bei Tippen & Auswahl)
   - `coordinatesChange: Coordinates | null` — Koordinaten bei Auswahl, `null` bei freiem Tippen
@@ -413,11 +459,11 @@ ToursComponent (ViewModel)
 
 ### Bekannte Frontend-Probleme / Tech-Debt
 
-- ⚠️ **ORS API Key hardcoded** in `address-input.ts` (Zeile 14) — sollte in `environment.ts`
+- ✅ **ORS API Key** nicht mehr im Frontend — läuft über Backend-Proxy (gelöst)
 - ⚠️ **Tour.id** wird im Frontend mit `crypto.randomUUID()` generiert — unüblich
 - ⚠️ **TourLog.logID** wird mit `Date.now()` generiert (tourlogs.ts) — Kollisions-anfällig
 - ⚠️ Import/Export: `importExportService.ts` existiert, aber Verbindung zum Backend unklar
-- ⚠️ SearchController Backend ist Stub — Frontend-Suchleiste filtert nur lokal
+- ⚠️ Suchleiste filtert lokal (Frontend); der Backend-Such-Endpunkt (`/api/search`) ist da, aber noch nicht vom Frontend verdrahtet
 
 ---
 
@@ -473,7 +519,7 @@ Backend-Start, idempotent via `ON CONFLICT DO NOTHING`):
 
 | Datei | Beschreibung |
 |---|---|
-| `application.properties` | **nicht im Git** (in .gitignore) — DB + ORS Key + Base-URL |
+| `application.properties` | DB + ORS Key + Base-URL. Steht in `.gitignore`, ist aber **trotzdem getrackt** (vor dem Ignore committet) → Key liegt in der History, sollte rotiert + untracked werden |
 | `application.example.properties` | Vorlage ohne echten Key |
 | `compose.yaml` | PostgreSQL-Container (`tourlog-postgres`, Port 5432) |
 | `init.sql` | Schema + Seed beim ersten Container-Start |
@@ -502,11 +548,14 @@ ors.geocode.focus-lon=16.3738
 | POST | /api/logs | TourLog erstellen |
 | PUT | /api/logs/{id} | TourLog updaten |
 | DELETE | /api/logs/{id} | TourLog löschen |
+| GET | /api/geocode/autocomplete | Adress-Autocomplete (ORS-Proxy, Key bleibt im Backend) |
 | POST | /api/import-export/import | CSV importieren |
 | GET | /api/import-export/export | CSV exportieren |
 | POST | /api/auth/login | Login |
 | POST | /api/auth/register | Registrierung |
-| GET | /api/search/search | Global Search (Stub) |
+| GET | /api/search/search | Volltextsuche Tours + Logs (implementiert) |
+| GET | /api/search/tours/search | Volltextsuche nur Tours |
+| GET | /api/search/tourlogs/search | Volltextsuche nur Logs |
 
 ---
 
@@ -517,16 +566,20 @@ ors.geocode.focus-lon=16.3738
   Durchreichen vom Autocomplete (kein doppeltes Geocoding mehr)
 - **ORS-Migration** auf `api.heigit.org` (alte Domain deprecated)
 - **VACATION → VEHICLE** umbenannt, Mapping auf `driving-car`
+- **Eigene Layer-Exceptions** (`ResourceNotFoundException`, `OrsServiceException`) statt roher `RuntimeException`/`Exception`
+- **ORS-Key aus dem Frontend** entfernt — Backend-Proxy (`/api/geocode/autocomplete`)
+- **Full-Text-Search** im Backend implementiert (war Stub)
+- **Design Pattern** dokumentiert (Facade = `OrsService`)
 
 ### Wichtig (Tech-Debt)
-1. **Doppelte Java-Klassen** — `model/Tour.java` vs `dto/tour/Tour.java` klären
-2. ORS API Key im Frontend hardcoded (`address-input.ts:14`) → in `environment.ts` auslagern
-3. `Tour.id` und `TourLog.logID` im Frontend generiert → sollte Backend-Aufgabe sein (`@GeneratedValue`)
-4. `TourLogController.update()` ruft Service zweimal auf
-5. `SearchController` ist ein Stub — Global Search nicht implementiert
-6. `System.out.println()` durch `log.info()` ersetzen (TourLogService, TourController)
+1. **Leere Gerüstdateien** in `model/` löschen (kein echtes Duplikat — sind 0 Bytes)
+2. `Tour.id` und `TourLog.logID` im Frontend generiert → sollte Backend-Aufgabe sein (`@GeneratedValue`)
+3. `TourLogController.update()` ruft Service zweimal auf (Kollege bearbeitet das auf main)
+4. `System.out.println()` durch `log.info()` ersetzen (TourLogService, TourController)
+5. ⚠️ **Sicherheit:** `application.properties` (echter ORS-Key) ist getrackt + in Git-History → Key rotieren, Datei untracken
 
 ### Nice-to-have
+6. Frontend-Suchleiste an Backend-`/api/search` verdrahten (statt nur lokalem Filter)
 7. Responsiveness / CSS Design verbessern
 8. TourLog → Tour: echten JPA FK-Constraint setzen (`@ManyToOne @JoinColumn`)
 9. CSV-Import triggert keine ORS-Neuberechnung für routeGeometry

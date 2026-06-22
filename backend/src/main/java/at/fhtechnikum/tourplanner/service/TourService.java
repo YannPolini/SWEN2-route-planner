@@ -2,6 +2,8 @@ package at.fhtechnikum.tourplanner.service;
 
 import at.fhtechnikum.tourplanner.dto.tour.OrsRouteResult;
 import at.fhtechnikum.tourplanner.dto.tour.Tour;
+import at.fhtechnikum.tourplanner.exception.OrsServiceException;
+import at.fhtechnikum.tourplanner.exception.ResourceNotFoundException;
 import at.fhtechnikum.tourplanner.repository.TourRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -59,7 +61,7 @@ public class TourService {
     public Optional<Tour> updateTour(String tourId, Tour tour) {
         log.info("updateTour: {}", tourId);
         if (!repository.existsById(tourId)) {
-            throw new RuntimeException("Tour not found: " + tourId);
+            throw new ResourceNotFoundException("Tour not found: " + tourId);
         }
         enrichWithOrsData(tour);
         return Optional.of(repository.save(tour));
@@ -96,10 +98,10 @@ public class TourService {
                     Math.round(result.distanceKm() * 100.0) / 100.0,
                     (long) result.durationSeconds());
 
-        } catch (JsonProcessingException e) {
-            log.warn("ORS enrichment: JSON error: {}", e.getMessage());
-        } catch (Exception e) {
+        } catch (OrsServiceException e) {
             log.warn("ORS enrichment failed for '{}' -> '{}': {}", from, to, e.getMessage());
+        } catch (JsonProcessingException e) {
+            log.warn("ORS enrichment: could not serialize route geometry: {}", e.getMessage());
         }
     }
 
