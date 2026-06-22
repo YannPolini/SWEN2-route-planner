@@ -1,4 +1,4 @@
-export type TransportType = 'bike' | 'hike' | 'running' | 'vacation';
+export type TransportType = 'bike' | 'hike' | 'running' | 'vehicle';
 
 export interface Tour {
   id: string;
@@ -7,6 +7,12 @@ export interface Tour {
   from: string;
   to: string;
   transportType: TransportType;
+  // Exact coordinates of the picked autocomplete suggestions. Null when the
+  // user typed a free-text address — the backend then geocodes it as fallback.
+  fromLat: number | null;
+  fromLng: number | null;
+  toLat: number | null;
+  toLng: number | null;
   distance: number;
   estimatedTime: number;      // seconds — formatDuration() converts to h/min display
   childFriendliness: number;
@@ -19,5 +25,5 @@ export const TRANSPORT_TYPES: { value: TransportType; label: string }[] = [
   { value: 'bike', label: 'Bike' },
   { value: 'hike', label: 'Hike' },
   { value: 'running', label: 'Running' },
-  { value: 'vacation', label: 'Vacation' },
+  { value: 'vehicle', label: 'Vehicle' },
 ];

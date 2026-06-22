@@ -7,7 +7,7 @@ import { SearchBarComponent } from '../shared/search-bar/search-bar';
 import { TourMapComponent } from '../shared/tour-map/tour-map';
 import { TourlogsComponent } from '../tourlogs/tourlogs';
 import { TourlogsModel } from '../tourlogs.model/tourlogs.model';
-import { AddressInputComponent } from '../shared/address-input/address-input';
+import { AddressInputComponent, Coordinates } from '../shared/address-input/address-input';
 
 // ═══════════════════════════════════════════════════════
 // VIEW-MODEL (Component) — UI state, UI logic, actions
@@ -44,6 +44,11 @@ export class ToursComponent {
   protected readonly editingTour = signal<Tour | null>(null);
   protected readonly deleteTarget = signal<Tour | null>(null);
   protected readonly formSubmitted = signal(false);
+
+  // Exact coordinates from the address autocomplete. Null = user typed free
+  // text, so the backend geocodes the string instead of using these directly.
+  protected readonly fromCoords = signal<Coordinates | null>(null);
+  protected readonly toCoords   = signal<Coordinates | null>(null);
 
   // ── Reactive Form (owned by ViewModel) ──
   // distance + estimatedTime removed: backend computes them via ORS
@@ -108,6 +113,8 @@ export class ToursComponent {
       transportType: 'hike',
       childFriendliness: 0,
     });
+    this.fromCoords.set(null);
+    this.toCoords.set(null);
     this.formSubmitted.set(false);
     this.showForm.set(true);
   }
@@ -122,6 +129,14 @@ export class ToursComponent {
       transportType: tour.transportType,
       childFriendliness: tour.childFriendliness,
     });
+    // Re-seed coordinates from the stored tour so an unchanged address keeps
+    // its exact point; editing a field clears them via coordinatesChange.
+    this.fromCoords.set(
+      tour.fromLat != null && tour.fromLng != null ? { lat: tour.fromLat, lng: tour.fromLng } : null,
+    );
+    this.toCoords.set(
+      tour.toLat != null && tour.toLng != null ? { lat: tour.toLat, lng: tour.toLng } : null,
+    );
     this.formSubmitted.set(false);
     this.showForm.set(true);
   }
@@ -139,13 +154,20 @@ export class ToursComponent {
     }
 
     const v = this.tourForm.getRawValue();
-    // distance/estimatedTime/routeGeometry: placeholders, backend fills via ORS
+    const from = this.fromCoords();
+    const to   = this.toCoords();
+    // distance/estimatedTime/routeGeometry: placeholders, backend fills via ORS.
+    // from/to coordinates come from the autocomplete selection (null if typed).
     const data: Omit<Tour, 'id' | 'createdAt'> = {
       name:          v.name.trim(),
       description:   v.description.trim(),
       from:          v.from.trim(),
       to:            v.to.trim(),
       transportType: v.transportType,
+      fromLat:       from?.lat ?? null,
+      fromLng:       from?.lng ?? null,
+      toLat:         to?.lat ?? null,
+      toLng:         to?.lng ?? null,
       distance:      0,
       estimatedTime: 0,
       childFriendliness: +v.childFriendliness,
@@ -195,7 +217,7 @@ export class ToursComponent {
       bike: 'text-bg-primary',
       hike: 'text-bg-success',
       running: 'text-bg-warning',
-      vacation: 'text-bg-info',
+      vehicle: 'text-bg-info',
     };
     return map[type] ?? 'text-bg-secondary';
   }

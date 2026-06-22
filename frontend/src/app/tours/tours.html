@@ -246,6 +246,7 @@
                   [value]="tourForm.controls.from.value"
                   [invalid]="(formSubmitted() || tourForm.controls.from.touched) && !!tourForm.controls.from.errors"
                   (valueChange)="tourForm.controls.from.setValue($event)"
+                  (coordinatesChange)="fromCoords.set($event)"
                   (blur)="tourForm.controls.from.markAsTouched()"
                 />
                 @if (
@@ -262,6 +263,7 @@
                   [value]="tourForm.controls.to.value"
                   [invalid]="(formSubmitted() || tourForm.controls.to.touched) && !!tourForm.controls.to.errors"
                   (valueChange)="tourForm.controls.to.setValue($event)"
+                  (coordinatesChange)="toCoords.set($event)"
                   (blur)="tourForm.controls.to.markAsTouched()"
                 />
                 @if (

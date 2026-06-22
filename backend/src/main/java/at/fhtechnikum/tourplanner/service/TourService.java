@@ -77,7 +77,14 @@ public class TourService {
         }
 
         try {
-            OrsRouteResult result = orsService.getRoute(from, to, tour.getTransportType());
+            OrsRouteResult result = hasCoordinates(tour)
+                    // Primary: route from the exact points picked in autocomplete.
+                    ? orsService.getRoute(
+                            new double[]{tour.getStartLng(), tour.getStartLat()},
+                            new double[]{tour.getEndLng(),   tour.getEndLat()},
+                            tour.getTransportType())
+                    // Fallback: geocode the free-text addresses, then route.
+                    : orsService.getRoute(from, to, tour.getTransportType());
 
             tour.setDistance(Math.round(result.distanceKm() * 100.0) / 100.0);
             tour.setEstimatedTime(result.durationSeconds());
@@ -94,5 +101,12 @@ public class TourService {
         } catch (Exception e) {
             log.warn("ORS enrichment failed for '{}' -> '{}': {}", from, to, e.getMessage());
         }
+    }
+
+    // True when both endpoints carry exact coordinates from the autocomplete,
+    // so we can route directly instead of geocoding the address strings.
+    private boolean hasCoordinates(Tour tour) {
+        return tour.getStartLat() != null && tour.getStartLng() != null
+                && tour.getEndLat() != null && tour.getEndLng() != null;
     }
 }

@@ -43,6 +43,23 @@ public class Tour {
     @Column(nullable = false)
     private TransportType transportType;
 
+    // Coordinates picked in autocomplete; null for free-text addresses (then geocoded).
+    @JsonProperty("fromLat")
+    @Column
+    private Double startLat;
+
+    @JsonProperty("fromLng")
+    @Column
+    private Double startLng;
+
+    @JsonProperty("toLat")
+    @Column
+    private Double endLat;
+
+    @JsonProperty("toLng")
+    @Column
+    private Double endLng;
+
     @Column(nullable = false)
     private double distance;
 

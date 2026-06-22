@@ -26,19 +26,28 @@ public class OrsService {
     @Value("${ors.api.key}")
     private String apiKey;
 
-    @Value("${ors.api.base-url:https://api.openrouteservice.org}")
+    @Value("${ors.api.base-url:https://api.heigit.org}")
     private String baseUrl;
+
+    // Geocoding bias toward Vienna (does not restrict results to a region).
+    @Value("${ors.geocode.focus-lat:48.2082}")
+    private double focusLat;
+
+    @Value("${ors.geocode.focus-lon:16.3738}")
+    private double focusLon;
 
     private final HttpClient httpClient = HttpClient.newHttpClient();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    // Converts a place name to [longitude, latitude] (ORS coordinate order).
+    // Geocodes a place name to [lng, lat]. Fallback only — the primary flow
+    // routes from coordinates the client already picked in autocomplete.
     public double[] geocode(String placeName) throws Exception {
         String encoded = URLEncoder.encode(placeName, StandardCharsets.UTF_8);
-        String url = baseUrl + "/geocode/search?api_key=" + apiKey
-                + "&text=" + encoded + "&size=1";
+        String url = baseUrl + "/pelias/v1/search?api_key=" + apiKey
+                + "&text=" + encoded + "&size=1"
+                + "&focus.point.lat=" + focusLat + "&focus.point.lon=" + focusLon;
 
-        log.info("ORS geocode: {}", placeName);
+        log.info("ORS geocode (fallback) for: '{}'", placeName);
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
@@ -67,20 +76,28 @@ public class OrsService {
         return new double[]{lng, lat}; // [lng, lat] — ORS order
     }
 
-    // Calls ORS Directions, returns distance/duration/geometry.
-    public OrsRouteResult getRoute(String from, String to, TransportType transportType) throws Exception {
-        String profile      = toOrsProfile(transportType);
-        double[] fromCoords = geocode(from); // [lng, lat]
-        double[] toCoords   = geocode(to);   // [lng, lat]
+    // Primary flow: route directly from coordinates picked in autocomplete. [lng, lat].
+    public OrsRouteResult getRoute(double[] fromCoords, double[] toCoords, TransportType transportType)
+            throws Exception {
+        return requestDirections(fromCoords, toCoords, toOrsProfile(transportType));
+    }
 
-        String url  = baseUrl + "/v2/directions/" + profile + "/geojson";
+    // Fallback flow: geocode free-text addresses, then route.
+    public OrsRouteResult getRoute(String from, String to, TransportType transportType) throws Exception {
+        return requestDirections(geocode(from), geocode(to), toOrsProfile(transportType));
+    }
+
+    private OrsRouteResult requestDirections(double[] fromCoords, double[] toCoords, String profile)
+            throws Exception {
+        String url  = baseUrl + "/openrouteservice/v2/directions/" + profile + "/geojson";
         String body = "{"
                 + "\"coordinates\":["
                 + "[" + fromCoords[0] + "," + fromCoords[1] + "],"
                 + "[" + toCoords[0]   + "," + toCoords[1]   + "]"
                 + "]}";
 
-        log.info("ORS directions {} -> {} ({})", from, to, profile);
+        log.info("ORS directions [{},{}] -> [{},{}] ({})",
+                fromCoords[0], fromCoords[1], toCoords[0], toCoords[1], profile);
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
@@ -95,16 +112,13 @@ public class OrsService {
         if (response.statusCode() != 200) {
             log.error("ORS directions HTTP {}: {}", response.statusCode(), response.body());
             throw new RuntimeException(
-                    "ORS Directions failed '" + from + "' -> '" + to
-                    + "' (HTTP " + response.statusCode() + ")");
+                    "ORS Directions failed (HTTP " + response.statusCode() + ")");
         }
 
-        return parseRoute(response.body(), fromCoords, toCoords);
+        return parseRoute(response.body());
     }
 
-    private OrsRouteResult parseRoute(String json, double[] fromCoords, double[] toCoords)
-            throws Exception {
-
+    private OrsRouteResult parseRoute(String json) throws Exception {
         JsonNode features = objectMapper.readTree(json).path("features");
         if (features.isEmpty()) {
             throw new RuntimeException("ORS returned no route features");
@@ -112,7 +126,7 @@ public class OrsService {
 
         JsonNode summary = features.get(0).path("properties").path("summary");
         double distanceKm      = summary.path("distance").asDouble() / 1000.0; // m → km
-        double durationSeconds = summary.path("duration").asDouble();           // already seconds
+        double durationSeconds = summary.path("duration").asDouble();
 
         // ORS geometry is [lng, lat]; Leaflet needs [lat, lng]
         List<double[]> coords = new ArrayList<>();
@@ -123,11 +137,7 @@ public class OrsService {
         log.info("ORS route: {} km, {} s, {} points",
                 Math.round(distanceKm * 100.0) / 100.0, (long) durationSeconds, coords.size());
 
-        // Store fromCoords/toCoords as [lat, lng] in the result
-        return new OrsRouteResult(
-                distanceKm, durationSeconds, coords,
-                fromCoords[1], fromCoords[0],
-                toCoords[1],   toCoords[0]);
+        return new OrsRouteResult(distanceKm, durationSeconds, coords);
     }
 
     private String toOrsProfile(TransportType type) {
@@ -135,7 +145,7 @@ public class OrsService {
             case BIKE     -> "cycling-regular";
             case HIKE     -> "foot-hiking";
             case RUNNING  -> "foot-walking";
-            case VACATION -> "foot-walking";
+            case VEHICLE  -> "driving-car";
         };
     }
 }
