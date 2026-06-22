@@ -3,6 +3,10 @@
 ALTER TABLE IF EXISTS tour DROP CONSTRAINT IF EXISTS tour_estimated_time_check;
 ALTER TABLE IF EXISTS tour DROP CONSTRAINT IF EXISTS tour_distance_check;
 
+-- Migrate rows persisted before the VACATION -> VEHICLE rename, so the enum
+-- can still be mapped when Hibernate reads them back.
+UPDATE tour SET transport_type = 'VEHICLE' WHERE transport_type = 'VACATION';
+
 INSERT INTO tour_log (
     logid,
     date,
@@ -95,7 +99,7 @@ INSERT INTO tour (
           'Entspannter Spaziergang durch die Altstadt mit Besuch der Festung.',
           'Salzburg Hauptbahnhof',
           'Festung Hohensalzburg',
-          'VACATION',
+          'VEHICLE',
           4.5,
           10800,
           5,

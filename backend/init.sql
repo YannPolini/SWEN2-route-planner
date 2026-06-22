@@ -133,7 +133,7 @@ INSERT INTO tour (
           'Entspannter Spaziergang durch die Altstadt mit Besuch der Festung.',
           'Salzburg Hauptbahnhof',
           'Festung Hohensalzburg',
-          'VACATION',
+          'VEHICLE',
           4.5,
           10800,
           5,

@@ -2,71 +2,6 @@ import { Injectable, signal, computed, inject } from '@angular/core';
 import { Tour, TransportType } from '../models/tour.model';
 import { TourApiService } from '../models/tour.model.api';
 
-/*
-const MOCK_TOURS: Tour[] = [
-  {
-    id: '1',
-    name: 'Donauinsel Rundweg',
-    description: 'Gemütliche Radtour entlang der Donauinsel mit Blick auf die Donau.',
-    from: 'Wien Floridsdorf',
-    to: 'Wien Donaustadt',
-    transportType: 'bike',
-    distance: 21.5,
-    estimatedTime: 4200,
-    routeImagePath: '',
-    createdAt: new Date('2026-03-01'),
-  },
-  {
-    id: '2',
-    name: 'Schneeberg Gipfeltour',
-    description: 'Anspruchsvolle Wanderung zum höchsten Berg Niederösterreichs.',
-    from: 'Puchberg am Schneeberg',
-    to: 'Schneeberg Gipfel',
-    transportType: 'hike',
-    distance: 12.8,
-    estimatedTime: 18000,
-    routeImagePath: '',
-    createdAt: new Date('2026-02-15'),
-  },
-  {
-    id: '3',
-    name: 'Prater Laufrunde',
-    description: 'Flache Laufstrecke durch den Wiener Prater, ideal für Intervalltraining.',
-    from: 'Praterstern',
-    to: 'Lusthaus',
-    transportType: 'running',
-    distance: 8.2,
-    estimatedTime: 2700,
-    routeImagePath: '',
-    createdAt: new Date('2026-03-10'),
-  },
-  {
-    id: '4',
-    name: 'Wachau Radweg',
-    description: 'Malerische Tour durch das UNESCO Weltkulturerbe entlang der Donau.',
-    from: 'Melk',
-    to: 'Krems an der Donau',
-    transportType: 'bike',
-    distance: 36.0,
-    estimatedTime: 7200,
-    routeImagePath: '',
-    createdAt: new Date('2026-02-28'),
-  },
-  {
-    id: '5',
-    name: 'Salzburg Stadtspaziergang',
-    description: 'Entspannter Spaziergang durch die Altstadt mit Besuch der Festung.',
-    from: 'Salzburg Hauptbahnhof',
-    to: 'Festung Hohensalzburg',
-    transportType: 'vacation',
-    distance: 4.5,
-    estimatedTime: 10800,
-    routeImagePath: '',
-    createdAt: new Date('2026-03-05'),
-  },
-];
-*/
-
 // ═══════════════════════════════════════════════════════
 // MODEL (Service) — domain data + business logic ONLY
 // No UI state, no form logic, no modal state here.
@@ -74,7 +9,6 @@ const MOCK_TOURS: Tour[] = [
 @Injectable({ providedIn: 'root' })
 export class TourService {
   // ── Domain state (Single Source of Truth) ──
-  //old:   private readonly _tours = signal<Tour[]>(MOCK_TOURS);
   private readonly _tours = signal<Tour[]>([]);
 
   private readonly _selectedTourId = signal<string | null>(null);
@@ -108,83 +42,43 @@ export class TourService {
 
   // ── CRUD operations (business logic) ──
   addTour(data: Omit<Tour, 'id' | 'createdAt'>): Tour {
-    //this._tours.update((tours) => [newTour, ...tours]); //old code no db
-    //create a new Tour
     const newTour: Tour = {
       ...data,
       id: crypto.randomUUID(),
-      createdAt: new Date()
+      createdAt: new Date(),
     };
-    //send to backend
     this.api.create(newTour).subscribe({
-      //then reload Tours
-      next: () => {
-        this.loadTours();
-      },
-      //if error dont reload but give error in console
-      error: err => {
-        console.error('API Fehler beim Create:', err);
-      }
+      next: () => this.loadTours(),
+      error: err => console.error('API Fehler beim Create:', err),
     });
     return newTour;
   }
 
-
-  updateTour(id: string, changes: Partial<Tour>): void {    
-    //this._tours.update((tours) => tours.map((t) => (t.id === id ? { ...t, ...changes } : t)));  //old code for no db
-    
-    // Find the current tour in the local signal state by its id
+  updateTour(id: string, changes: Partial<Tour>): void {
     const existingTour = this._tours().find(tour => tour.id === id);
-
-    // If no tour with this id exists locally, stop the update, so no incomplete Tour send to backend
     if (!existingTour) {
       console.error('Tour not found:', id);
       return;
     }
 
-    // Create the updated Tour
-    const updatedTour: Tour = {
-      ...existingTour,
-      ...changes,
-    };
+    const updatedTour: Tour = { ...existingTour, ...changes };
 
-    // Send the full updated tour to the backend.
+    // Reload from backend on success so derived state stays in sync.
     this.api.update(updatedTour).subscribe({
-      // Only update the local signal after the backend confirms success.
-      //Should i do this or not? Just do loadTours?
-      //next: () => {
-      //  this._tours.update(tours =>
-      //    // Replace only the tour with the matching id.
-      //    // All other tours stay unchanged.
-      //    tours.map(tour => tour.id === id ? updatedTour : tour)
-      //  );
-      //},
-      next: () => {
-        this.loadTours();
-      },
-
-      // If the backend update fails, keep local state unchanged.
-      error: err => {
-        console.error('API Fehler beim Update:', err);
-      }
+      next: () => this.loadTours(),
+      error: err => console.error('API Fehler beim Update:', err),
     });
   }
 
   deleteTour(id: string): void {
-    
-    //this._tours.update((tours) => tours.filter((t) => t.id !== id)); //old code for no db
     this.api.delete(id).subscribe({
       next: () => {
-        console.log('Tour deleted successfully');
         this.loadTours();
-
         if (this._selectedTourId() === id) {
           this._selectedTourId.set(null);
         }
       },
-      error: err => {
-        console.error('API Fehler beim Delete:', err);
-      }
+      error: err => console.error('API Fehler beim Delete:', err),
     });
   }
 
@@ -196,8 +90,6 @@ export class TourService {
     return this._tours().find((t) => t.id === id);
   }
 
-
-  //added for backend integration
   constructor() {
     this.loadTours();
   }
@@ -206,17 +98,8 @@ export class TourService {
 
   loadTours(): void {
     this.api.getAll().subscribe({
-      next: tours => {
-        console.log('Tours vom Backend:', tours);
-
-        this._tours.set(tours);
-
-        console.log('Signal danach:', this._tours());
-      },
-      error: err => {
-        console.error('API Fehler:', err);
-      }
+      next: tours => this._tours.set(tours),
+      error: err => console.error('API Fehler:', err),
     });
   }
-
 }

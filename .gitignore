@@ -1,2 +1,5 @@
 .idea/
 backend/src/main/resources/application.properties
+
+# Secrets — never commit. Share via WhatsApp/secure channel, use .env.example as template.
+backend/.env

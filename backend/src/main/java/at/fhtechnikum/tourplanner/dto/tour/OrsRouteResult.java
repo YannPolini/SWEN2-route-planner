@@ -7,16 +7,10 @@ import java.util.List;
  *
  * distanceKm      — route length in km
  * durationSeconds — estimated travel time in seconds
- * coordinates     — [[lat,lng],...] pairs ready for Leaflet polyline
- * fromLat/fromLng — geocoded start point
- * toLat/toLng     — geocoded end point
+ * coordinates     — [[lat,lng],...] pairs ready for a Leaflet polyline
  */
 public record OrsRouteResult(
         double distanceKm,
         double durationSeconds,
-        List<double[]> coordinates,
-        double fromLat,
-        double fromLng,
-        double toLat,
-        double toLng
+        List<double[]> coordinates
 ) {}

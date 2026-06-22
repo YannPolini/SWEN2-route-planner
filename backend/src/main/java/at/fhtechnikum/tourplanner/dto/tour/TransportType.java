@@ -9,7 +9,7 @@ public enum TransportType {
     BIKE("bike", "Bike"),
     HIKE("hike", "Hike"),
     RUNNING("running", "Running"),
-    VACATION("vacation", "Vacation");
+    VEHICLE("vehicle", "Vehicle");
 
     private final String value;
     @Getter
