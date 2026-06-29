@@ -30,3 +30,52 @@
 .map-placeholder {
   height: 280px;
 }
+
+.weather-panel {
+  border-top: 1px solid #e9ecef;
+  padding-top: 1rem;
+}
+
+.weather-days {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.weather-day {
+  border: 1px solid #dee2e6;
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  min-width: 0;
+  background: #fff;
+}
+
+.weather-main {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 3.5rem;
+}
+
+.weather-icon {
+  width: 3rem;
+  height: 3rem;
+  flex: 0 0 auto;
+}
+
+.weather-temp {
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.weather-description {
+  text-transform: capitalize;
+  word-break: break-word;
+}
+
+@media (max-width: 575.98px) {
+  .weather-days {
+    grid-template-columns: 1fr;
+  }
+}

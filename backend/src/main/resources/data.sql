@@ -2,6 +2,7 @@
 -- Hibernate ddl-auto=update never removes constraints, so we do it here.
 ALTER TABLE IF EXISTS tour DROP CONSTRAINT IF EXISTS tour_estimated_time_check;
 ALTER TABLE IF EXISTS tour DROP CONSTRAINT IF EXISTS tour_distance_check;
+ALTER TABLE IF EXISTS tour DROP CONSTRAINT IF EXISTS tour_transport_type_check;
 
 -- Migrate rows persisted before the VACATION -> VEHICLE rename, so the enum
 -- can still be mapped when Hibernate reads them back.

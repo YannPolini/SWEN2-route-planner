@@ -45,7 +45,24 @@ public class GlobalExceptionHandler {
                 .body(response);
     }
 
-    //Für ungültige User-Eingaben.
+    // Fuer Fehler der externen OpenWeather-API.
+    @ExceptionHandler(WeatherServiceException.class)
+    public ResponseEntity<ErrorResponseDto> handleWeatherServiceException(
+            WeatherServiceException exception
+    ) {
+        ErrorResponseDto response = new ErrorResponseDto(
+                LocalDateTime.now(),
+                HttpStatus.BAD_GATEWAY.value(),
+                "Bad Gateway",
+                exception.getMessage()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_GATEWAY)
+                .body(response);
+    }
+
+    // Fuer ungueltige User-Eingaben.
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponseDto> handleIllegalArgumentException(
             IllegalArgumentException exception

@@ -1,0 +1,17 @@
+#!/usr/bin/env sh
+
+SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+LOCAL_MAVEN="$SCRIPT_DIR/../.tools/apache-maven-3.9.9/bin/mvn"
+
+if [ -x "$LOCAL_MAVEN" ]; then
+  exec "$LOCAL_MAVEN" "$@"
+fi
+
+if command -v mvn >/dev/null 2>&1; then
+  exec mvn "$@"
+fi
+
+echo "Maven was not found."
+echo "Expected local Maven at: $LOCAL_MAVEN"
+echo "Or install Maven and make sure mvn is available on PATH."
+exit 1

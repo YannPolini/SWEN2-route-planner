@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Tour } from './tour.model';
+import { Tour, WeatherForecast } from './tour.model';
 
 
 @Injectable({
@@ -37,5 +37,9 @@ export class TourApiService {
     return this.http.delete(`${this.apiUrl}/${id}`, {
         responseType: 'text'
     });
+  }
+
+  getWeather(id: string) {
+    return this.http.get<WeatherForecast>(`${this.apiUrl}/${id}/weather`);
   }
 }

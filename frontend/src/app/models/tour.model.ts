@@ -21,6 +21,23 @@ export interface Tour {
   createdAt: Date;
 }
 
+export interface WeatherForecast {
+  tourId: string;
+  locationName: string | null;
+  days: WeatherForecastDay[];
+}
+
+export interface WeatherForecastDay {
+  date: string;
+  temperature: number;
+  minTemperature: number;
+  maxTemperature: number;
+  description: string;
+  icon: string;
+  humidity?: number | null;
+  windSpeed?: number | null;
+}
+
 export const TRANSPORT_TYPES: { value: TransportType; label: string }[] = [
   { value: 'bike', label: 'Bike' },
   { value: 'hike', label: 'Hike' },

@@ -2,7 +2,7 @@ import { Component, inject, signal, computed } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { TourService } from '../services/tour.service';
-import { Tour, TransportType, TRANSPORT_TYPES } from '../models/tour.model';
+import { Tour, TransportType, TRANSPORT_TYPES, WeatherForecast } from '../models/tour.model';
 import { SearchBarComponent } from '../shared/search-bar/search-bar';
 import { TourMapComponent } from '../shared/tour-map/tour-map';
 import { TourlogsComponent } from '../tourlogs/tourlogs';
@@ -44,6 +44,10 @@ export class ToursComponent {
   protected readonly editingTour = signal<Tour | null>(null);
   protected readonly deleteTarget = signal<Tour | null>(null);
   protected readonly formSubmitted = signal(false);
+  protected readonly weatherForecast = signal<WeatherForecast | null>(null);
+  protected readonly weatherLoading = signal(false);
+  protected readonly weatherError = signal(false);
+  private weatherRequestTourId: string | null = null;
 
   // Exact coordinates from the address autocomplete. Null = user typed free
   // text, so the backend geocodes the string instead of using these directly.
@@ -92,6 +96,7 @@ export class ToursComponent {
 
   protected selectTour(id: string): void {
     this.tourService.selectTour(id);
+    this.loadWeather(id);
   }
 
   protected updateSearch(term: string): void {
@@ -197,7 +202,12 @@ export class ToursComponent {
     const t = this.deleteTarget();
     if (t) {
       this.tourService.deleteTour(t.id); // ← calls Model
-      if (this.selectedTourId() === t.id) this.tourService.selectTour(null);
+      if (this.selectedTourId() === t.id) {
+        this.tourService.selectTour(null);
+        this.weatherForecast.set(null);
+        this.weatherError.set(false);
+        this.weatherLoading.set(false);
+      }
     }
     this.deleteTarget.set(null);
   }
@@ -220,6 +230,31 @@ export class ToursComponent {
       vehicle: 'text-bg-info',
     };
     return map[type] ?? 'text-bg-secondary';
+  }
+
+  protected weatherIconUrl(icon: string): string {
+    return `https://openweathermap.org/img/wn/${icon}@2x.png`;
+  }
+
+  private loadWeather(tourId: string): void {
+    this.weatherRequestTourId = tourId;
+    this.weatherForecast.set(null);
+    this.weatherError.set(false);
+    this.weatherLoading.set(true);
+
+    this.tourService.getWeatherForecast(tourId).subscribe({
+      next: forecast => {
+        if (this.weatherRequestTourId !== tourId) return;
+        this.weatherForecast.set(forecast);
+        this.weatherLoading.set(false);
+      },
+      error: err => {
+        if (this.weatherRequestTourId !== tourId) return;
+        console.error('API Fehler beim Wetter:', err);
+        this.weatherError.set(true);
+        this.weatherLoading.set(false);
+      },
+    });
   }
 
   //popularity

@@ -1,9 +1,12 @@
 package at.fhtechnikum.tourplanner.controller;
 
 import at.fhtechnikum.tourplanner.dto.tour.Tour;
+import at.fhtechnikum.tourplanner.dto.weather.WeatherForecastDto;
+import at.fhtechnikum.tourplanner.exception.ResourceNotFoundException;
 import at.fhtechnikum.tourplanner.dto.tourlog.TourLog;
 import at.fhtechnikum.tourplanner.service.TourLogService;
 import at.fhtechnikum.tourplanner.service.TourService;
+import at.fhtechnikum.tourplanner.service.WeatherService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,9 +19,11 @@ import java.util.List;
 public class TourController {
 
     private final TourService service;
+    private final WeatherService weatherService;
 
-    public TourController(TourService service) {
+    public TourController(TourService service, WeatherService weatherService) {
         this.service = service;
+        this.weatherService = weatherService;
     }
 
 
@@ -38,6 +43,13 @@ public class TourController {
     }
 
     //wird eig nicht gebraucht, da immer getAll
+    @GetMapping("/{tourId}/weather")
+    public ResponseEntity<WeatherForecastDto> getWeather(@Valid @PathVariable String tourId) {
+        Tour tour = service.getTourById(tourId)
+                .orElseThrow(() -> new ResourceNotFoundException("Tour not found: " + tourId));
+        return ResponseEntity.ok(weatherService.getForecastForTour(tour));
+    }
+
     @GetMapping("/category/{category}")
     public ResponseEntity<String> getByCategory(@PathVariable String category) { return ResponseEntity.ok("get by category"); }
 

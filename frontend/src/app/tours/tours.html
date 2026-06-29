@@ -164,6 +164,48 @@
             </div>
           </div>
 
+          <div class="weather-panel mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h3 class="h6 mb-0">Wetter</h3>
+              @if (weatherForecast()?.locationName) {
+                <span class="small text-secondary">{{ weatherForecast()?.locationName }}</span>
+              }
+            </div>
+
+            @if (weatherLoading()) {
+              <div class="small text-secondary">Wetter wird geladen...</div>
+            } @else if (weatherError()) {
+              <div class="small text-secondary">Wetter konnte nicht geladen werden.</div>
+            } @else if (weatherForecast(); as forecast) {
+              <div class="weather-days">
+                @for (day of forecast.days; track day.date) {
+                  <div class="weather-day">
+                    <div class="small fw-semibold">{{ day.date | date: 'EEE, d. MMM' }}</div>
+                    <div class="weather-main">
+                      @if (day.icon) {
+                        <img
+                          class="weather-icon"
+                          [src]="weatherIconUrl(day.icon)"
+                          [alt]="day.description"
+                        />
+                      }
+                      <div>
+                        <div class="weather-temp">{{ day.temperature | number: '1.0-0' }} C</div>
+                        <div class="small text-secondary">
+                          {{ day.minTemperature | number: '1.0-0' }} C /
+                          {{ day.maxTemperature | number: '1.0-0' }} C
+                        </div>
+                      </div>
+                    </div>
+                    <div class="small text-secondary weather-description">
+                      {{ day.description }}
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+
           <h3 class="h6 mb-2">Route Map</h3>
           <app-tour-map
             [fromLocation]="tour.from"

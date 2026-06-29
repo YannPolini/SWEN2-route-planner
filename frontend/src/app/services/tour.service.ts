@@ -90,6 +90,10 @@ export class TourService {
     return this._tours().find((t) => t.id === id);
   }
 
+  getWeatherForecast(id: string) {
+    return this.api.getWeather(id);
+  }
+
   constructor() {
     this.loadTours();
   }
