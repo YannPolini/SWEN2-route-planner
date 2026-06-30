@@ -11,7 +11,7 @@ import { ImportResult, ImportExportService } from './importExportService';
 })
 export class ImportExport {
 
-  // Hier speichern wir die Datei, die der User auswählt
+  // Kann file enthalten, ist aber am anfang leer
   selectedFile: File | null = null;
 
   // Tracks whether an import is in progress (used to show a loading indicator)
@@ -31,7 +31,6 @@ export class ImportExport {
     // Exit early wenn keine Datei ausgewählt wurde
     if (!file) return;
 
-    // Nur diese drei Dateitypen erlauben
     const allowed = ['.xlsx', '.csv', '.json'];
     const ext = '.' + file.name.split('.').pop()?.toLowerCase();
 
