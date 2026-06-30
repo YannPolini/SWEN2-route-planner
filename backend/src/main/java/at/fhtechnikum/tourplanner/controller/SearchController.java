@@ -1,8 +1,8 @@
 package at.fhtechnikum.tourplanner.controller;
 
 import at.fhtechnikum.tourplanner.dto.search.SearchResultDto;
-import at.fhtechnikum.tourplanner.dto.tour.Tour;
-import at.fhtechnikum.tourplanner.dto.tourlog.TourLog;
+import at.fhtechnikum.tourplanner.model.Tour;
+import at.fhtechnikum.tourplanner.model.TourLog;
 import at.fhtechnikum.tourplanner.service.SearchService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

@@ -1,7 +1,7 @@
 package at.fhtechnikum.tourplanner.service;
 
 import at.fhtechnikum.tourplanner.dto.tour.OrsRouteResult;
-import at.fhtechnikum.tourplanner.dto.tour.Tour;
+import at.fhtechnikum.tourplanner.model.Tour;
 import at.fhtechnikum.tourplanner.exception.OrsServiceException;
 import at.fhtechnikum.tourplanner.exception.ResourceNotFoundException;
 import at.fhtechnikum.tourplanner.repository.TourRepository;

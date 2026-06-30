@@ -1,6 +1,6 @@
 package at.fhtechnikum.tourplanner.controller;
 
-import at.fhtechnikum.tourplanner.dto.tourlog.TourLog;
+import at.fhtechnikum.tourplanner.model.TourLog;
 import at.fhtechnikum.tourplanner.service.TourLogService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;

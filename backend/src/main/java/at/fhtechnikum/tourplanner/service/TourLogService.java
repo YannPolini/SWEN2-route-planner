@@ -1,6 +1,6 @@
 package at.fhtechnikum.tourplanner.service;
 
-import at.fhtechnikum.tourplanner.dto.tourlog.TourLog;
+import at.fhtechnikum.tourplanner.model.TourLog;
 import at.fhtechnikum.tourplanner.exception.ResourceNotFoundException;
 import at.fhtechnikum.tourplanner.repository.TourLogRepository;
 import org.springframework.stereotype.Service;

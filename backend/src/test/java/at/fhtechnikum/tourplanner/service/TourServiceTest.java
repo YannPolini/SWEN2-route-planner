@@ -1,6 +1,6 @@
 package at.fhtechnikum.tourplanner.service;
 
-import at.fhtechnikum.tourplanner.dto.tour.Tour;
+import at.fhtechnikum.tourplanner.model.Tour;
 import at.fhtechnikum.tourplanner.repository.TourRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.ConstraintViolation;
@@ -14,10 +14,8 @@ import java.util.List;
 import java.util.Optional;
 
 import jakarta.validation.Validator;
-import jakarta.validation.ConstraintViolation;
 
-import at.fhtechnikum.tourplanner.dto.tour.Tour;
-import at.fhtechnikum.tourplanner.dto.tour.TransportType;
+import at.fhtechnikum.tourplanner.model.TransportType;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDateTime;

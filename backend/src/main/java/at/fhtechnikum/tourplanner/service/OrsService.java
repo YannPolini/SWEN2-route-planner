@@ -2,7 +2,7 @@ package at.fhtechnikum.tourplanner.service;
 
 import at.fhtechnikum.tourplanner.dto.tour.AddressSuggestion;
 import at.fhtechnikum.tourplanner.dto.tour.OrsRouteResult;
-import at.fhtechnikum.tourplanner.dto.tour.TransportType;
+import at.fhtechnikum.tourplanner.model.TransportType;
 import at.fhtechnikum.tourplanner.exception.OrsServiceException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;

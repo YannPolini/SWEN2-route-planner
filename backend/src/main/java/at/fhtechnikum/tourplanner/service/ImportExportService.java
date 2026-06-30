@@ -1,9 +1,9 @@
 package at.fhtechnikum.tourplanner.service;
 
 import at.fhtechnikum.tourplanner.dto.importexport.ImportResultDto;
-import at.fhtechnikum.tourplanner.dto.tour.TransportType;
-import at.fhtechnikum.tourplanner.dto.tourlog.TourLog;
-import at.fhtechnikum.tourplanner.dto.tour.Tour;
+import at.fhtechnikum.tourplanner.model.TransportType;
+import at.fhtechnikum.tourplanner.model.TourLog;
+import at.fhtechnikum.tourplanner.model.Tour;
 import at.fhtechnikum.tourplanner.repository.*;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;

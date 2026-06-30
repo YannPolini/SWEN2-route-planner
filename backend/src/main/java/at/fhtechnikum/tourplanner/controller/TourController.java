@@ -1,9 +1,9 @@
 package at.fhtechnikum.tourplanner.controller;
 
-import at.fhtechnikum.tourplanner.dto.tour.Tour;
+import at.fhtechnikum.tourplanner.model.Tour;
 import at.fhtechnikum.tourplanner.dto.weather.WeatherForecastDto;
 import at.fhtechnikum.tourplanner.exception.ResourceNotFoundException;
-import at.fhtechnikum.tourplanner.dto.tourlog.TourLog;
+import at.fhtechnikum.tourplanner.model.TourLog;
 import at.fhtechnikum.tourplanner.service.TourLogService;
 import at.fhtechnikum.tourplanner.service.TourService;
 import at.fhtechnikum.tourplanner.service.WeatherService;

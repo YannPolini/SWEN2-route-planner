@@ -2,40 +2,37 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Tour, WeatherForecast } from './tour.model';
 
-
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
-
 export class TourApiService {
-    private apiUrl = 'http://localhost:8080/api/tours';
-
+  private apiUrl = 'http://localhost:8080/api/tours';
 
   constructor(private http: HttpClient) {}
 
   getAll() {
-    console.log("getting all tours");
+    console.log('getting all tours');
     return this.http.get<Tour[]>(this.apiUrl);
   }
 
   create(tour: Tour) {
-    console.log("sending", tour);
+    console.log('sending', tour);
     return this.http.post(this.apiUrl, tour, {
-        responseType: 'text'
+      responseType: 'text',
     });
   }
 
   update(tour: Tour) {
-    console.log("updating", tour);
+    console.log('updating', tour);
     return this.http.put(`${this.apiUrl}/${tour.id}`, tour, {
-        responseType: 'text'
+      responseType: 'text',
     });
   }
 
   delete(id: string) {
-    console.log("delete:" ,id);
+    console.log('delete:', id);
     return this.http.delete(`${this.apiUrl}/${id}`, {
-        responseType: 'text'
+      responseType: 'text',
     });
   }
 

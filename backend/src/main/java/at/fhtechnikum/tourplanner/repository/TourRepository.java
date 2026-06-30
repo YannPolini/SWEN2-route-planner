@@ -1,7 +1,7 @@
 package at.fhtechnikum.tourplanner.repository;
 
 
-import at.fhtechnikum.tourplanner.dto.tour.Tour;
+import at.fhtechnikum.tourplanner.model.Tour;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

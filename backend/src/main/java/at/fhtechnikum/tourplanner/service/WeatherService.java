@@ -1,6 +1,6 @@
 package at.fhtechnikum.tourplanner.service;
 
-import at.fhtechnikum.tourplanner.dto.tour.Tour;
+import at.fhtechnikum.tourplanner.model.Tour;
 import at.fhtechnikum.tourplanner.dto.weather.WeatherForecastDayDto;
 import at.fhtechnikum.tourplanner.dto.weather.WeatherForecastDto;
 import at.fhtechnikum.tourplanner.exception.OrsServiceException;

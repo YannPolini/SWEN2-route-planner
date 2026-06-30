@@ -1,8 +1,8 @@
 package at.fhtechnikum.tourplanner.service;
 
 import at.fhtechnikum.tourplanner.dto.search.SearchResultDto;
-import at.fhtechnikum.tourplanner.dto.tour.Tour;
-import at.fhtechnikum.tourplanner.dto.tourlog.TourLog;
+import at.fhtechnikum.tourplanner.model.Tour;
+import at.fhtechnikum.tourplanner.model.TourLog;
 import at.fhtechnikum.tourplanner.repository.TourLogRepository;
 import at.fhtechnikum.tourplanner.repository.TourRepository;
 import org.springframework.stereotype.Service;

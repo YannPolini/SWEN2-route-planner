@@ -52,15 +52,15 @@ export class ToursComponent {
   // Exact coordinates from the address autocomplete. Null = user typed free
   // text, so the backend geocodes the string instead of using these directly.
   protected readonly fromCoords = signal<Coordinates | null>(null);
-  protected readonly toCoords   = signal<Coordinates | null>(null);
+  protected readonly toCoords = signal<Coordinates | null>(null);
 
   // ── Reactive Form (owned by ViewModel) ──
   // distance + estimatedTime removed: backend computes them via ORS
   protected readonly tourForm = this.fb.nonNullable.group({
-    name:          ['', [Validators.required, Validators.minLength(3)]],
-    description:   ['', [Validators.required]],
-    from:          ['', [Validators.required]],
-    to:            ['', [Validators.required]],
+    name: ['', [Validators.required, Validators.minLength(3)]],
+    description: ['', [Validators.required]],
+    from: ['', [Validators.required]],
+    to: ['', [Validators.required]],
     transportType: ['hike' as TransportType, [Validators.required]],
     childFriendliness: [0, [Validators.required, Validators.min(0), Validators.max(5)]],
   });
@@ -111,10 +111,10 @@ export class ToursComponent {
   protected openCreateForm(): void {
     this.editingTour.set(null);
     this.tourForm.reset({
-      name:          '',
-      description:   '',
-      from:          '',
-      to:            '',
+      name: '',
+      description: '',
+      from: '',
+      to: '',
       transportType: 'hike',
       childFriendliness: 0,
     });
@@ -127,17 +127,19 @@ export class ToursComponent {
   protected openEditForm(tour: Tour): void {
     this.editingTour.set(tour);
     this.tourForm.setValue({
-      name:          tour.name,
-      description:   tour.description,
-      from:          tour.from,
-      to:            tour.to,
+      name: tour.name,
+      description: tour.description,
+      from: tour.from,
+      to: tour.to,
       transportType: tour.transportType,
       childFriendliness: tour.childFriendliness,
     });
     // Re-seed coordinates from the stored tour so an unchanged address keeps
     // its exact point; editing a field clears them via coordinatesChange.
     this.fromCoords.set(
-      tour.fromLat != null && tour.fromLng != null ? { lat: tour.fromLat, lng: tour.fromLng } : null,
+      tour.fromLat != null && tour.fromLng != null
+        ? { lat: tour.fromLat, lng: tour.fromLng }
+        : null,
     );
     this.toCoords.set(
       tour.toLat != null && tour.toLng != null ? { lat: tour.toLat, lng: tour.toLng } : null,
@@ -160,24 +162,24 @@ export class ToursComponent {
 
     const v = this.tourForm.getRawValue();
     const from = this.fromCoords();
-    const to   = this.toCoords();
+    const to = this.toCoords();
     // distance/estimatedTime/routeGeometry: placeholders, backend fills via ORS.
     // from/to coordinates come from the autocomplete selection (null if typed).
     const data: Omit<Tour, 'id' | 'createdAt'> = {
-      name:          v.name.trim(),
-      description:   v.description.trim(),
-      from:          v.from.trim(),
-      to:            v.to.trim(),
+      name: v.name.trim(),
+      description: v.description.trim(),
+      from: v.from.trim(),
+      to: v.to.trim(),
       transportType: v.transportType,
-      fromLat:       from?.lat ?? null,
-      fromLng:       from?.lng ?? null,
-      toLat:         to?.lat ?? null,
-      toLng:         to?.lng ?? null,
-      distance:      0,
+      fromLat: from?.lat ?? null,
+      fromLng: from?.lng ?? null,
+      toLat: to?.lat ?? null,
+      toLng: to?.lng ?? null,
+      distance: 0,
       estimatedTime: 0,
       childFriendliness: +v.childFriendliness,
       routeImagePath: this.editingTour()?.routeImagePath ?? '',
-      routeGeometry:  null,
+      routeGeometry: null,
     };
 
     const editing = this.editingTour();
@@ -243,12 +245,12 @@ export class ToursComponent {
     this.weatherLoading.set(true);
 
     this.tourService.getWeatherForecast(tourId).subscribe({
-      next: forecast => {
+      next: (forecast) => {
         if (this.weatherRequestTourId !== tourId) return;
         this.weatherForecast.set(forecast);
         this.weatherLoading.set(false);
       },
-      error: err => {
+      error: (err) => {
         if (this.weatherRequestTourId !== tourId) return;
         console.error('API Fehler beim Wetter:', err);
         this.weatherError.set(true);

@@ -57,7 +57,9 @@ interface AddressSuggestion {
                   type="button"
                   class="dropdown-item small text-truncate"
                   (mousedown)="select(s)"
-                >{{ s.label }}</button>
+                >
+                  {{ s.label }}
+                </button>
               </li>
             }
           }
@@ -68,10 +70,10 @@ interface AddressSuggestion {
 })
 export class AddressInputComponent implements OnDestroy {
   /** Current value — parent should bind this to the form control's value */
-  value       = input<string>('');
+  value = input<string>('');
   placeholder = input<string>('');
   /** Pass true to show the input in an error state */
-  invalid     = input<boolean>(false);
+  invalid = input<boolean>(false);
 
   /** Fires on every keystroke and on dropdown selection */
   valueChange = output<string>();
@@ -83,16 +85,16 @@ export class AddressInputComponent implements OnDestroy {
    */
   coordinatesChange = output<Coordinates | null>();
   /** Fires when the input loses focus — use to call markAsTouched() */
-  blur        = output<void>();
+  blur = output<void>();
 
   protected displayValue = signal('');
-  protected suggestions  = signal<AddressSuggestion[]>([]);
-  protected isOpen       = signal(false);
-  protected loading      = signal(false);
+  protected suggestions = signal<AddressSuggestion[]>([]);
+  protected isOpen = signal(false);
+  protected loading = signal(false);
 
-  private http       = inject(HttpClient);
+  private http = inject(HttpClient);
   private platformId = inject(PLATFORM_ID);
-  private debounce:  ReturnType<typeof setTimeout> | null = null;
+  private debounce: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
     // Sync visible text when the parent resets or pre-fills the control;
@@ -146,19 +148,17 @@ export class AddressInputComponent implements OnDestroy {
 
     const url = `${AUTOCOMPLETE_URL}?text=${encodeURIComponent(text)}`;
 
-    this.http
-      .get<AddressSuggestion[]>(url)
-      .subscribe({
-        next: items => {
-          this.suggestions.set(items ?? []);
-          this.loading.set(false);
-        },
-        error: () => {
-          this.suggestions.set([]);
-          this.isOpen.set(false);
-          this.loading.set(false);
-        },
-      });
+    this.http.get<AddressSuggestion[]>(url).subscribe({
+      next: (items) => {
+        this.suggestions.set(items ?? []);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.suggestions.set([]);
+        this.isOpen.set(false);
+        this.loading.set(false);
+      },
+    });
   }
 
   ngOnDestroy(): void {

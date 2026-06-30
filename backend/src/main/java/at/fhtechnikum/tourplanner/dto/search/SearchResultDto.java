@@ -1,7 +1,7 @@
 package at.fhtechnikum.tourplanner.dto.search;
 
-import at.fhtechnikum.tourplanner.dto.tour.Tour;
-import at.fhtechnikum.tourplanner.dto.tourlog.TourLog;
+import at.fhtechnikum.tourplanner.model.Tour;
+import at.fhtechnikum.tourplanner.model.TourLog;
 
 import java.util.List;
 
