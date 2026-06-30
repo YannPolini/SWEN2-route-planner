@@ -118,7 +118,7 @@ public class TourLogServiceTest {
 
         assertThatThrownBy(() -> tourLogService.updateTourLog("1", log))
                 .isInstanceOf(RuntimeException.class)
-                .hasMessage("Log not found");
+                .hasMessage("Log not found: 1");
 
         verify(repository).existsById("1");
         verify(repository, never()).save(any(TourLog.class));
