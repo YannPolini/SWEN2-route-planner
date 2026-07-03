@@ -1,6 +1,7 @@
 package at.fhtechnikum.tourplanner.service;
 
 import at.fhtechnikum.tourplanner.dto.importexport.ImportResultDto;
+import at.fhtechnikum.tourplanner.model.AppUser;
 import at.fhtechnikum.tourplanner.model.TransportType;
 import at.fhtechnikum.tourplanner.model.TourLog;
 import at.fhtechnikum.tourplanner.model.Tour;
@@ -40,7 +41,7 @@ public class ImportExportService {
 
     //Importiert aus einer CSV-Datei.
     @Transactional
-    public ImportResultDto importTours(MultipartFile file) {
+    public ImportResultDto importTours(MultipartFile file, AppUser owner) {
         System.out.println("importing");
         validateFile(file);
 
@@ -67,7 +68,7 @@ public class ImportExportService {
                     tourRepository.save(tour);
 
                     // Then save log if the row contains log data
-                    TourLog log = mapCsvRecordToTourLog(record);
+                    TourLog log = mapCsvRecordToTourLog(record, owner);
 
                     if (log != null) {
                         tourLogRepository.save(log);
@@ -95,7 +96,7 @@ public class ImportExportService {
 
      //Exportiert alle Tours und Tourlogs als CSV-Datei.
     @Transactional(readOnly = true)
-    public byte[] exportAsCsv() {
+    public byte[] exportAsCsv(AppUser owner) {
         List<Tour> tours = tourRepository.findAll();
 
         try (
@@ -113,10 +114,11 @@ public class ImportExportService {
         ) {
 
             for (Tour tour : tours) {
-                List<TourLog> logs = tourLogRepository.findByTourID(tour.getId());
+                List<TourLog> logs = tourLogRepository.findByTourIDAndOwnerUserId(tour.getId(), owner.getId());
 
                 // keep tours without logs in export
-                if (logs.isEmpty()) {
+            if (logs.isEmpty()) {
+                    TourMetricsCalculator.updateChildFriendliness(tour);
                     csv.printRecord(
                             tour.getId(), tour.getName(), tour.getStartLocation(), tour.getEndLocation(),
                             tour.getTransportType(), tour.getDistance(), tour.getEstimatedTime(), tour.getChildFriendliness(),
@@ -126,6 +128,7 @@ public class ImportExportService {
                 }
 
                 for (TourLog log : logs) {
+                    TourMetricsCalculator.updateChildFriendliness(tour);
                     csv.printRecord(
                             tour.getId(), tour.getName(), tour.getStartLocation(), tour.getEndLocation(),
                             tour.getTransportType(), tour.getDistance(), tour.getEstimatedTime(), tour.getChildFriendliness(),
@@ -169,7 +172,7 @@ public class ImportExportService {
         tour.setTransportType(TransportType.valueOf(getRequiredValue(record, "transport_type")));
         tour.setDistance(parseDouble(getRequiredValue(record, "distance")));
         tour.setEstimatedTime(parseDouble(getRequiredValue(record, "estimated_time")));
-        tour.setChildFriendliness(parseInt(getRequiredValue(record, "child_friendliness")));
+        TourMetricsCalculator.updateChildFriendliness(tour);
         //Export has no route_image_path in the header
         tour.setRouteImagePath(getOptionalValue(record, "route_image_path"));
         //Export has no route_geometry column
@@ -186,7 +189,7 @@ public class ImportExportService {
         return tour;
     }
 
-    private TourLog mapCsvRecordToTourLog(CSVRecord record) {
+    private TourLog mapCsvRecordToTourLog(CSVRecord record, AppUser owner) {
         String logId = getOptionalValue(record, "log_id");
 
         //If no log id, dieser teil wird übersprungen
@@ -204,7 +207,8 @@ public class ImportExportService {
         log.setTotalDistance(parseDouble(getRequiredValue(record, "log_total_distance")));
         log.setTotalTime(parseDouble(getRequiredValue(record, "log_total_time")));
         log.setRating(parseInt(getRequiredValue(record, "log_rating")));
-        log.setCreatorName(getRequiredValue(record, "log_creator"));
+        log.setOwnerUserId(owner.getId());
+        log.setCreatorName(owner.getName());
 
         validateTourLogBusinessRules(log);
         return log;

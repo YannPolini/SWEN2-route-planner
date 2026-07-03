@@ -10,7 +10,7 @@ import java.util.List;
 /** Proxies ORS geocoding so the API key stays on the server, never in the browser. */
 @RestController
 @RequestMapping("/api/geocode")
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = {"http://localhost:4200", "http://127.0.0.1:4200"})
 public class GeocodeController {
 
     private final OrsService orsService;

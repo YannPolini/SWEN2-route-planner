@@ -327,36 +327,8 @@
             </div>
 
             <div class="alert alert-info py-2 px-3 mb-3 small">
-              🗺️ <strong>Distance and estimated time</strong> are calculated automatically
-              via OpenRouteService when you save.
-            </div>
-
-            <div class="row g-3 mb-3">
-              <div class="col-12">
-                <label for="tourChildFriendliness" class="form-label">
-                  Child friendliness (0...not suitable, 5...very suitable) *
-                </label>
-                <input
-                  id="tourChildFriendliness"
-                  type="number"
-                  class="form-control"
-                  formControlName="childFriendliness"
-                  min="0"
-                  max="5"
-                />
-                @if (
-                  (formSubmitted() || tourForm.controls.childFriendliness.touched) &&
-                  tourForm.controls.childFriendliness.errors
-                ) {
-                  <div class="invalid-feedback d-block">
-                    @if (tourForm.controls.childFriendliness.errors['required']) {
-                      <span>Required.</span>
-                    } @else {
-                      <span>Must be between 0 and 5.</span>
-                    }
-                  </div>
-                }
-              </div>
+              <strong>Distance, estimated time, and child friendliness</strong> are calculated
+              automatically when you save.
             </div>
 
             <div class="d-flex justify-content-end gap-2">

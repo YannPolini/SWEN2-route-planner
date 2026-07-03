@@ -50,7 +50,12 @@ public class TourLog {
     @JsonProperty("tourID")
     private String tourID;
 
+    @Column(name = "owner_user_id")
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private Long ownerUserId;
+
     @Column(nullable = false)
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     //@ManyToOne                //does not work with string, maybe make a user type?
     //@JoinColumn(name = "??")  //user DB does not exist yet
     private String creatorName;

@@ -1,12 +1,15 @@
 package at.fhtechnikum.tourplanner.service;
 
 import at.fhtechnikum.tourplanner.model.TourLog;
+import at.fhtechnikum.tourplanner.model.AppUser;
 import at.fhtechnikum.tourplanner.repository.TourLogRepository;
+import at.fhtechnikum.tourplanner.repository.TourRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,6 +21,9 @@ import static org.mockito.Mockito.*;
 public class TourLogServiceTest {
     @Mock
     private TourLogRepository repository;
+
+    @Mock
+    private TourRepository tourRepository;
 
     @InjectMocks
     private TourLogService tourLogService;
@@ -68,9 +74,70 @@ public class TourLogServiceTest {
     @Test
     void createTourLog_savesTheLog() {
         TourLog log = new TourLog();
+        log.setTourID("tour-1");
+
+        when(tourRepository.existsById("tour-1")).thenReturn(true);
+
         //wieso hier kein when?
         tourLogService.createTourLog(log);
 
+        verify(tourRepository).existsById("tour-1");
+        verify(repository).save(log);
+    }
+
+    @Test
+    void createTourLog_rejectsUnknownTour() {
+        TourLog log = new TourLog();
+        log.setTourID("missing-tour");
+
+        when(tourRepository.existsById("missing-tour")).thenReturn(false);
+
+        assertThatThrownBy(() -> tourLogService.createTourLog(log))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Referenced tour does not exist: missing-tour");
+
+        verify(repository, never()).save(any(TourLog.class));
+    }
+
+    @Test
+    void createTourLog_rejectsMissingTourId() {
+        TourLog log = new TourLog();
+
+        assertThatThrownBy(() -> tourLogService.createTourLog(log))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("tourID is required");
+
+        verifyNoInteractions(tourRepository);
+        verify(repository, never()).save(any(TourLog.class));
+    }
+
+    @Test
+    void getTourLogsForUser_returnsOnlyOwnedLogs() {
+        AppUser owner = user(42L, null);
+        TourLog log = new TourLog();
+
+        when(repository.findByOwnerUserId(42L)).thenReturn(List.of(log));
+
+        List<TourLog> result = tourLogService.getTourLogsForUser(owner);
+
+        assertThat(result).containsExactly(log);
+        verify(repository).findByOwnerUserId(42L);
+    }
+
+    @Test
+    void createTourLog_withOwner_setsServerSideOwnerFields() {
+        AppUser owner = user(42L, "Demo User");
+        TourLog log = new TourLog();
+        log.setCreatorName("Spoofed User");
+        log.setOwnerUserId(999L);
+        log.setTourID("tour-1");
+
+        when(tourRepository.existsById("tour-1")).thenReturn(true);
+
+        tourLogService.createTourLog(log, owner);
+
+        assertThat(log.getOwnerUserId()).isEqualTo(42L);
+        assertThat(log.getCreatorName()).isEqualTo("Demo User");
         verify(repository).save(log);
     }
 
@@ -99,15 +166,48 @@ public class TourLogServiceTest {
     @Test
     void updateTourLog_returnsUpdatedLog_whenLogExists() {
         TourLog log = new TourLog();
+        log.setTourID("tour-1");
 
         when(repository.existsById("1")).thenReturn(true);
+        when(tourRepository.existsById("tour-1")).thenReturn(true);
         when(repository.save(log)).thenReturn(log);
 
         Optional<TourLog> result = tourLogService.updateTourLog("1", log);
 
         assertThat(result).contains(log);
         verify(repository).existsById("1");
+        verify(tourRepository).existsById("tour-1");
         verify(repository).save(log);
+    }
+
+    @Test
+    void updateTourLog_rejectsUnknownTour() {
+        TourLog log = new TourLog();
+        log.setTourID("missing-tour");
+
+        when(repository.existsById("1")).thenReturn(true);
+        when(tourRepository.existsById("missing-tour")).thenReturn(false);
+
+        assertThatThrownBy(() -> tourLogService.updateTourLog("1", log))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Referenced tour does not exist: missing-tour");
+
+        verify(repository, never()).save(any(TourLog.class));
+    }
+
+    @Test
+    void updateTourLog_withOwner_rejectsLogsOwnedBySomeoneElse() {
+        AppUser owner = user(42L, null);
+        TourLog existing = new TourLog();
+        existing.setOwnerUserId(99L);
+
+        when(repository.findById("1")).thenReturn(Optional.of(existing));
+
+        assertThatThrownBy(() -> tourLogService.updateTourLog("1", new TourLog(), owner))
+                .isInstanceOf(ResponseStatusException.class)
+                .hasMessageContaining("403 FORBIDDEN");
+
+        verify(repository, never()).save(any(TourLog.class));
     }
 
     @Test
@@ -122,5 +222,14 @@ public class TourLogServiceTest {
 
         verify(repository).existsById("1");
         verify(repository, never()).save(any(TourLog.class));
+    }
+
+    private AppUser user(Long id, String name) {
+        AppUser user = mock(AppUser.class);
+        when(user.getId()).thenReturn(id);
+        if (name != null) {
+            when(user.getName()).thenReturn(name);
+        }
+        return user;
     }
 }

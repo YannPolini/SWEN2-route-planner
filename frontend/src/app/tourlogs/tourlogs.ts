@@ -2,7 +2,6 @@ import { Component, signal, computed, inject, effect } from '@angular/core';
 import { TourlogsList } from '../tourlogs-list/tourlogs-list';
 import { FormBuilder, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { TourService } from '../services/tour.service';
-import { AuthService } from '../auth/auth.service';
 import { TourlogsModel, Log } from '../tourlogs.model/tourlogs.model';
 import { SearchBarComponent } from '../shared/search-bar/search-bar';
 
@@ -52,7 +51,6 @@ export class TourlogsComponent {
   protected readonly formSubmitted = signal(false);
 
   private readonly tourService = inject(TourService);
-  private readonly authService = inject(AuthService);
 
   //ausgelagert zu tourlogs.model.ts
   protected readonly filteredLogs = this.tourlogsModel.filteredLogs;    //Filtered Liste der Tourlogs, mit UserName und 
@@ -178,10 +176,9 @@ export class TourlogsComponent {
 
     const formValue = this.logForm.getRawValue();
     const currentLog = this.editingLog();
-    const currentUsername = this.authService.currentUser()?.name;
     const selectedTourId = this.tourService.selectedTourId();
 
-    if (!currentUsername || !selectedTourId) {
+    if (!selectedTourId) {
       return;
     }
 
@@ -200,7 +197,8 @@ export class TourlogsComponent {
         rating: formValue.rating,
         tourID: selectedTourId,
         logID: Date.now(),
-        creatorName: currentUsername,
+        ownerUserId: null,
+        creatorName: '',
       };
 
       //this.saveToBackend(newLog);

@@ -62,7 +62,6 @@ export class ToursComponent {
     from: ['', [Validators.required]],
     to: ['', [Validators.required]],
     transportType: ['hike' as TransportType, [Validators.required]],
-    childFriendliness: [0, [Validators.required, Validators.min(0), Validators.max(5)]],
   });
 
   // ── Derived state (combines Model data + UI state) ──
@@ -116,7 +115,6 @@ export class ToursComponent {
       from: '',
       to: '',
       transportType: 'hike',
-      childFriendliness: 0,
     });
     this.fromCoords.set(null);
     this.toCoords.set(null);
@@ -132,7 +130,6 @@ export class ToursComponent {
       from: tour.from,
       to: tour.to,
       transportType: tour.transportType,
-      childFriendliness: tour.childFriendliness,
     });
     // Re-seed coordinates from the stored tour so an unchanged address keeps
     // its exact point; editing a field clears them via coordinatesChange.
@@ -177,7 +174,7 @@ export class ToursComponent {
       toLng: to?.lng ?? null,
       distance: 0,
       estimatedTime: 0,
-      childFriendliness: +v.childFriendliness,
+      childFriendliness: 0,
       routeImagePath: this.editingTour()?.routeImagePath ?? '',
       routeGeometry: null,
     };

@@ -1,6 +1,8 @@
 package at.fhtechnikum.tourplanner.service;
 
 import at.fhtechnikum.tourplanner.model.Tour;
+import at.fhtechnikum.tourplanner.dto.tour.OrsRouteResult;
+import at.fhtechnikum.tourplanner.repository.TourLogRepository;
 import at.fhtechnikum.tourplanner.repository.TourRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.ConstraintViolation;
@@ -29,6 +31,9 @@ public class TourServiceTest {
 
     @Mock
     private TourRepository repository;
+
+    @Mock
+    private TourLogRepository tourLogRepository;
 
     @Mock
     private OrsService orsService;
@@ -100,10 +105,36 @@ public class TourServiceTest {
     }
 
     @Test
+    void createTour_computesChildFriendlinessFromEnrichedRoute() throws Exception {
+        Tour tour = new Tour();
+        tour.setName("Prater Run");
+        tour.setStartLocation("Praterstern");
+        tour.setEndLocation("Lusthaus");
+        tour.setTransportType(TransportType.RUNNING);
+        tour.setStartLat(48.2182);
+        tour.setStartLng(16.3920);
+        tour.setEndLat(48.1927);
+        tour.setEndLng(16.4396);
+        tour.setChildFriendliness(5);
+
+        when(orsService.getRoute(any(double[].class), any(double[].class), eq(TransportType.RUNNING)))
+                .thenReturn(new OrsRouteResult(4.7, 34 * 60, List.of(new double[]{48.2, 16.4})));
+        when(objectMapper.writeValueAsString(any())).thenReturn("[[48.2,16.4]]");
+
+        tourService.createTour(tour);
+
+        assertThat(tour.getDistance()).isEqualTo(4.7);
+        assertThat(tour.getEstimatedTime()).isEqualTo(34 * 60);
+        assertThat(tour.getChildFriendliness()).isEqualTo(3);
+        verify(repository).save(tour);
+    }
+
+    @Test
     void deleteTour_returnsTheTourID_Successfully() {
         when(repository.existsById("1")).thenReturn(true);
         boolean result = tourService.deleteTour("1");
         assertThat(result).isTrue();
+        verify(tourLogRepository).deleteByTourID("1");
         verify(repository).deleteById("1");
     }
 
@@ -112,6 +143,7 @@ public class TourServiceTest {
         when(repository.existsById("1")).thenReturn(false);
         boolean result = tourService.deleteTour("1");
         assertThat(result).isFalse();
+        verify(tourLogRepository, never()).deleteByTourID(anyString());
         verify(repository, never()).deleteById("1");
     }
 

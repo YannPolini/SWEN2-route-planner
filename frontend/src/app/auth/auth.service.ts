@@ -146,7 +146,7 @@ export class AuthService {
     localStorage.removeItem(this.sessionKey);
   }
 
-  private authHeaders(token = this.tokenSignal()): HttpHeaders {
+  authHeaders(token = this.tokenSignal()): HttpHeaders {
     return token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : new HttpHeaders();
   }
 

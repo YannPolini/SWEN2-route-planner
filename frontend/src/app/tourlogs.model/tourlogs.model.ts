@@ -1,5 +1,4 @@
 import { signal, computed, inject, Injectable } from '@angular/core';
-import { AuthService } from '../auth/auth.service';
 import { TourService } from '../services/tour.service';
 import { TourLogApiService } from './TourLogApiService';
 
@@ -13,6 +12,7 @@ export type Log = {
   rating: number;
   tourID: string;
   logID: number;
+  ownerUserId?: number | null;
   creatorName: string;
 };
 
@@ -21,6 +21,13 @@ export class TourlogsModel {
 
   readonly logList = signal<Log[]>([]);
   readonly searchTerm = signal<string>('');
+  readonly popularityByTour = computed(() => {
+    const counts = new Map<string, number>();
+    for (const log of this.logList()) {
+      counts.set(log.tourID, (counts.get(log.tourID) ?? 0) + 1);
+    }
+    return counts;
+  });
   /*
   readonly logList = signal<Log[]>([
     {
@@ -114,19 +121,17 @@ export class TourlogsModel {
     this.loadLogs();
   }
 
-  private readonly authService = inject(AuthService);
   private readonly tourService = inject(TourService);
 
   readonly filteredLogs = computed(() => {
     const selectedTourId = this.tourService.selectedTourId();
-    const currentUsername = this.authService.currentUser()?.name; 
     const term = this.searchTerm().toLowerCase().trim();
 
     if (!selectedTourId) {
       return [];
     }
 
-    let result = this.logList().filter(log => log.tourID === selectedTourId && log.creatorName === currentUsername);
+    let result = this.logList().filter(log => log.tourID === selectedTourId);
 
     if (term) {
       result = result.filter(log =>
@@ -228,6 +233,6 @@ export class TourlogsModel {
   }
 
   getPopularity(tourID: string): number {
-    return this.logList().filter(log => log.tourID === tourID).length;
+    return this.popularityByTour().get(tourID) ?? 0;
   }
 }

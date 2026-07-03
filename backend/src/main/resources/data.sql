@@ -1,110 +1,22 @@
--- Drop legacy check constraints left over from old @Min/@DecimalMin annotations.
--- Hibernate ddl-auto=update never removes constraints, so we do it here.
+-- Keep only idempotent schema/data migrations here.
+-- Demo tours and logs should be created through the app/API, not reinserted on every backend start.
+
 ALTER TABLE IF EXISTS tour DROP CONSTRAINT IF EXISTS tour_estimated_time_check;
 ALTER TABLE IF EXISTS tour DROP CONSTRAINT IF EXISTS tour_distance_check;
 ALTER TABLE IF EXISTS tour DROP CONSTRAINT IF EXISTS tour_transport_type_check;
 
--- Migrate rows persisted before the VACATION -> VEHICLE rename, so the enum
--- can still be mapped when Hibernate reads them back.
 UPDATE tour SET transport_type = 'VEHICLE' WHERE transport_type = 'VACATION';
 
-INSERT INTO tour_log (
-    logid,
-    date,
-    time,
-    comment,
-    difficulty,
-    total_distance,
-    total_time,
-    rating,
-    tourid,
-    creator_name
-) VALUES
-      (1, '2026-03-20', '08:45', 'Angenehme Tour mit schönem Wetter und guter Sicht.', 2, 12.4, 150, 4, '1', 'Demo User 2'),
-      (2, '2026-03-21', '14:10', 'Teilweise anstrengender Anstieg, aber insgesamt sehr lohnend.', 4, 18.7, 245, 5, '2', 'Demo User'),
-      (6, '2026-04-01', '09:15', 'Sehr schöne Morgenrunde entlang des Flusses, kaum Verkehr.', 2, 10.5, 95, 4, '3', 'Demo User'),
-      (7, '2026-04-02', '13:40', 'Heißes Wetter, aber tolle Aussicht auf den Bergen.', 4, 21.3, 280, 5, '4', 'Demo User'),
-      (8, '2026-04-03', '17:20', 'Kurze Feierabendtour, entspannend und ruhig.', 1, 5.8, 60, 3, '5', 'Demo User'),
-      (9, '2026-04-04', '08:00', 'Sehr anspruchsvoll, viele steile Abschnitte.', 5, 25.0, 340, 5, '1', 'Demo User'),
-      (10, '2026-04-05', '11:10', 'Gemütliche Tour durch den Wald, ideal zum Abschalten.', 2, 13.2, 150, 4, '2', 'Demo User')
-ON CONFLICT (logid) DO NOTHING;
+DELETE FROM tour_log
+WHERE tourid IS NOT NULL
+  AND NOT EXISTS (
+      SELECT 1
+      FROM tour
+      WHERE tour.id = tour_log.tourid
+  );
 
-INSERT INTO tour (
-    id,
-    name,
-    description,
-    start_location,
-    end_location,
-    transport_type,
-    distance,
-    estimated_time,
-    child_friendliness,
-    route_image_path,
-    created_at
-) VALUES
-      (
-          '1',
-          'Donauinsel Rundweg',
-          'Gemütliche Radtour entlang der Donauinsel mit Blick auf die Donau.',
-          'Wien Floridsdorf',
-          'Wien Donaustadt',
-          'BIKE',
-          21.5,
-          4200,
-          5,
-          '',
-          '2026-03-01 00:00:00'
-      ),
-      (
-          '2',
-          'Schneeberg Gipfeltour',
-          'Anspruchsvolle Wanderung zum höchsten Berg Niederösterreichs.',
-          'Puchberg am Schneeberg',
-          'Schneeberg Gipfel',
-          'HIKE',
-          12.8,
-          18000,
-          2,
-          '',
-          '2026-02-15 00:00:00'
-      ),
-      (
-          '3',
-          'Prater Laufrunde',
-          'Flache Laufstrecke durch den Wiener Prater, ideal für Intervalltraining.',
-          'Praterstern',
-          'Lusthaus',
-          'RUNNING',
-          8.2,
-          2700,
-          4,
-          '',
-          '2026-03-10 00:00:00'
-      ),
-      (
-          '4',
-          'Wachau Radweg',
-          'Malerische Tour durch das UNESCO Weltkulturerbe entlang der Donau.',
-          'Melk',
-          'Krems an der Donau',
-          'BIKE',
-          36.0,
-          7200,
-          4,
-          '',
-          '2026-02-28 00:00:00'
-      ),
-      (
-          '5',
-          'Salzburg Stadtspaziergang',
-          'Entspannter Spaziergang durch die Altstadt mit Besuch der Festung.',
-          'Salzburg Hauptbahnhof',
-          'Festung Hohensalzburg',
-          'VEHICLE',
-          4.5,
-          10800,
-          5,
-          '',
-          '2026-03-05 00:00:00'
-      )
-ON CONFLICT (id) DO NOTHING;
+ALTER TABLE IF EXISTS tour_log DROP CONSTRAINT IF EXISTS fk_tour_log_tour;
+
+ALTER TABLE IF EXISTS tour_log
+    ADD CONSTRAINT fk_tour_log_tour
+    FOREIGN KEY (tourid) REFERENCES tour(id) ON DELETE CASCADE;

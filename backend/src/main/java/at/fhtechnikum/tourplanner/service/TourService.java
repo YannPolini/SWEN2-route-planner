@@ -4,6 +4,7 @@ import at.fhtechnikum.tourplanner.dto.tour.OrsRouteResult;
 import at.fhtechnikum.tourplanner.model.Tour;
 import at.fhtechnikum.tourplanner.exception.OrsServiceException;
 import at.fhtechnikum.tourplanner.exception.ResourceNotFoundException;
+import at.fhtechnikum.tourplanner.repository.TourLogRepository;
 import at.fhtechnikum.tourplanner.repository.TourRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,31 +22,40 @@ public class TourService {
     private static final Logger log = LoggerFactory.getLogger(TourService.class);
 
     private final TourRepository repository;
+    private final TourLogRepository tourLogRepository;
     private final OrsService     orsService;
     private final ObjectMapper   objectMapper;
 
     public TourService(TourRepository repository,
+                       TourLogRepository tourLogRepository,
                        OrsService orsService,
                        ObjectMapper objectMapper) {
         this.repository   = repository;
+        this.tourLogRepository = tourLogRepository;
         this.orsService   = orsService;
         this.objectMapper = objectMapper;
     }
 
     public List<Tour> getAllTours() {
         List<Tour> tours = repository.findAll();
+        tours.forEach(TourMetricsCalculator::updateChildFriendliness);
         log.info("getAllTours: {} found", tours.size());
         return tours;
     }
 
     public Optional<Tour> getTourById(String id) {
-        return repository.findById(id);
+        return repository.findById(id)
+                .map(tour -> {
+                    TourMetricsCalculator.updateChildFriendliness(tour);
+                    return tour;
+                });
     }
 
     @Transactional
     public void createTour(Tour tour) {
         log.info("createTour: {}", tour.getName());
         enrichWithOrsData(tour);
+        TourMetricsCalculator.updateChildFriendliness(tour);
         repository.save(tour);
     }
 
@@ -53,6 +63,7 @@ public class TourService {
     public boolean deleteTour(String id) {
         log.info("deleteTour: {}", id);
         if (!repository.existsById(id)) return false;
+        tourLogRepository.deleteByTourID(id);
         repository.deleteById(id);
         return true;
     }
@@ -64,6 +75,7 @@ public class TourService {
             throw new ResourceNotFoundException("Tour not found: " + tourId);
         }
         enrichWithOrsData(tour);
+        TourMetricsCalculator.updateChildFriendliness(tour);
         return Optional.of(repository.save(tour));
     }
 

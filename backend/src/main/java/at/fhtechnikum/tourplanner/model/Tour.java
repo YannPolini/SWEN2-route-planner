@@ -69,6 +69,7 @@ public class Tour {
     private double estimatedTime;
 
     @Column(nullable = false)
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Min(value = 0, message = "Child friendliness should not be less than 0")
     @Max(value = 5, message = "Child friendliness should not be more than 5")
     private int childFriendliness;
