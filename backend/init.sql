@@ -1,3 +1,11 @@
+CREATE TABLE IF NOT EXISTS app_user (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS tour (
     id VARCHAR(255) PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -12,16 +20,10 @@ CREATE TABLE IF NOT EXISTS tour (
     distance DOUBLE PRECISION NOT NULL,
     estimated_time DOUBLE PRECISION NOT NULL,
     child_friendliness INTEGER NOT NULL DEFAULT 0,
+    owner_user_id BIGINT REFERENCES app_user(id) ON DELETE CASCADE,
+    creator_name VARCHAR(255),
     route_image_path VARCHAR(255) NOT NULL,
     route_geometry TEXT,
-    created_at TIMESTAMP NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS app_user (
-    id BIGSERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    email VARCHAR(255) NOT NULL UNIQUE,
-    password_hash VARCHAR(255) NOT NULL,
     created_at TIMESTAMP NOT NULL
 );
 

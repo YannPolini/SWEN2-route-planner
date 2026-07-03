@@ -16,6 +16,8 @@ export interface Tour {
   distance: number;
   estimatedTime: number;      // seconds — formatDuration() converts to h/min display
   childFriendliness: number;
+  ownerUserId?: number | null;
+  creatorName?: string | null;
   routeImagePath: string;
   routeGeometry: string | null; // [[lat,lng],...] as JSON — null if ORS failed
   createdAt: Date;

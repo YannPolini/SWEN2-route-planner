@@ -74,6 +74,14 @@ public class Tour {
     @Max(value = 5, message = "Child friendliness should not be more than 5")
     private int childFriendliness;
 
+    @Column(name = "owner_user_id")
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private Long ownerUserId;
+
+    @Column
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private String creatorName;
+
     @Column(nullable = false)
     private String routeImagePath;
 

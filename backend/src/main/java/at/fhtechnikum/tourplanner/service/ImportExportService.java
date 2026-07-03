@@ -62,7 +62,8 @@ public class ImportExportService {
             System.out.println("trying");
             for (CSVRecord record : parser) {
                 try {
-                    Tour tour = mapCsvRecordToTour(record);
+                    Tour tour = mapCsvRecordToTour(record, owner);
+                    requireWritableTourId(tour, owner);
 
                     // Save/update tour first
                     tourRepository.save(tour);
@@ -97,7 +98,7 @@ public class ImportExportService {
      //Exportiert alle Tours und Tourlogs als CSV-Datei.
     @Transactional(readOnly = true)
     public byte[] exportAsCsv(AppUser owner) {
-        List<Tour> tours = tourRepository.findAll();
+        List<Tour> tours = tourRepository.findByOwnerUserId(owner.getId());
 
         try (
                 ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -157,7 +158,7 @@ public class ImportExportService {
         }
     }
 
-    private Tour mapCsvRecordToTour(CSVRecord record) {
+    private Tour mapCsvRecordToTour(CSVRecord record, AppUser owner) {
         Tour tour = new Tour();
 
         tour.setId(getRequiredValue(record, "tour_id"));
@@ -184,6 +185,7 @@ public class ImportExportService {
         } else {
             tour.setCreatedAt(LocalDateTime.parse(createdAt));
         }
+        assignOwner(tour, owner);
 
         validateTour(tour);
         return tour;
@@ -210,8 +212,20 @@ public class ImportExportService {
         log.setOwnerUserId(owner.getId());
         log.setCreatorName(owner.getName());
 
-        validateTourLogBusinessRules(log);
+        validateTourLogBusinessRules(log, owner);
         return log;
+    }
+
+    private void assignOwner(Tour tour, AppUser owner) {
+        tour.setOwnerUserId(owner.getId());
+        tour.setCreatorName(owner.getName());
+    }
+
+    private void requireWritableTourId(Tour tour, AppUser owner) {
+        if (tourRepository.existsById(tour.getId())
+                && !tourRepository.existsByIdAndOwnerUserId(tour.getId(), owner.getId())) {
+            throw new IllegalArgumentException("Tour belongs to another user: " + tour.getId());
+        }
     }
 
     //Fail bad rows early
@@ -313,7 +327,7 @@ public class ImportExportService {
     }
 
     // TourLog business rules (domain-level validation after parsing)
-    private void validateTourLogBusinessRules(TourLog log) {
+    private void validateTourLogBusinessRules(TourLog log, AppUser owner) {
         if (log.getLogID() == null) {
             throw new IllegalArgumentException("logID is required");
         }
@@ -346,7 +360,7 @@ public class ImportExportService {
         }
 
         //Coupled Tour to make sure it exists
-        if (!tourRepository.existsById(log.getTourID())) {
+        if (!tourRepository.existsByIdAndOwnerUserId(log.getTourID(), owner.getId())) {
             throw new IllegalArgumentException("Referenced tour does not exist: " + log.getTourID());
         }
     }

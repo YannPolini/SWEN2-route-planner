@@ -52,7 +52,7 @@ public class TourLogService {
     @Transactional
     public void createTourLog(TourLog tourLog, AppUser owner) {
         System.out.println("Creating a new owned tour log_service");
-        requireExistingTour(tourLog.getTourID());
+        requireExistingTour(tourLog.getTourID(), owner);
         assignOwner(tourLog, owner);
         repository.save(tourLog);
     }
@@ -119,7 +119,7 @@ public class TourLogService {
                 .orElseThrow(() -> new ResourceNotFoundException("Log not found: " + logID));
 
         requireOwner(existing, owner);
-        requireExistingTour(log.getTourID());
+        requireExistingTour(log.getTourID(), owner);
         log.setLogID(logID);
         assignOwner(log, owner);
 
@@ -131,6 +131,15 @@ public class TourLogService {
             throw new IllegalArgumentException("tourID is required");
         }
         if (!tourRepository.existsById(tourID)) {
+            throw new IllegalArgumentException("Referenced tour does not exist: " + tourID);
+        }
+    }
+
+    private void requireExistingTour(String tourID, AppUser owner) {
+        if (tourID == null || tourID.isBlank()) {
+            throw new IllegalArgumentException("tourID is required");
+        }
+        if (!tourRepository.existsByIdAndOwnerUserId(tourID, owner.getId())) {
             throw new IllegalArgumentException("Referenced tour does not exist: " + tourID);
         }
     }

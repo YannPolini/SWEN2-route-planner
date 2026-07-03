@@ -132,13 +132,29 @@ public class TourLogServiceTest {
         log.setOwnerUserId(999L);
         log.setTourID("tour-1");
 
-        when(tourRepository.existsById("tour-1")).thenReturn(true);
+        when(tourRepository.existsByIdAndOwnerUserId("tour-1", 42L)).thenReturn(true);
 
         tourLogService.createTourLog(log, owner);
 
         assertThat(log.getOwnerUserId()).isEqualTo(42L);
         assertThat(log.getCreatorName()).isEqualTo("Demo User");
+        verify(tourRepository).existsByIdAndOwnerUserId("tour-1", 42L);
         verify(repository).save(log);
+    }
+
+    @Test
+    void createTourLog_withOwner_rejectsOtherUsersTour() {
+        AppUser owner = user(42L, null);
+        TourLog log = new TourLog();
+        log.setTourID("tour-1");
+
+        when(tourRepository.existsByIdAndOwnerUserId("tour-1", 42L)).thenReturn(false);
+
+        assertThatThrownBy(() -> tourLogService.createTourLog(log, owner))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Referenced tour does not exist: tour-1");
+
+        verify(repository, never()).save(any(TourLog.class));
     }
 
     @Test
