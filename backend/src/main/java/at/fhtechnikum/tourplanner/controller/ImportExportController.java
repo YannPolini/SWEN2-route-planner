@@ -44,6 +44,10 @@ public class ImportExportController {
             @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
             @RequestParam String format
     ) {
+        if (!"csv".equalsIgnoreCase(format)) {
+            return ResponseEntity.badRequest().build();
+        }
+
         AppUser owner = authService.requireUser(authorizationHeader);
         byte[] csvFile = importExportService.exportAsCsv(owner);
 

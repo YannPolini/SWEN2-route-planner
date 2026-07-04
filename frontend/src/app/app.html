@@ -1,31 +1,42 @@
 <div class="app-shell">
-  <nav class="navbar navbar-expand-lg border-bottom bg-white shadow-sm">
-    <div class="container">
-      <a class="navbar-brand fw-semibold" routerLink="/">Tour Planner</a>
+  <nav class="navbar navbar-expand-lg border-bottom bg-white">
+    <div class="container-fluid app-nav">
+      <a class="navbar-brand app-brand" routerLink="/">
+        <span class="app-brand-mark" aria-hidden="true"></span>
+        <span>Tour Planner</span>
+      </a>
 
-      <div class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+      <div class="navbar-nav app-header-actions ms-auto align-items-lg-center">
         @if (authService.isAuthenticated()) {
-          <import-export></import-export>
-          <a class="nav-link" routerLink="/tourlogs" routerLinkActive="active">Tour Logs</a>
           <a
-            class="nav-link profile-nav-link"
+            class="nav-link app-header-link"
+            routerLink="/tours"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: false }"
+          >
+            Route library
+          </a>
+          <a
+            class="nav-link app-header-link"
             routerLink="/profile"
             routerLinkActive="active"
           >
             {{ authService.currentUser()?.name }}
           </a>
-          <button type="button" class="btn btn-outline-secondary btn-sm" (click)="logout()">
+          <button type="button" class="nav-link app-header-link" (click)="logout()">
             Logout
           </button>
         } @else {
-          <a class="nav-link" routerLink="/login" routerLinkActive="active">Login</a>
-          <a class="btn btn-primary btn-sm" routerLink="/register">Register</a>
+          <a class="nav-link app-header-link" routerLink="/login" routerLinkActive="active">Login</a>
+          <a class="nav-link app-header-link" routerLink="/register" routerLinkActive="active">
+            Register
+          </a>
         }
       </div>
     </div>
   </nav>
 
-  <main class="app-content container py-4">
+  <main class="app-content container-fluid py-4">
     <router-outlet></router-outlet>
   </main>
 </div>

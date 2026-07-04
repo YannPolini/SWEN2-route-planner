@@ -3,6 +3,7 @@ package at.fhtechnikum.tourplanner.service;
 import at.fhtechnikum.tourplanner.dto.tour.OrsRouteResult;
 import at.fhtechnikum.tourplanner.model.AppUser;
 import at.fhtechnikum.tourplanner.model.Tour;
+import at.fhtechnikum.tourplanner.model.TourLog;
 import at.fhtechnikum.tourplanner.exception.OrsServiceException;
 import at.fhtechnikum.tourplanner.exception.ResourceNotFoundException;
 import at.fhtechnikum.tourplanner.repository.TourLogRepository;
@@ -42,7 +43,7 @@ public class TourService {
 
     public List<Tour> getAllTours() {
         List<Tour> tours = repository.findAll();
-        tours.forEach(TourMetricsCalculator::updateChildFriendliness);
+        tours.forEach(this::updateTourMetrics);
         log.info("getAllTours: {} found", tours.size());
         return tours;
     }
@@ -50,14 +51,14 @@ public class TourService {
     public Optional<Tour> getTourById(String id) {
         return repository.findById(id)
                 .map(tour -> {
-                    TourMetricsCalculator.updateChildFriendliness(tour);
+                    updateTourMetrics(tour);
                     return tour;
                 });
     }
 
     public List<Tour> getToursForUser(AppUser owner) {
         List<Tour> tours = repository.findByOwnerUserId(owner.getId());
-        tours.forEach(TourMetricsCalculator::updateChildFriendliness);
+        tours.forEach(tour -> updateTourMetrics(tour, owner));
         log.info("getToursForUser: {} found for user {}", tours.size(), owner.getId());
         return tours;
     }
@@ -65,7 +66,7 @@ public class TourService {
     public Optional<Tour> getTourById(String id, AppUser owner) {
         return repository.findByIdAndOwnerUserId(id, owner.getId())
                 .map(tour -> {
-                    TourMetricsCalculator.updateChildFriendliness(tour);
+                    updateTourMetrics(tour, owner);
                     return tour;
                 });
     }
@@ -130,6 +131,29 @@ public class TourService {
         enrichWithOrsData(tour);
         TourMetricsCalculator.updateChildFriendliness(tour);
         return Optional.of(repository.save(tour));
+    }
+
+    private void updateTourMetrics(Tour tour) {
+        TourMetricsCalculator.updateChildFriendliness(tour);
+        tour.setDifficulty(calculateAverageDifficulty(tourLogRepository.findByTourID(tour.getId())));
+    }
+
+    private void updateTourMetrics(Tour tour, AppUser owner) {
+        TourMetricsCalculator.updateChildFriendliness(tour);
+        tour.setDifficulty(calculateAverageDifficulty(
+                tourLogRepository.findByTourIDAndOwnerUserId(tour.getId(), owner.getId())));
+    }
+
+    private Double calculateAverageDifficulty(List<TourLog> logs) {
+        if (logs == null || logs.isEmpty()) {
+            return null;
+        }
+
+        double average = logs.stream()
+                .mapToInt(TourLog::getDifficulty)
+                .average()
+                .orElse(0);
+        return Math.round(average * 10.0) / 10.0;
     }
 
     // Fills distance, estimatedTime and routeGeometry before every DB save.

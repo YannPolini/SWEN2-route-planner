@@ -2,9 +2,15 @@
 backend/src/main/resources/application.properties
 .tools/
 
-# Secrets — never commit. Share via WhatsApp/secure channel, use .env.example as template.
+# Secrets - never commit. Share via a secure channel; use examples/templates instead.
 backend/.env
 
-# Local dev server logs
-backend/backend-live*.log
-frontend/frontend-live*.log
+# Dependencies and build output
+node_modules/
+.angular/
+dist/
+target/
+backend/.mvn/wrapper/dists/
+
+# Local logs
+*.log

@@ -15,7 +15,7 @@ class WeatherServiceTest {
     private final WeatherService weatherService = new WeatherService(mock(OrsService.class));
 
     @Test
-    void mapForecastResponse_returnsThreeDailyForecasts() {
+    void mapForecastResponse_returnsFiveDailyForecasts() {
         String json = """
                 {
                   "city": { "name": "Vienna" },
@@ -24,7 +24,8 @@ class WeatherServiceTest {
                     { "dt_txt": "2026-06-26 12:00:00", "main": { "temp": 22.0, "temp_min": 21.0, "temp_max": 24.0, "humidity": 50 }, "weather": [{ "description": "sonnig", "icon": "01d" }], "wind": { "speed": 3.0 } },
                     { "dt_txt": "2026-06-27 12:00:00", "main": { "temp": 18.0, "temp_min": 16.0, "temp_max": 20.0, "humidity": 65 }, "weather": [{ "description": "regen", "icon": "10d" }], "wind": { "speed": 4.0 } },
                     { "dt_txt": "2026-06-28 12:00:00", "main": { "temp": 24.0, "temp_min": 22.0, "temp_max": 26.0, "humidity": 45 }, "weather": [{ "description": "klar", "icon": "01d" }], "wind": { "speed": 2.0 } },
-                    { "dt_txt": "2026-06-29 12:00:00", "main": { "temp": 25.0, "temp_min": 23.0, "temp_max": 27.0, "humidity": 40 }, "weather": [{ "description": "heiss", "icon": "02d" }], "wind": { "speed": 1.0 } }
+                    { "dt_txt": "2026-06-29 12:00:00", "main": { "temp": 25.0, "temp_min": 23.0, "temp_max": 27.0, "humidity": 40 }, "weather": [{ "description": "heiss", "icon": "02d" }], "wind": { "speed": 1.0 } },
+                    { "dt_txt": "2026-06-30 12:00:00", "main": { "temp": 19.0, "temp_min": 18.0, "temp_max": 22.0, "humidity": 58 }, "weather": [{ "description": "windig", "icon": "03d" }], "wind": { "speed": 5.0 } }
                   ]
                 }
                 """;
@@ -33,7 +34,7 @@ class WeatherServiceTest {
 
         assertThat(result.tourId()).isEqualTo("tour-1");
         assertThat(result.locationName()).isEqualTo("Vienna");
-        assertThat(result.days()).hasSize(3);
+        assertThat(result.days()).hasSize(5);
         assertThat(result.days().getFirst().date()).isEqualTo(LocalDate.of(2026, 6, 26));
         assertThat(result.days().getFirst().temperature()).isEqualTo(21.0);
         assertThat(result.days().getFirst().minTemperature()).isEqualTo(19.0);

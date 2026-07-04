@@ -1,11 +1,72 @@
 .app-shell {
   min-height: 100vh;
+  background: #f6f7f9;
 }
 
+.app-nav,
 .app-content {
-  max-width: 960px;
+  max-width: 1180px;
 }
 
-.profile-nav-link {
+.navbar-brand {
+  letter-spacing: 0;
+}
+
+.navbar {
+  min-height: 3.5rem;
+}
+
+.navbar-nav {
+  flex-direction: row;
+}
+
+.app-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.38rem;
+  color: #111827;
+  font-size: 1.13rem;
+  font-weight: 700;
+}
+
+.app-brand:hover,
+.app-brand:focus-visible {
+  color: #111827;
+}
+
+.app-brand-mark {
+  display: inline-block;
+  width: 1.45rem;
+  height: 1.45rem;
+  background: #2563eb;
+  mask: url('/brand/map-marker-5-svgrepo-com.svg') center / contain no-repeat;
+  -webkit-mask: url('/brand/map-marker-5-svgrepo-com.svg') center / contain no-repeat;
+}
+
+.app-header-actions {
+  gap: 0.35rem;
+}
+
+.app-header-link {
+  border: 0;
+  border-radius: 6px;
+  padding: 0.45rem 0.65rem;
+  background: transparent;
+  color: #374151;
+  font: inherit;
+  font-size: 0.92rem;
   font-weight: 600;
+  line-height: 1.2;
+}
+
+.app-header-link:hover,
+.app-header-link:focus-visible,
+.app-header-link.active {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+.app-header-link:focus-visible {
+  outline: 2px solid #93c5fd;
+  outline-offset: 2px;
 }

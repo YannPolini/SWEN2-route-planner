@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 
-//Damit angular auch versteht
 public enum TransportType {
     BIKE("bike", "Bike"),
     HIKE("hike", "Hike"),

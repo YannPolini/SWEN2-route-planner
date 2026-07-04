@@ -28,25 +28,7 @@ public class TourLogServiceTest {
     @InjectMocks
     private TourLogService tourLogService;
 
-    /*  //Falls mal gebraucht wird
-    private TourLog createTourLog(String id) {
-        TourLog log = new TourLog();
-        log.setLogID(id);
-        log.setDate("2026-06-21");
-        log.setTime("12:00");
-        log.setComment("Nice tour");
-        log.setDifficulty(3);
-        log.setTotalDistance(10.5);
-        log.setTotalTime(90);
-        log.setRating(4);
-        log.setTourID("tour-1");
-        log.setCreatorName("Example");
-        return log;
-    }
-     */
-
     @Test
-    //Testet ob getAllTourLogs korrekt repository.findAll() verwendet und dessen Ergebnis zurückgibt
     void getAllTourLogs_returnsLogsFromRepository() {
         TourLog log1 = new TourLog();
         TourLog log2 = new TourLog();
@@ -78,7 +60,6 @@ public class TourLogServiceTest {
 
         when(tourRepository.existsById("tour-1")).thenReturn(true);
 
-        //wieso hier kein when?
         tourLogService.createTourLog(log);
 
         verify(tourRepository).existsById("tour-1");

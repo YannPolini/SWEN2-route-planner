@@ -2,10 +2,11 @@ package at.fhtechnikum.tourplanner.service;
 
 import at.fhtechnikum.tourplanner.dto.importexport.ImportResultDto;
 import at.fhtechnikum.tourplanner.model.AppUser;
-import at.fhtechnikum.tourplanner.model.TransportType;
-import at.fhtechnikum.tourplanner.model.TourLog;
 import at.fhtechnikum.tourplanner.model.Tour;
-import at.fhtechnikum.tourplanner.repository.*;
+import at.fhtechnikum.tourplanner.model.TourLog;
+import at.fhtechnikum.tourplanner.model.TransportType;
+import at.fhtechnikum.tourplanner.repository.TourLogRepository;
+import at.fhtechnikum.tourplanner.repository.TourRepository;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
@@ -14,16 +15,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.*;
-import java.math.BigDecimal;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
-import java.io.ByteArrayOutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
 
 import static java.lang.Double.parseDouble;
 import static java.lang.Integer.parseInt;
@@ -39,10 +40,8 @@ public class ImportExportService {
         this.tourLogRepository = tourLogRepository;
     }
 
-    //Importiert aus einer CSV-Datei.
     @Transactional
     public ImportResultDto importTours(MultipartFile file, AppUser owner) {
-        System.out.println("importing");
         validateFile(file);
 
         int importedRows = 0;
@@ -59,43 +58,30 @@ public class ImportExportService {
                         .build()
                         .parse(reader)
         ) {
-            System.out.println("trying");
             for (CSVRecord record : parser) {
                 try {
                     Tour tour = mapCsvRecordToTour(record, owner);
                     requireWritableTourId(tour, owner);
-
-                    // Save/update tour first
                     tourRepository.save(tour);
 
-                    // Then save log if the row contains log data
                     TourLog log = mapCsvRecordToTourLog(record, owner);
-
                     if (log != null) {
                         tourLogRepository.save(log);
                     }
 
                     importedRows++;
-                    System.out.println("imported rows: " + importedRows);
-
                 } catch (Exception rowException) {
                     failedRows++;
-                    String message = "Row " + record.getRecordNumber() + ": " + rowException.getMessage();
-                    errors.add(message);
-                    System.err.println(message);
+                    errors.add("Row " + record.getRecordNumber() + ": " + rowException.getMessage());
                 }
             }
-
         } catch (IOException e) {
-            System.err.println("Error reading file " + file.getOriginalFilename());
             throw new RuntimeException("Could not read uploaded CSV file", e);
         }
 
-        System.out.println("Done importing");
         return new ImportResultDto(importedRows, failedRows, errors);
     }
 
-     //Exportiert alle Tours und Tourlogs als CSV-Datei.
     @Transactional(readOnly = true)
     public byte[] exportAsCsv(AppUser owner) {
         List<Tour> tours = tourRepository.findByOwnerUserId(owner.getId());
@@ -107,34 +93,34 @@ public class ImportExportService {
                         writer,
                         CSVFormat.DEFAULT.builder()
                                 .setHeader(
-                                        "tour_id","tour_name","from","to","transport_type","distance","estimated_time","child_friendliness",
-                                        "log_id","log_date","log_time","log_comment","log_difficulty","log_total_distance","log_total_time","log_rating","log_creator"
+                                        "tour_id", "tour_name", "from", "to", "transport_type", "distance",
+                                        "estimated_time", "child_friendliness", "log_id", "log_date",
+                                        "log_time", "log_comment", "log_difficulty", "log_total_distance",
+                                        "log_total_time", "log_rating", "log_creator"
                                 )
                                 .build()
                 )
         ) {
-
             for (Tour tour : tours) {
                 List<TourLog> logs = tourLogRepository.findByTourIDAndOwnerUserId(tour.getId(), owner.getId());
+                TourMetricsCalculator.updateChildFriendliness(tour);
 
-                // keep tours without logs in export
-            if (logs.isEmpty()) {
-                    TourMetricsCalculator.updateChildFriendliness(tour);
+                if (logs.isEmpty()) {
                     csv.printRecord(
                             tour.getId(), tour.getName(), tour.getStartLocation(), tour.getEndLocation(),
-                            tour.getTransportType(), tour.getDistance(), tour.getEstimatedTime(), tour.getChildFriendliness(),
-                            "", "", "", "", "", "", "", "", ""
+                            tour.getTransportType(), tour.getDistance(), tour.getEstimatedTime(),
+                            tour.getChildFriendliness(), "", "", "", "", "", "", "", "", ""
                     );
                     continue;
                 }
 
                 for (TourLog log : logs) {
-                    TourMetricsCalculator.updateChildFriendliness(tour);
                     csv.printRecord(
                             tour.getId(), tour.getName(), tour.getStartLocation(), tour.getEndLocation(),
-                            tour.getTransportType(), tour.getDistance(), tour.getEstimatedTime(), tour.getChildFriendliness(),
-                            log.getLogID(), log.getDate(), log.getTime(), log.getComment(), log.getDifficulty(),
-                            log.getTotalDistance(), log.getTotalTime(), log.getRating(), log.getCreatorName()
+                            tour.getTransportType(), tour.getDistance(), tour.getEstimatedTime(),
+                            tour.getChildFriendliness(), log.getLogID(), log.getDate(), log.getTime(),
+                            log.getComment(), log.getDifficulty(), log.getTotalDistance(), log.getTotalTime(),
+                            log.getRating(), log.getCreatorName()
                     );
                 }
             }
@@ -145,7 +131,7 @@ public class ImportExportService {
             throw new RuntimeException("Could not export tours + logs as CSV", e);
         }
     }
-    //
+
     private void validateFile(MultipartFile file) {
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("CSV file is empty");
@@ -163,7 +149,6 @@ public class ImportExportService {
 
         tour.setId(getRequiredValue(record, "tour_id"));
         tour.setName(getRequiredValue(record, "tour_name"));
-        // imported Tour no desc -> use a fallback:
         tour.setDescription(getOptionalValue(record, "description"));
         if (tour.getDescription().isBlank()) {
             tour.setDescription("Imported tour");
@@ -174,17 +159,11 @@ public class ImportExportService {
         tour.setDistance(parseDouble(getRequiredValue(record, "distance")));
         tour.setEstimatedTime(parseDouble(getRequiredValue(record, "estimated_time")));
         TourMetricsCalculator.updateChildFriendliness(tour);
-        //Export has no route_image_path in the header
         tour.setRouteImagePath(getOptionalValue(record, "route_image_path"));
-        //Export has no route_geometry column
         tour.setRouteGeometry(getOptionalValue(record, "route_geometry"));
-        //Export has no created_at column
+
         String createdAt = getOptionalValue(record, "created_at");
-        if (createdAt.isBlank()) {
-            tour.setCreatedAt(LocalDateTime.now());
-        } else {
-            tour.setCreatedAt(LocalDateTime.parse(createdAt));
-        }
+        tour.setCreatedAt(createdAt.isBlank() ? LocalDateTime.now() : LocalDateTime.parse(createdAt));
         assignOwner(tour, owner);
 
         validateTour(tour);
@@ -193,8 +172,6 @@ public class ImportExportService {
 
     private TourLog mapCsvRecordToTourLog(CSVRecord record, AppUser owner) {
         String logId = getOptionalValue(record, "log_id");
-
-        //If no log id, dieser teil wird übersprungen
         if (logId.isBlank()) {
             return null;
         }
@@ -228,7 +205,6 @@ public class ImportExportService {
         }
     }
 
-    //Fail bad rows early
     private void validateTour(Tour tour) {
         if (tour.getId() == null || tour.getId().isBlank()) {
             throw new IllegalArgumentException("id is required");
@@ -259,7 +235,6 @@ public class ImportExportService {
         }
     }
 
-    //checks that the header exists, the value is not blank, trims it, and throws a clear error if invalid
     private String getRequiredValue(CSVRecord record, String columnName) {
         if (!record.isMapped(columnName)) {
             throw new IllegalArgumentException("Missing column: " + columnName);
@@ -274,59 +249,15 @@ public class ImportExportService {
         return value.trim();
     }
 
-    //returns a trimmed value if present otherwise an empty string, so imports don't fail on missing optional data
     private String getOptionalValue(CSVRecord record, String columnName) {
         if (!record.isMapped(columnName)) {
             return "";
         }
 
         String value = record.get(columnName);
-
-        if (value == null) {
-            return "";
-        }
-
-        return value.trim();
+        return value == null ? "" : value.trim();
     }
 
-    // Tour business rules (domain-level validation after parsing)
-    private void validateTourBusinessRules(Tour tour) {
-        if (tour.getId() == null || tour.getId().isBlank()) {
-            throw new IllegalArgumentException("id is required");
-        }
-        if (tour.getName() == null || tour.getName().trim().length() < 3) {
-            throw new IllegalArgumentException("name must have at least 3 characters");
-        }
-        if (tour.getDescription() == null || tour.getDescription().isBlank()) {
-            throw new IllegalArgumentException("description is required");
-        }
-        if (tour.getStartLocation() == null || tour.getStartLocation().isBlank()) {
-            throw new IllegalArgumentException("from is required");
-        }
-        if (tour.getEndLocation() == null || tour.getEndLocation().isBlank()) {
-            throw new IllegalArgumentException("to is required");
-        }
-        if (tour.getTransportType() == null) {
-            throw new IllegalArgumentException("transportType is required");
-        }
-        if (tour.getDistance() < 0) {
-            throw new IllegalArgumentException("distance cannot be negative");
-        }
-        if (tour.getEstimatedTime() < 0) {
-            throw new IllegalArgumentException("estimatedTime cannot be negative");
-        }
-        if (tour.getChildFriendliness() < 0 || tour.getChildFriendliness() > 5) {
-            throw new IllegalArgumentException("childFriendliness must be between 0 and 5");
-        }
-        if (tour.getRouteImagePath() == null || tour.getRouteImagePath().isBlank()) {
-            throw new IllegalArgumentException("routeImagePath is required");
-        }
-        if (tour.getCreatedAt() == null) {
-            throw new IllegalArgumentException("createdAt is required");
-        }
-    }
-
-    // TourLog business rules (domain-level validation after parsing)
     private void validateTourLogBusinessRules(TourLog log, AppUser owner) {
         if (log.getLogID() == null) {
             throw new IllegalArgumentException("logID is required");
@@ -358,8 +289,6 @@ public class ImportExportService {
         if (log.getCreatorName() == null || log.getCreatorName().isBlank()) {
             throw new IllegalArgumentException("creatorName is required");
         }
-
-        //Coupled Tour to make sure it exists
         if (!tourRepository.existsByIdAndOwnerUserId(log.getTourID(), owner.getId())) {
             throw new IllegalArgumentException("Referenced tour does not exist: " + log.getTourID());
         }

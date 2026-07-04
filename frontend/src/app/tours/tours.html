@@ -1,288 +1,323 @@
-<!-- ═══ STATISTICS DASHBOARD ═══ -->
-<div class="row g-3 mb-4">
-  <div class="col-6 col-md-3">
-    <div class="card shadow-sm text-center">
-      <div class="card-body py-3">
-        <div class="text-secondary small text-uppercase fw-medium">Total tours</div>
-        <div class="fs-3 fw-semibold">{{ stats().count }}</div>
+@if (!detailTourId()) {
+  <section class="tours-page">
+    <div class="page-heading">
+      <div>
+        <p class="section-kicker">Tours</p>
+        <h1>Route library</h1>
+      </div>
+      <div class="page-actions">
+        <import-export></import-export>
+        <button class="btn btn-primary btn-sm" type="button" (click)="openCreateForm()">
+          New Tour
+        </button>
       </div>
     </div>
-  </div>
-  <div class="col-6 col-md-3">
-    <div class="card shadow-sm text-center">
-      <div class="card-body py-3">
-        <div class="text-secondary small text-uppercase fw-medium">Total distance</div>
-        <div class="fs-3 fw-semibold">
-          {{ stats().totalDistance | number: '1.1-1' }}
-          <span class="fs-6 fw-normal text-secondary">km</span>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="col-6 col-md-3">
-    <div class="card shadow-sm text-center">
-      <div class="card-body py-3">
-        <div class="text-secondary small text-uppercase fw-medium">Avg. distance</div>
-        <div class="fs-3 fw-semibold">
-          {{ stats().avgDistance | number: '1.1-1' }}
-          <span class="fs-6 fw-normal text-secondary">km</span>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="col-6 col-md-3">
-    <div class="card shadow-sm text-center">
-      <div class="card-body py-3">
-        <div class="text-secondary small text-uppercase fw-medium">Avg. duration</div>
-        <div class="fs-3 fw-semibold">{{ formatDuration(stats().avgTime) }}</div>
-      </div>
-    </div>
-  </div>
-</div>
 
-<div class="row g-4 tours-layout">
-  <!-- ═══ LEFT: TOUR LIST ═══ -->
-  <div class="col-12 col-lg-5">
-    <div class="card shadow-sm">
-      <div class="card-body">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <h1 class="h4 mb-0">Tours</h1>
-          <button class="btn btn-primary btn-sm" (click)="openCreateForm()">+ New Tour</button>
-        </div>
+    <div class="summary-strip">
+      <div class="metric">
+        <span>Total tours</span>
+        <strong>{{ stats().count }}</strong>
+      </div>
+      <div class="metric">
+        <span>Total distance</span>
+        <strong>{{ stats().totalDistance | number: '1.1-1' }} km</strong>
+      </div>
+      <div class="metric">
+        <span>Average distance</span>
+        <strong>{{ stats().avgDistance | number: '1.1-1' }} km</strong>
+      </div>
+      <div class="metric">
+        <span>Average duration</span>
+        <strong>{{ formatDuration(stats().avgTime) }}</strong>
+      </div>
+    </div>
 
-        <div class="mb-3">
-          <app-search-bar
-            placeholder="Search tours..."
-            [value]="searchTerm()"
-            (valueChange)="updateSearch($event)"
-          />
-        </div>
+    <div class="tour-toolbar">
+      <app-search-bar
+        placeholder="Search tours"
+        [value]="searchTerm()"
+        (valueChange)="updateSearch($event)"
+      />
 
-        <!-- Transport Type Filter -->
-        <div class="d-flex flex-wrap gap-1 mb-3">
+      <div class="filter-group" aria-label="Transport type filter">
+        <button
+          type="button"
+          class="filter-chip"
+          [class.active]="filterType() === null"
+          (click)="setFilterType(null)"
+        >
+          All <span>{{ tourCount() }}</span>
+        </button>
+        @for (type of transportTypes; track type.value) {
           <button
-            class="btn btn-sm"
-            [class]="filterType() === null ? 'btn-dark' : 'btn-outline-secondary'"
-            (click)="setFilterType(null)"
+            type="button"
+            class="filter-chip category-chip"
+            [class.active]="filterType() === type.value"
+            [attr.aria-label]="type.label"
+            [title]="type.label"
+            (click)="setFilterType(type.value)"
           >
-            All ({{ tourCount() }})
+            <app-transport-icon [type]="type.value" [label]="type.label" />
+            <span>{{ type.label }}</span>
           </button>
-          @for (t of transportTypes; track t.value) {
-            <button
-              class="btn btn-sm"
-              [class]="filterType() === t.value ? 'btn-dark' : 'btn-outline-secondary'"
-              (click)="setFilterType(t.value)"
-            >
-              {{ t.label }}
-            </button>
-          }
-        </div>
-
-        <div class="tour-list">
-          @for (tour of filteredTours(); track tour.id) {
-            <div
-              class="tour-item p-3 rounded-3 mb-2"
-              [class.active]="tour.id === selectedTourId()"
-              (click)="selectTour(tour.id)"
-            >
-              <div class="d-flex justify-content-between align-items-start mb-1">
-                <strong class="tour-item-name">{{ tour.name }}</strong>
-                <span class="badge {{ badgeClass(tour.transportType) }} ms-2">
-                  {{ tour.transportType }}
-                </span>
-              </div>
-              <div class="small text-secondary">{{ tour.from }} → {{ tour.to }}</div>
-              <div class="small text-secondary mt-1">
-                {{ tour.distance }} km · {{ formatDuration(tour.estimatedTime) }}
-              </div>
-              <div class="small text-secondary">Child friendly: {{ tour.childFriendliness }}/5</div>
-            </div>
-          } @empty {
-            <div class="text-center text-secondary py-5">
-              <div class="fs-1 mb-2">🗺️</div>
-              <p class="mb-1 fw-medium">No tours found</p>
-              <p class="small">Create your first tour or adjust your search.</p>
-            </div>
-          }
-        </div>
+        }
       </div>
     </div>
-  </div>
 
-  <!-- ═══ RIGHT: TOUR DETAIL ═══ -->
-  <div class="col-12 col-lg-7">
-    @if (selectedTour(); as tour) {
-      <div class="card shadow-sm mb-4">
-        <div class="card-body">
-          <div class="d-flex justify-content-between align-items-start mb-3">
+    <div class="tour-list">
+      @for (tour of filteredTours(); track tour.id) {
+        <button class="tour-card" type="button" (click)="openTour(tour.id)">
+          <span class="tour-row-main">
+            <span
+              class="tour-badge"
+              [class]="badgeClass(tour.transportType)"
+              [attr.aria-label]="transportLabel(tour.transportType)"
+              [title]="transportLabel(tour.transportType)"
+            >
+              <app-transport-icon
+                [type]="tour.transportType"
+                [label]="transportLabel(tour.transportType)"
+              />
+              <span>{{ transportLabel(tour.transportType) }}</span>
+            </span>
+            <span>
+              <span class="tour-name">{{ tour.name }}</span>
+              <span class="tour-route">{{ tour.from }} -> {{ tour.to }}</span>
+            </span>
+          </span>
+
+          <span class="tour-card-meta">
+            <span class="meta-pill">
+              <span class="metric-icon metric-icon-distance" aria-hidden="true"></span>
+              <span>{{ tour.distance | number: '1.1-1' }} km</span>
+            </span>
+            <span class="meta-pill">
+              <span class="metric-icon metric-icon-time" aria-hidden="true"></span>
+              <span>{{ formatDuration(tour.estimatedTime) }}</span>
+            </span>
+            <span class="meta-pill">
+              <span class="metric-icon metric-icon-logs" aria-hidden="true"></span>
+              <span>{{ logCount(tour.id) }} logs</span>
+            </span>
+            <span class="meta-pill">
+              <span class="metric-icon metric-icon-difficulty" aria-hidden="true"></span>
+              <span>Difficulty {{ formatDifficulty(tour.difficulty) }}</span>
+            </span>
+          </span>
+        </button>
+      } @empty {
+        <div class="empty-state">
+          <h2>No tours found</h2>
+          @if (tourCount() === 0) {
+            <p>Start from scratch or add the demo route library.</p>
+            <div class="empty-actions">
+              <button class="btn btn-primary btn-sm" type="button" (click)="seedDemoData()" [disabled]="demoSeedLoading()">
+                {{ demoSeedLoading() ? 'Adding demo data...' : 'Add demo data' }}
+              </button>
+              <button class="btn btn-outline-secondary btn-sm" type="button" (click)="openCreateForm()">
+                New Tour
+              </button>
+            </div>
+            @if (demoSeedError()) {
+              <p class="empty-error">{{ demoSeedError() }}</p>
+            }
+          } @else {
+            <p>Adjust the search or create a new tour.</p>
+          }
+        </div>
+      }
+    </div>
+  </section>
+} @else {
+  @if (selectedTour(); as tour) {
+    <section class="tour-detail-page">
+      <div class="detail-header">
+        <div class="detail-topbar">
+          <button class="btn btn-outline-secondary btn-sm" type="button" (click)="backToTours()">
+            Back
+          </button>
+          <div class="detail-actions">
+            <button class="btn btn-outline-secondary btn-sm" type="button" (click)="openEditForm(tour)">
+              Edit
+            </button>
+            <button class="btn btn-outline-danger btn-sm" type="button" (click)="confirmDelete(tour)">
+              Delete
+            </button>
+          </div>
+        </div>
+        <div class="detail-title">
+          <div class="detail-title-line">
+            <h1>{{ tour.name }}</h1>
+            <span
+              class="tour-badge"
+              [class]="badgeClass(tour.transportType)"
+              [attr.aria-label]="transportLabel(tour.transportType)"
+              [title]="transportLabel(tour.transportType)"
+            >
+              <app-transport-icon
+                [type]="tour.transportType"
+                [label]="transportLabel(tour.transportType)"
+              />
+              <span>{{ transportLabel(tour.transportType) }}</span>
+            </span>
+          </div>
+          <p>{{ tour.from }} -> {{ tour.to }}</p>
+        </div>
+      </div>
+
+      <section class="detail-stack">
+        <app-tour-map
+          [fromLocation]="tour.from"
+          [toLocation]="tour.to"
+          [routeGeometry]="tour.routeGeometry"
+        />
+
+        <div class="detail-panel">
+          <h2>Tour details</h2>
+          <p>{{ tour.description }}</p>
+
+          <div class="detail-facts">
             <div>
-              <h2 class="h4 mb-1">{{ tour.name }}</h2>
-              <span class="badge {{ badgeClass(tour.transportType) }}">{{
-                tour.transportType
-              }}</span>
+              <span class="fact-icon metric-icon metric-icon-distance" aria-hidden="true"></span>
+              <span class="fact-copy">
+                <span>Distance</span>
+                <strong>{{ tour.distance | number: '1.1-1' }} km</strong>
+              </span>
             </div>
-            <div class="d-flex gap-2">
-              <button class="btn btn-outline-secondary btn-sm" (click)="openEditForm(tour)">
-                ✏️ Edit
-              </button>
-              <button class="btn btn-outline-danger btn-sm" (click)="confirmDelete(tour)">
-                🗑️ Delete
-              </button>
+            <div>
+              <span class="fact-icon metric-icon metric-icon-time" aria-hidden="true"></span>
+              <span class="fact-copy">
+                <span>Estimated time</span>
+                <strong>{{ formatDuration(tour.estimatedTime) }}</strong>
+              </span>
             </div>
-          </div>
-
-          <p class="text-secondary">{{ tour.description }}</p>
-
-          <div class="row g-3 mb-4">
-            <div class="col-6 col-md-4">
-              <div class="text-uppercase small text-secondary fw-medium">From</div>
-              <div>{{ tour.from }}</div>
+            <div>
+              <span class="fact-icon metric-icon metric-icon-child" aria-hidden="true"></span>
+              <span class="fact-copy">
+                <span>Child friendly</span>
+                <strong>{{ tour.childFriendliness }}/5</strong>
+              </span>
             </div>
-            <div class="col-6 col-md-4">
-              <div class="text-uppercase small text-secondary fw-medium">To</div>
-              <div>{{ tour.to }}</div>
+            <div>
+              <span class="fact-icon metric-icon metric-icon-difficulty" aria-hidden="true"></span>
+              <span class="fact-copy">
+                <span>Difficulty</span>
+                <strong>{{ formatDifficulty(tour.difficulty) }}</strong>
+              </span>
             </div>
-            <div class="col-6 col-md-4">
-              <div class="text-uppercase small text-secondary fw-medium">Distance</div>
-              <div>{{ tour.distance }} km</div>
+            <div>
+              <span class="fact-icon metric-icon metric-icon-calendar" aria-hidden="true"></span>
+              <span class="fact-copy">
+                <span>Created</span>
+                <strong>{{ tour.createdAt | date: 'mediumDate' }}</strong>
+              </span>
             </div>
-            <div class="col-6 col-md-4">
-              <div class="text-uppercase small text-secondary fw-medium">Est. time</div>
-              <div>{{ formatDuration(tour.estimatedTime) }}</div>
-            </div>
-            <div class="col-6 col-md-4">
-              <div class="text-uppercase small text-secondary fw-medium">Created</div>
-              <div>{{ tour.createdAt | date: 'mediumDate' }}</div>
-            </div>
-            <div class="col-6 col-md-4">
-              <div class="text-uppercase small text-secondary fw-medium">Popularity</div>
-              <div>{{ tourlogsModel.getPopularity(selectedTourId()!) }}</div>
-            </div>
-            <div class="col-6 col-md-4">
-              <div class="text-uppercase small text-secondary fw-medium">Child friendly</div>
-              <div>{{ tour.childFriendliness }}/5</div>
+            <div>
+              <span class="fact-icon metric-icon metric-icon-logs" aria-hidden="true"></span>
+              <span class="fact-copy">
+                <span>Logs</span>
+                <strong>{{ logCount(tour.id) }}</strong>
+              </span>
             </div>
           </div>
+        </div>
 
-          <div class="weather-panel mb-4">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-              <h3 class="h6 mb-0">Wetter</h3>
-              @if (weatherForecast()?.locationName) {
-                <span class="small text-secondary">{{ weatherForecast()?.locationName }}</span>
-              }
-            </div>
-
-            @if (weatherLoading()) {
-              <div class="small text-secondary">Wetter wird geladen...</div>
-            } @else if (weatherError()) {
-              <div class="small text-secondary">Wetter konnte nicht geladen werden.</div>
-            } @else if (weatherForecast(); as forecast) {
-              <div class="weather-days">
-                @for (day of forecast.days; track day.date) {
-                  <div class="weather-day">
-                    <div class="small fw-semibold">{{ day.date | date: 'EEE, d. MMM' }}</div>
-                    <div class="weather-main">
-                      @if (day.icon) {
-                        <img
-                          class="weather-icon"
-                          [src]="weatherIconUrl(day.icon)"
-                          [alt]="day.description"
-                        />
-                      }
-                      <div>
-                        <div class="weather-temp">{{ day.temperature | number: '1.0-0' }} C</div>
-                        <div class="small text-secondary">
-                          {{ day.minTemperature | number: '1.0-0' }} C /
-                          {{ day.maxTemperature | number: '1.0-0' }} C
-                        </div>
-                      </div>
-                    </div>
-                    <div class="small text-secondary weather-description">
-                      {{ day.description }}
-                    </div>
-                  </div>
-                }
-              </div>
+        <section class="weather-card">
+          <div class="panel-heading">
+            <h2>Weather</h2>
+            @if (weatherForecast()?.locationName) {
+              <span>{{ weatherForecast()?.locationName }}</span>
             }
           </div>
 
-          <h3 class="h6 mb-2">Route Map</h3>
-          <app-tour-map
-            [fromLocation]="tour.from"
-            [toLocation]="tour.to"
-            [routeGeometry]="tour.routeGeometry"
-          />
-        </div>
-      </div>
+          @if (weatherLoading()) {
+            <p class="muted-text">Loading weather...</p>
+          } @else if (weatherError()) {
+            <p class="muted-text">Weather is unavailable.</p>
+          } @else if (weatherForecast(); as forecast) {
+            <div class="weather-list">
+              @for (day of forecast.days; track day.date) {
+                <article class="weather-day">
+                  <div>
+                    <strong>{{ day.date | date: 'EEE, d MMM' }}</strong>
+                    <span>{{ day.description }}</span>
+                  </div>
+                  <div class="weather-temp">
+                    @if (day.icon) {
+                      <img [src]="weatherIconUrl(day.icon)" [alt]="day.description" />
+                    }
+                    <strong>{{ day.temperature | number: '1.0-0' }} C</strong>
+                  </div>
+                </article>
+              }
+              </div>
+          }
+        </section>
+      </section>
 
-      <!-- Tour Logs for selected tour -->
-      <app-tourlogs></app-tourlogs>
+      <section class="logs-section">
+        <app-tourlogs></app-tourlogs>
+      </section>
+    </section>
+  } @else {
+    <section class="empty-state detail-empty">
+      <h1>Tour not found</h1>
+      <button class="btn btn-primary btn-sm" type="button" (click)="backToTours()">Back to tours</button>
+    </section>
+  }
+}
 
-    } @else {
-      <div class="card shadow-sm">
-        <div class="card-body text-center text-secondary py-5">
-          <div class="fs-1 mb-2">👈</div>
-          <p class="mb-1 fw-medium">Select a tour</p>
-          <p class="small">Choose a tour from the list to see its details.</p>
-        </div>
-      </div>
-    }
-  </div>
-</div>
-
-<!-- ═══ CREATE/EDIT MODAL ═══ -->
 @if (showForm()) {
   <div class="modal-backdrop fade show"></div>
   <div class="modal fade show d-block" tabindex="-1" (click)="closeForm()">
-    <div class="modal-dialog" (click)="$event.stopPropagation()">
+    <div class="modal-dialog modal-lg" (click)="$event.stopPropagation()">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">{{ editingTour() ? 'Edit Tour' : 'Create New Tour' }}</h5>
+          <h5 class="modal-title">{{ editingTour() ? 'Edit Tour' : 'Create Tour' }}</h5>
           <button type="button" class="btn-close" (click)="closeForm()"></button>
         </div>
         <div class="modal-body">
           <form [formGroup]="tourForm" (ngSubmit)="submitForm()" novalidate>
-            <div class="mb-3">
-              <label for="tourName" class="form-label">Tour Name *</label>
-              <input
-                id="tourName"
-                class="form-control"
-                formControlName="name"
-                placeholder="e.g. Donauinsel Rundweg"
-              />
-              @if (
-                (formSubmitted() || tourForm.controls.name.touched) && tourForm.controls.name.errors
-              ) {
-                <div class="invalid-feedback d-block">
-                  @if (tourForm.controls.name.errors['required']) {
-                    <span>Name is required.</span>
-                  } @else if (tourForm.controls.name.errors['minlength']) {
-                    <span>At least 3 characters.</span>
-                  }
-                </div>
-              }
-            </div>
-
-            <div class="mb-3">
-              <label for="tourDesc" class="form-label">Description *</label>
-              <textarea
-                id="tourDesc"
-                class="form-control"
-                rows="3"
-                formControlName="description"
-                placeholder="Describe the tour..."
-              ></textarea>
-              @if (
-                (formSubmitted() || tourForm.controls.description.touched) &&
-                tourForm.controls.description.errors?.['required']
-              ) {
-                <div class="invalid-feedback d-block">Description is required.</div>
-              }
-            </div>
-
             <div class="row g-3">
-              <div class="col-6">
-                <label class="form-label">From *</label>
+              <div class="col-12">
+                <label for="tourName" class="form-label">Name</label>
+                <input
+                  id="tourName"
+                  class="form-control"
+                  formControlName="name"
+                  placeholder="Donauinsel loop"
+                />
+                @if (
+                  (formSubmitted() || tourForm.controls.name.touched) && tourForm.controls.name.errors
+                ) {
+                  <div class="invalid-feedback d-block">
+                    @if (tourForm.controls.name.errors['required']) {
+                      <span>Name is required.</span>
+                    } @else if (tourForm.controls.name.errors['minlength']) {
+                      <span>Use at least 3 characters.</span>
+                    }
+                  </div>
+                }
+              </div>
+
+              <div class="col-12">
+                <label for="tourDesc" class="form-label">Description</label>
+                <textarea
+                  id="tourDesc"
+                  class="form-control"
+                  rows="3"
+                  formControlName="description"
+                ></textarea>
+                @if (
+                  (formSubmitted() || tourForm.controls.description.touched) &&
+                  tourForm.controls.description.errors?.['required']
+                ) {
+                  <div class="invalid-feedback d-block">Description is required.</div>
+                }
+              </div>
+
+              <div class="col-12 col-md-6">
+                <label class="form-label">From</label>
                 <app-address-input
                   placeholder="Start location"
                   [value]="tourForm.controls.from.value"
@@ -295,11 +330,12 @@
                   (formSubmitted() || tourForm.controls.from.touched) &&
                   tourForm.controls.from.errors?.['required']
                 ) {
-                  <div class="invalid-feedback d-block">Required.</div>
+                  <div class="invalid-feedback d-block">Start location is required.</div>
                 }
               </div>
-              <div class="col-6">
-                <label class="form-label">To *</label>
+
+              <div class="col-12 col-md-6">
+                <label class="form-label">To</label>
                 <app-address-input
                   placeholder="End location"
                   [value]="tourForm.controls.to.value"
@@ -312,27 +348,31 @@
                   (formSubmitted() || tourForm.controls.to.touched) &&
                   tourForm.controls.to.errors?.['required']
                 ) {
-                  <div class="invalid-feedback d-block">Required.</div>
+                  <div class="invalid-feedback d-block">End location is required.</div>
                 }
+              </div>
+
+              <div class="col-12 col-md-6">
+                <span class="form-label">Transport type</span>
+                <div class="transport-type-picker" role="group" aria-label="Transport type">
+                  @for (type of transportTypes; track type.value) {
+                    <button
+                      type="button"
+                      class="transport-type-option"
+                      [class.selected]="tourForm.controls.transportType.value === type.value"
+                      [attr.aria-pressed]="tourForm.controls.transportType.value === type.value"
+                      (click)="tourForm.controls.transportType.setValue(type.value)"
+                    >
+                      <app-transport-icon [type]="type.value" [label]="type.label" />
+                      <span>{{ type.label }}</span>
+                    </button>
+                  }
+                </div>
               </div>
             </div>
 
-            <div class="mb-3 mt-3">
-              <label for="tourType" class="form-label">Transport Type *</label>
-              <select id="tourType" class="form-select" formControlName="transportType">
-                @for (t of transportTypes; track t.value) {
-                  <option [value]="t.value">{{ t.label }}</option>
-                }
-              </select>
-            </div>
-
-            <div class="alert alert-info py-2 px-3 mb-3 small">
-              <strong>Distance, estimated time, and child friendliness</strong> are calculated
-              automatically when you save.
-            </div>
-
-            <div class="d-flex justify-content-end gap-2">
-              <button type="button" class="btn btn-secondary" (click)="closeForm()">Cancel</button>
+            <div class="modal-actions">
+              <button type="button" class="btn btn-outline-secondary" (click)="closeForm()">Cancel</button>
               <button type="submit" class="btn btn-primary">
                 {{ editingTour() ? 'Save Changes' : 'Create Tour' }}
               </button>
@@ -344,7 +384,6 @@
   </div>
 }
 
-<!-- ═══ DELETE CONFIRM MODAL ═══ -->
 @if (deleteTarget(); as target) {
   <div class="modal-backdrop fade show"></div>
   <div class="modal fade show d-block" tabindex="-1" (click)="cancelDelete()">
@@ -356,13 +395,14 @@
         </div>
         <div class="modal-body">
           <p>
-            Delete <strong>{{ target.name }}</strong
-            >? This cannot be undone.
+            Delete <strong>{{ target.name }}</strong>?
           </p>
         </div>
         <div class="modal-footer">
-          <button class="btn btn-secondary btn-sm" (click)="cancelDelete()">Cancel</button>
-          <button class="btn btn-danger btn-sm" (click)="executeDelete()">Delete</button>
+          <button class="btn btn-outline-secondary btn-sm" type="button" (click)="cancelDelete()">
+            Cancel
+          </button>
+          <button class="btn btn-danger btn-sm" type="button" (click)="executeDelete()">Delete</button>
         </div>
       </div>
     </div>

@@ -10,7 +10,7 @@ export interface ImportResult {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ImportExportService {
   private apiUrl = 'http://localhost:8080/api';
@@ -22,14 +22,14 @@ export class ImportExportService {
     formData.append('file', file);
 
     return this.http.post<ImportResult>(`${this.apiUrl}/import`, formData, {
-      headers: this.authService.authHeaders()
+      headers: this.authService.authHeaders(),
     });
   }
 
-  exportTours(format: 'excel' | 'csv' | 'json'): Observable<Blob> {
+  exportTours(format: 'csv'): Observable<Blob> {
     return this.http.get(`${this.apiUrl}/export?format=${format}`, {
       headers: this.authService.authHeaders(),
-      responseType: 'blob'
+      responseType: 'blob',
     });
   }
 }

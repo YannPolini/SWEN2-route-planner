@@ -1,17 +1,5 @@
-import {Component, Input} from '@angular/core';
-
-type Log = {
-  date: string;
-  time: string;
-  comment: string;
-  difficulty: number;
-  totalDistance: number;
-  totalTime: number;
-  rating: number;
-  tourID: string;
-  logID: number;
-  creatorName: string;
-};
+import { Component, Input } from '@angular/core';
+import { Log } from '../tourlogs.model/tourlogs.model';
 
 @Component({
   selector: 'app-tourlogs-list',

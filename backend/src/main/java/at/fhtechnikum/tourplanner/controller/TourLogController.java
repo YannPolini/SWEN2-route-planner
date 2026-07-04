@@ -72,9 +72,4 @@ public class TourLogController {
         service.deleteTourLog(logId, owner);
         return ResponseEntity.ok("deleted");
     }
-
-    @GetMapping("/test")
-    public String test() {
-        return "controller works";
-    }
 }

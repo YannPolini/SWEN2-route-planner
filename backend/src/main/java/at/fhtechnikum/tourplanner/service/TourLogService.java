@@ -26,32 +26,25 @@ public class TourLogService {
     }
 
     public List<TourLog> getAllTourLogs() {
-        List<TourLog> logs = repository.findAll();
-        System.out.println("Logs aus DB: " + logs.size());
-        return logs;
+        return repository.findAll();
     }
 
     public List<TourLog> getTourLogsForUser(AppUser owner) {
-        List<TourLog> logs = repository.findByOwnerUserId(owner.getId());
-        System.out.println("Logs aus DB fuer User " + owner.getId() + ": " + logs.size());
-        return logs;
+        return repository.findByOwnerUserId(owner.getId());
     }
 
-    //Long?
     public Optional<TourLog> getTourLogById(String id) {
         return repository.findById(id);
     }
 
     @Transactional
     public void createTourLog(TourLog tourLog) {
-        System.out.println("Creating a new tour log_service");
         requireExistingTour(tourLog.getTourID());
         repository.save(tourLog);
     }
 
     @Transactional
     public void createTourLog(TourLog tourLog, AppUser owner) {
-        System.out.println("Creating a new owned tour log_service");
         requireExistingTour(tourLog.getTourID(), owner);
         assignOwner(tourLog, owner);
         repository.save(tourLog);
@@ -80,41 +73,17 @@ public class TourLogService {
 
     @Transactional
     public Optional<TourLog> updateTourLog(String logID, TourLog log) {
-        //damit falls es nicht existiert nich ausversehen neues erstellen
-        System.out.println("Updating a tour log_service");
         if (!repository.existsById(logID)) {
             throw new ResourceNotFoundException("Log not found: " + logID);
         }
 
-        //log.setLogID(logID);
         requireExistingTour(log.getTourID());
         TourLog saved = repository.save(log);
-        System.out.println("Saved log");
-
-        /*
-        public TourLog updateTourLog(Long logID, TourLog dto) {
-            TourLog existing = repository.findById(logID)
-            .orElseThrow(() -> new RuntimeException("Log not found"));
-
-        existing.setDate(dto.getDate());
-        existing.setTime(dto.getTime());
-        existing.setComment(dto.getComment());
-        existing.setDifficulty(dto.getDifficulty());
-        existing.setTotalDistance(dto.getTotalDistance());
-        existing.setTotalTime(dto.getTotalTime());
-        existing.setRating(dto.getRating());
-        existing.setTourID(dto.getTourID());
-        existing.setCreatorName(dto.getCreatorName());
-
-        return repository.save(existing);
-        }
-         */
         return Optional.of(saved);
     }
 
     @Transactional
     public Optional<TourLog> updateTourLog(String logID, TourLog log, AppUser owner) {
-        System.out.println("Updating an owned tour log_service");
         TourLog existing = repository.findById(logID)
                 .orElseThrow(() -> new ResourceNotFoundException("Log not found: " + logID));
 

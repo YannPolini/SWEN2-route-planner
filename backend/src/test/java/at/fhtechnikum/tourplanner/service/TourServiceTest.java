@@ -3,6 +3,7 @@ package at.fhtechnikum.tourplanner.service;
 import at.fhtechnikum.tourplanner.model.Tour;
 import at.fhtechnikum.tourplanner.dto.tour.OrsRouteResult;
 import at.fhtechnikum.tourplanner.model.AppUser;
+import at.fhtechnikum.tourplanner.model.TourLog;
 import at.fhtechnikum.tourplanner.repository.TourLogRepository;
 import at.fhtechnikum.tourplanner.repository.TourRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -46,26 +47,6 @@ public class TourServiceTest {
     @InjectMocks
     private TourService tourService;
 
-    /*  //Falls irgendwann ein bsp gebraucht wird (zb ors enriching testing
-    private Tour createTour(String id){
-        Tour tour = new Tour();
-        tour.setId(id);
-        tour.setName("Vienna City Walk");
-        tour.setDescription("Short test tour through Vienna");
-        tour.setStartLocation("Stephansplatz, Vienna");
-        tour.setEndLocation("Karlsplatz, Vienna");
-        tour.setTransportType(TransportType.HIKE);
-        tour.setDistance(2.4);
-        tour.setEstimatedTime(1800);
-        tour.setChildFriendliness(4);
-        tour.setRouteImagePath("/images/routes/tour-1.png");
-        tour.setRouteGeometry("[[48.2082,16.3738],[48.2000,16.3700]]");
-        tour.setCreatedAt(LocalDateTime.of(2026, 6, 21, 12, 0));
-
-        return tour;
-    }
-     */
-
     @Test
     void getAllTours_returnsToursFromRepository() {
         Tour tour = new Tour();
@@ -97,6 +78,23 @@ public class TourServiceTest {
 
         assertThat(result).containsExactly(tour);
         verify(repository).findByOwnerUserId(42L);
+    }
+
+    @Test
+    void getToursForUser_setsAverageDifficultyFromOwnedLogs() {
+        AppUser owner = user(42L, null);
+        Tour tour = new Tour();
+        tour.setId("tour-1");
+        TourLog easyLog = logWithDifficulty(2);
+        TourLog hardLog = logWithDifficulty(5);
+
+        when(repository.findByOwnerUserId(42L)).thenReturn(List.of(tour));
+        when(tourLogRepository.findByTourIDAndOwnerUserId("tour-1", 42L))
+                .thenReturn(List.of(easyLog, hardLog));
+
+        List<Tour> result = tourService.getToursForUser(owner);
+
+        assertThat(result.get(0).getDifficulty()).isEqualTo(3.5);
     }
 
     @Test
@@ -280,5 +278,11 @@ public class TourServiceTest {
             when(user.getName()).thenReturn(name);
         }
         return user;
+    }
+
+    private TourLog logWithDifficulty(int difficulty) {
+        TourLog log = new TourLog();
+        log.setDifficulty(difficulty);
+        return log;
     }
 }

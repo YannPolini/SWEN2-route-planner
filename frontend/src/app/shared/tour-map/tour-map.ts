@@ -19,7 +19,7 @@ import { isPlatformBrowser } from '@angular/common';
     :host { display: block; }
     .tour-map {
       width: 100%;
-      height: 320px;
+      height: 380px;
       z-index: 0;
       background: #f1f3f5;
     }

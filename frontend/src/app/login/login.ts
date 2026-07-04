@@ -38,7 +38,7 @@ export class LoginComponent {
         return;
       }
 
-      void this.router.navigate(['/tourlogs']);
+      void this.router.navigate(['/tours']);
     });
   }
 }

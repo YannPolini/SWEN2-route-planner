@@ -1,17 +1,31 @@
 #!/usr/bin/env sh
 
+set -e
+
+MAVEN_VERSION=3.9.9
 SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-LOCAL_MAVEN="$SCRIPT_DIR/../.tools/apache-maven-3.9.9/bin/mvn"
+MAVEN_HOME="$SCRIPT_DIR/.mvn/wrapper/dists/apache-maven-$MAVEN_VERSION"
+MAVEN_BIN="$MAVEN_HOME/bin/mvn"
+MAVEN_URL="https://archive.apache.org/dist/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-$MAVEN_VERSION-bin.tar.gz"
+ARCHIVE="$SCRIPT_DIR/.mvn/wrapper/dists/apache-maven-$MAVEN_VERSION-bin.tar.gz"
 
-if [ -x "$LOCAL_MAVEN" ]; then
-  exec "$LOCAL_MAVEN" "$@"
+if [ ! -x "$MAVEN_BIN" ]; then
+  echo "Downloading Apache Maven $MAVEN_VERSION..."
+  mkdir -p "$SCRIPT_DIR/.mvn/wrapper/dists"
+
+  if command -v curl >/dev/null 2>&1; then
+    curl -fsSL "$MAVEN_URL" -o "$ARCHIVE"
+  elif command -v wget >/dev/null 2>&1; then
+    wget -q "$MAVEN_URL" -O "$ARCHIVE"
+  elif command -v node >/dev/null 2>&1; then
+    node -e "const fs=require('fs'); const out=process.argv[1]; const url=process.argv[2]; fetch(url).then(r=>{ if(!r.ok) throw new Error(r.status + ' ' + r.statusText); return r.arrayBuffer(); }).then(b=>fs.writeFileSync(out, Buffer.from(b))).catch(e=>{ console.error(e.message); process.exit(1); });" "$ARCHIVE" "$MAVEN_URL"
+  else
+    echo "Cannot download Maven: curl, wget, or node is required." >&2
+    exit 1
+  fi
+
+  tar -xzf "$ARCHIVE" -C "$SCRIPT_DIR/.mvn/wrapper/dists"
+  rm -f "$ARCHIVE"
 fi
 
-if command -v mvn >/dev/null 2>&1; then
-  exec mvn "$@"
-fi
-
-echo "Maven was not found."
-echo "Expected local Maven at: $LOCAL_MAVEN"
-echo "Or install Maven and make sure mvn is available on PATH."
-exit 1
+exec "$MAVEN_BIN" "$@"

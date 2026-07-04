@@ -1,8 +1,15 @@
-import { Component, signal, computed, inject, effect } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
+import {
+  AbstractControl,
+  FormBuilder,
+  ReactiveFormsModule,
+  ValidationErrors,
+  ValidatorFn,
+  Validators,
+} from '@angular/forms';
 import { TourlogsList } from '../tourlogs-list/tourlogs-list';
-import { FormBuilder, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { TourService } from '../services/tour.service';
-import { TourlogsModel, Log } from '../tourlogs.model/tourlogs.model';
+import { Log, TourlogsModel } from '../tourlogs.model/tourlogs.model';
 import { SearchBarComponent } from '../shared/search-bar/search-bar';
 
 @Component({
@@ -15,25 +22,19 @@ import { SearchBarComponent } from '../shared/search-bar/search-bar';
 export class TourlogsComponent {
   private readonly fb = inject(FormBuilder);
   private readonly tourlogsModel = inject(TourlogsModel);
+  private readonly tourService = inject(TourService);
 
-  protected readonly logList = this.tourlogsModel.logList;    //Ganze liste der TourLogs, nicht private da in html benutzt
-
-  protected readonly today = new Date().toISOString().split('T')[0]; //Heutige Datum, new Date().toISOString() → "2026-04-09T12:34:56.000Z", .split('T')[0] → "2026-04-09"
+  protected readonly logList = this.tourlogsModel.logList;
+  protected readonly today = new Date().toISOString().split('T')[0];
   protected readonly minDate = '1900-01-01';
+  protected readonly formSubmitted = signal(false);
+  protected readonly filteredLogs = this.tourlogsModel.filteredLogs;
+  protected readonly searchTerm = this.tourlogsModel.searchTerm;
+  protected readonly canAddLog = computed(() => this.tourService.selectedTourId() !== null);
+  protected readonly showFormPopup = signal(false);
 
-  private maxDateValidator(maxDate: string): ValidatorFn {
-    return (control: AbstractControl): ValidationErrors | null => {
-      if (!control.value) return null;
-      return control.value > maxDate ? { maxDate: true } : null;
-    };
-  }
-
-  private minDateValidator(minDate: string): ValidatorFn {
-    return (control: AbstractControl): ValidationErrors | null => {
-      if (!control.value) return null;
-        return control.value < minDate ? { minDate: true } : null;
-    };
-  }
+  private readonly selectedLogId = signal<string | null>(null);
+  private readonly editingLogId = signal<string | null>(null);
 
   readonly logForm = this.fb.nonNullable.group({
     date: ['', [Validators.required, this.maxDateValidator(this.today), this.minDateValidator(this.minDate)]],
@@ -46,78 +47,38 @@ export class TourlogsComponent {
     tourID: [''],
   });
 
-  
+  protected readonly selectedLog = computed(
+    () => this.tourlogsModel.logList().find((log) => log.logID === this.selectedLogId()) ?? null,
+  );
 
-  protected readonly formSubmitted = signal(false);
+  protected readonly editingLog = computed(
+    () => this.tourlogsModel.logList().find((log) => log.logID === this.editingLogId()) ?? null,
+  );
 
-  private readonly tourService = inject(TourService);
-
-  //ausgelagert zu tourlogs.model.ts
-  protected readonly filteredLogs = this.tourlogsModel.filteredLogs;    //Filtered Liste der Tourlogs, mit UserName und 
-  protected readonly searchTerm = this.tourlogsModel.searchTerm;
-
-  protected readonly canAddLog = computed(() => this.tourService.selectedTourId() !== null);  //Wenn eine Tour ausgewählt ist, dann hat es eine ID
+  constructor() {
+    effect(() => {
+      this.tourService.selectedTourId();
+      this.selectedLogId.set(null);
+      this.editingLogId.set(null);
+      this.showFormPopup.set(false);
+      this.resetForm();
+    });
+  }
 
   protected updateSearch(term: string): void {
     this.tourlogsModel.setSearchTerm(term);
   }
 
-  //with addPopup
   protected openAdd(): void {
-    //damit nicht wenn kein tour ausgewählt trotzdem tourlog adden kann
     if (!this.tourService.selectedTour()) {
       return;
     }
 
     this.editingLogId.set(null);
-
-    this.logForm.reset({
-      date: '',
-      time: '',
-      comment: '',
-      difficulty: 1,
-      totalDistance: 0,
-      totalTime: 0,
-      rating: 0,
-    });
-
+    this.resetForm();
     this.formSubmitted.set(false);
     this.showFormPopup.set(true);
   }
-
-  protected readonly showFormPopup = signal(false);
-
-  private readonly selectedLogId = signal<number | null>(null);   //welches Log gerade selected ist
-  private readonly editingLogId = signal<number | null>(null);    //welches Log gerade bearbeitet wird, wenn edit will dann bekommt nummer von dem was edited wird
-
-  protected readonly selectedLog = computed(
-    () => this.tourlogsModel.logList().find((log) => log.logID === this.selectedLogId()) ?? null,
-  );
-
-  constructor() {
-
-    effect(() => {
-      //damit wenn sich die tour wechselt das selectedLog auf null gesetzt wird
-      this.tourService.selectedTourId();
-      this.selectedLogId.set(null);
-      this.editingLogId.set(null);
-      this.showFormPopup.set(false);
-
-      this.logForm.reset({
-        date: '',
-        time: '',
-        comment: '',
-        difficulty: 1,
-        totalDistance: 0,
-        totalTime: 0,
-        rating: 0,
-      });
-    });
-  }
-
-  protected readonly editingLog = computed(
-    () => this.tourlogsModel.logList().find((log) => log.logID === this.editingLogId()) ?? null,
-  );
 
   protected selectLog(log: Log): void {
     this.selectedLogId.set(log.logID);
@@ -141,32 +102,21 @@ export class TourlogsComponent {
   }
 
   protected deleteLog(): void {
-    const currentLog = this.selectedLog(); //holt ausgewähltes Log damit benutzt werden kann
+    const currentLog = this.selectedLog();
 
     if (!currentLog) return;
 
     this.tourlogsModel.deleteLog(currentLog.logID);
-    this.selectedLogId.set(null); //wenn gelöscht wurde, wird das was im ausgewählten log ist zurückgesetzt
+    this.selectedLogId.set(null);
   }
 
-  //close the addPopup
   protected closeFormPopup(): void {
     this.showFormPopup.set(false);
     this.editingLogId.set(null);
     this.formSubmitted.set(false);
-
-    this.logForm.reset({
-      date: '',
-      time: '',
-      comment: '',
-      difficulty: 1,
-      totalDistance: 0,
-      totalTime: 0,
-      rating: 0,
-    });
+    this.resetForm();
   }
 
-  //Damit beim popup gleichzeitig adden und editen kann
   protected saveLog(): void {
     this.formSubmitted.set(true);
 
@@ -183,9 +133,8 @@ export class TourlogsComponent {
     }
 
     if (currentLog) {
-      this.tourlogsModel.updateLog({ ...currentLog, ...formValue }); 
+      this.tourlogsModel.updateLog({ ...currentLog, ...formValue });
       this.selectedLogId.set(currentLog.logID);
-      //this.updateBackendLog(currentLog);    //gehört das hierher ins viewmodel oder ins model? 
     } else {
       const newLog: Log = {
         date: formValue.date,
@@ -196,16 +145,42 @@ export class TourlogsComponent {
         totalTime: formValue.totalTime,
         rating: formValue.rating,
         tourID: selectedTourId,
-        logID: Date.now(),
+        logID: Date.now().toString(),
         ownerUserId: null,
         creatorName: '',
       };
 
-      //this.saveToBackend(newLog);
-      this.tourlogsModel.addLog(newLog);    
+      this.tourlogsModel.addLog(newLog);
       this.selectedLogId.set(newLog.logID);
     }
 
     this.closeFormPopup();
+  }
+
+  private maxDateValidator(maxDate: string): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      if (!control.value) return null;
+      return control.value > maxDate ? { maxDate: true } : null;
+    };
+  }
+
+  private minDateValidator(minDate: string): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      if (!control.value) return null;
+      return control.value < minDate ? { minDate: true } : null;
+    };
+  }
+
+  private resetForm(): void {
+    this.logForm.reset({
+      date: '',
+      time: '',
+      comment: '',
+      difficulty: 1,
+      totalDistance: 0,
+      totalTime: 0,
+      rating: 0,
+      tourID: '',
+    });
   }
 }

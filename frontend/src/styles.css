@@ -10,3 +10,132 @@ body {
   background: linear-gradient(180deg, #f8f9fa 0%, #eef4ff 100%);
   color: #212529;
 }
+
+.btn {
+  --button-border: #d7dce3;
+  --button-bg: #ffffff;
+  --button-color: #27313f;
+  --button-hover-bg: #f3f5f8;
+  --button-hover-border: #b8c0cc;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-height: 2.35rem;
+  border-color: var(--button-border);
+  border-radius: 8px;
+  background: var(--button-bg);
+  color: var(--button-color);
+  font-size: 0.9rem;
+  font-weight: 650;
+  line-height: 1;
+  letter-spacing: 0;
+  box-shadow: none;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.15s ease;
+}
+
+.btn-sm {
+  min-height: 2rem;
+  padding: 0.45rem 0.72rem;
+  font-size: 0.82rem;
+}
+
+.btn:hover,
+.btn:focus-visible {
+  border-color: var(--button-hover-border);
+  background: var(--button-hover-bg);
+  color: var(--button-color);
+  box-shadow: 0 6px 16px rgba(31, 41, 55, 0.08);
+}
+
+.btn:focus-visible {
+  outline: 3px solid rgba(37, 99, 235, 0.18);
+  outline-offset: 2px;
+}
+
+.btn:active {
+  transform: translateY(1px);
+  box-shadow: none;
+}
+
+.btn:disabled,
+.btn.disabled {
+  border-color: #e3e7ed;
+  background: #f4f6f8;
+  color: #9aa3af;
+  box-shadow: none;
+  opacity: 1;
+}
+
+.btn-primary {
+  --button-border: #243244;
+  --button-bg: #243244;
+  --button-color: #ffffff;
+  --button-hover-bg: #111827;
+  --button-hover-border: #111827;
+}
+
+.btn-secondary,
+.btn-outline-secondary {
+  --button-border: #d7dce3;
+  --button-bg: #ffffff;
+  --button-color: #27313f;
+  --button-hover-bg: #f3f5f8;
+  --button-hover-border: #b8c0cc;
+}
+
+.btn-danger,
+.btn-outline-danger {
+  --button-border: #f0b8b8;
+  --button-bg: #fff7f7;
+  --button-color: #b42318;
+  --button-hover-bg: #fee4e2;
+  --button-hover-border: #f28b82;
+}
+
+.btn-close {
+  border-radius: 8px;
+}
+
+.metric-icon {
+  display: inline-block;
+  flex: 0 0 auto;
+  width: 1rem;
+  height: 1rem;
+  background: currentColor;
+  mask: var(--metric-icon-url) center / contain no-repeat;
+  -webkit-mask: var(--metric-icon-url) center / contain no-repeat;
+}
+
+.metric-icon-distance {
+  --metric-icon-url: url('/metric-icons/distance.svg');
+}
+
+.metric-icon-time {
+  --metric-icon-url: url('/metric-icons/clock.svg');
+}
+
+.metric-icon-difficulty {
+  --metric-icon-url: url('/metric-icons/difficulty.svg');
+}
+
+.metric-icon-calendar {
+  --metric-icon-url: url('/metric-icons/calendar.svg');
+}
+
+.metric-icon-child {
+  --metric-icon-url: url('/metric-icons/child.svg');
+}
+
+.metric-icon-logs {
+  --metric-icon-url: url('/metric-icons/logs.svg');
+}
+
+.metric-icon-star {
+  --metric-icon-url: url('/metric-icons/star.svg');
+}
