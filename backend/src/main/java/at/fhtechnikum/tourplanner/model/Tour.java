@@ -74,7 +74,7 @@ public class Tour {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Double difficulty;
 
-    @Column(name = "owner_user_id")
+    @Column(name = "owner_user_id", nullable = false)
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long ownerUserId;
 

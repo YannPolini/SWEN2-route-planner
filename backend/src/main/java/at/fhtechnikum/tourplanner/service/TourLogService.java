@@ -5,6 +5,8 @@ import at.fhtechnikum.tourplanner.model.AppUser;
 import at.fhtechnikum.tourplanner.exception.ResourceNotFoundException;
 import at.fhtechnikum.tourplanner.repository.TourLogRepository;
 import at.fhtechnikum.tourplanner.repository.TourRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +19,8 @@ import java.util.Optional;
 @Service
 public class TourLogService {
 
+    private static final Logger log = LoggerFactory.getLogger(TourLogService.class);
+
     private final TourLogRepository repository;
     private final TourRepository tourRepository;
 
@@ -26,25 +30,31 @@ public class TourLogService {
     }
 
     public List<TourLog> getAllTourLogs() {
-        return repository.findAll();
+        List<TourLog> tourLogs = repository.findAll();
+        log.info("getAllTours: {} found", tourLogs.size());
+        return tourLogs;
     }
 
     public List<TourLog> getTourLogsForUser(AppUser owner) {
+        log.info("getTourLogUser: {} found", owner.getId());
         return repository.findByOwnerUserId(owner.getId());
     }
 
     public Optional<TourLog> getTourLogById(String id) {
+        log.info("getTourLogById: {} found", id);
         return repository.findById(id);
     }
 
     @Transactional
     public void createTourLog(TourLog tourLog) {
+        log.info("createTourLog: {} found", tourLog);
         requireExistingTour(tourLog.getTourID());
         repository.save(tourLog);
     }
 
     @Transactional
     public void createTourLog(TourLog tourLog, AppUser owner) {
+        log.info("createTourLog: {} found", tourLog);
         requireExistingTour(tourLog.getTourID(), owner);
         assignOwner(tourLog, owner);
         repository.save(tourLog);
@@ -52,6 +62,7 @@ public class TourLogService {
 
     @Transactional
     public boolean deleteTourLog(String id) {
+        log.info("deleteTourLog: {} found", id);
         if(!repository.existsById(id)) {
             return false;
         }
@@ -61,6 +72,7 @@ public class TourLogService {
 
     @Transactional
     public boolean deleteTourLog(String id, AppUser owner) {
+        log.info("deleteTourLog: {} found", id);
         Optional<TourLog> existing = repository.findById(id);
         if (existing.isEmpty()) {
             return false;
@@ -72,30 +84,33 @@ public class TourLogService {
     }
 
     @Transactional
-    public Optional<TourLog> updateTourLog(String logID, TourLog log) {
+    public Optional<TourLog> updateTourLog(String logID, TourLog tourLog) {
+        log.info("updateTourLog: {} found", logID);
         if (!repository.existsById(logID)) {
             throw new ResourceNotFoundException("Log not found: " + logID);
         }
 
-        requireExistingTour(log.getTourID());
-        TourLog saved = repository.save(log);
+        requireExistingTour(tourLog.getTourID());
+        TourLog saved = repository.save(tourLog);
         return Optional.of(saved);
     }
 
     @Transactional
-    public Optional<TourLog> updateTourLog(String logID, TourLog log, AppUser owner) {
+    public Optional<TourLog> updateTourLog(String logID, TourLog tourLog, AppUser owner) {
+        log.info("updateTourLog: {} found", logID);
         TourLog existing = repository.findById(logID)
                 .orElseThrow(() -> new ResourceNotFoundException("Log not found: " + logID));
 
         requireOwner(existing, owner);
-        requireExistingTour(log.getTourID(), owner);
-        log.setLogID(logID);
-        assignOwner(log, owner);
+        requireExistingTour(tourLog.getTourID(), owner);
+        tourLog.setLogID(logID);
+        assignOwner(tourLog, owner);
 
-        return Optional.of(repository.save(log));
+        return Optional.of(repository.save(tourLog));
     }
 
     private void requireExistingTour(String tourID) {
+        log.info("checking if tour exists: {}", tourID);
         if (tourID == null || tourID.isBlank()) {
             throw new IllegalArgumentException("tourID is required");
         }
@@ -105,6 +120,7 @@ public class TourLogService {
     }
 
     private void requireExistingTour(String tourID, AppUser owner) {
+        log.info("checking if tour exists: {} with owner", tourID);
         if (tourID == null || tourID.isBlank()) {
             throw new IllegalArgumentException("tourID is required");
         }
@@ -113,13 +129,15 @@ public class TourLogService {
         }
     }
 
-    private void assignOwner(TourLog log, AppUser owner) {
-        log.setOwnerUserId(owner.getId());
-        log.setCreatorName(owner.getName());
+    private void assignOwner(TourLog tourLog, AppUser owner) {
+        log.info("checking if tour exists: {}", tourLog.getTourID());
+        tourLog.setOwnerUserId(owner.getId());
+        tourLog.setCreatorName(owner.getName());
     }
 
-    private void requireOwner(TourLog log, AppUser owner) {
-        if (!Objects.equals(log.getOwnerUserId(), owner.getId())) {
+    private void requireOwner(TourLog tourLog, AppUser owner) {
+        log.info("checking if tour exists: {}", tourLog.getTourID());
+        if (!Objects.equals(tourLog.getOwnerUserId(), owner.getId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Log belongs to another user.");
         }
     }
