@@ -7,6 +7,14 @@
       </div>
       <div class="page-actions">
         <import-export></import-export>
+        <button
+          class="btn btn-outline-danger btn-sm"
+          type="button"
+          (click)="confirmDeleteAll()"
+          [disabled]="tourCount() === 0 || deleteAllLoading()"
+        >
+          Delete all tours
+        </button>
         <button class="btn btn-primary btn-sm" type="button" (click)="openCreateForm()">
           New Tour
         </button>
@@ -403,6 +411,46 @@
             Cancel
           </button>
           <button class="btn btn-danger btn-sm" type="button" (click)="executeDelete()">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+@if (deleteAllOpen()) {
+  <div class="modal-backdrop fade show"></div>
+  <div class="modal fade show d-block" tabindex="-1" (click)="cancelDeleteAll()">
+    <div class="modal-dialog modal-sm" (click)="$event.stopPropagation()">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Delete All Tours</h5>
+          <button type="button" class="btn-close" (click)="cancelDeleteAll()" [disabled]="deleteAllLoading()"></button>
+        </div>
+        <div class="modal-body">
+          <p>
+            Delete all <strong>{{ tourCount() }}</strong> tours and their logs?
+          </p>
+          @if (deleteAllError()) {
+            <p class="empty-error">{{ deleteAllError() }}</p>
+          }
+        </div>
+        <div class="modal-footer">
+          <button
+            class="btn btn-outline-secondary btn-sm"
+            type="button"
+            (click)="cancelDeleteAll()"
+            [disabled]="deleteAllLoading()"
+          >
+            Cancel
+          </button>
+          <button
+            class="btn btn-danger btn-sm"
+            type="button"
+            (click)="executeDeleteAll()"
+            [disabled]="deleteAllLoading()"
+          >
+            {{ deleteAllLoading() ? 'Deleting...' : 'Delete all' }}
+          </button>
         </div>
       </div>
     </div>

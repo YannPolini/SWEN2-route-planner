@@ -43,6 +43,13 @@ export class TourApiService {
     });
   }
 
+  deleteAll() {
+    return this.http.delete(this.apiUrl, {
+      headers: this.authService.authHeaders(),
+      responseType: 'text',
+    });
+  }
+
   getWeather(id: string) {
     return this.http.get<WeatherForecast>(`${this.apiUrl}/${id}/weather`, {
       headers: this.authService.authHeaders(),

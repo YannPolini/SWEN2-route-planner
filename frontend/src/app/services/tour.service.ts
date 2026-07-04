@@ -90,6 +90,15 @@ export class TourService {
     });
   }
 
+  deleteAllTours() {
+    return this.api.deleteAll().pipe(
+      tap(() => {
+        this._selectedTourId.set(null);
+        this._tours.set([]);
+      }),
+    );
+  }
+
   selectTour(id: string | null): void {
     this._selectedTourId.set(id);
   }

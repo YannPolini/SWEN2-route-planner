@@ -88,6 +88,15 @@ public class TourController {
         return ResponseEntity.ok("update tour");
     }
 
+    @DeleteMapping("")
+    public ResponseEntity<String> deleteAll(
+            @RequestHeader(value = "Authorization", required = false) String authorizationHeader
+    ) {
+        AppUser owner = authService.requireUser(authorizationHeader);
+        int deletedCount = service.deleteToursForUser(owner);
+        return ResponseEntity.ok("deleted " + deletedCount + " tours");
+    }
+
     @DeleteMapping("/{tourId}")
     public ResponseEntity<String> delete(
             @RequestHeader(value = "Authorization", required = false) String authorizationHeader,

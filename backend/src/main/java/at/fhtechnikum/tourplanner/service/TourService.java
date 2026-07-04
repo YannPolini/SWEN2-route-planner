@@ -110,6 +110,17 @@ public class TourService {
     }
 
     @Transactional
+    public int deleteToursForUser(AppUser owner) {
+        log.info("deleteToursForUser: user {}", owner.getId());
+        List<Tour> tours = repository.findByOwnerUserId(owner.getId());
+
+        tours.forEach(tour -> tourLogRepository.deleteByTourID(tour.getId()));
+        repository.deleteAll(tours);
+
+        return tours.size();
+    }
+
+    @Transactional
     public Optional<Tour> updateTour(String tourId, Tour tour) {
         log.info("updateTour: {}", tourId);
         if (!repository.existsById(tourId)) {

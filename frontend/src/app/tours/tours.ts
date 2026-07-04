@@ -46,6 +46,9 @@ export class ToursComponent {
   protected readonly showForm = signal(false);
   protected readonly editingTour = signal<Tour | null>(null);
   protected readonly deleteTarget = signal<Tour | null>(null);
+  protected readonly deleteAllOpen = signal(false);
+  protected readonly deleteAllLoading = signal(false);
+  protected readonly deleteAllError = signal('');
   protected readonly formSubmitted = signal(false);
   protected readonly weatherForecast = signal<WeatherForecast | null>(null);
   protected readonly weatherLoading = signal(false);
@@ -226,6 +229,41 @@ export class ToursComponent {
     if (wasOpen) {
       this.router.navigate(['/tours']);
     }
+  }
+
+  protected confirmDeleteAll(): void {
+    if (this.tourCount() === 0) return;
+
+    this.deleteAllError.set('');
+    this.deleteAllOpen.set(true);
+  }
+
+  protected cancelDeleteAll(): void {
+    if (this.deleteAllLoading()) return;
+
+    this.deleteAllOpen.set(false);
+    this.deleteAllError.set('');
+  }
+
+  protected executeDeleteAll(): void {
+    if (this.deleteAllLoading()) return;
+
+    this.deleteAllLoading.set(true);
+    this.deleteAllError.set('');
+
+    this.tourService.deleteAllTours().subscribe({
+      next: () => {
+        this.tourlogsModel.loadLogs();
+        this.deleteAllLoading.set(false);
+        this.deleteAllOpen.set(false);
+        this.router.navigate(['/tours']);
+      },
+      error: (err) => {
+        console.error('Delete all tours failed:', err);
+        this.deleteAllError.set('Could not delete all tours. Please try again.');
+        this.deleteAllLoading.set(false);
+      },
+    });
   }
 
   protected formatDuration(seconds: number): string {
