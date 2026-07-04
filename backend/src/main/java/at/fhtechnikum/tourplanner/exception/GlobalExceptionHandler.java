@@ -5,11 +5,29 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ErrorResponseDto> handleResponseStatusException(
+            ResponseStatusException exception
+    ) {
+        HttpStatus status = HttpStatus.valueOf(exception.getStatusCode().value());
+        ErrorResponseDto response = new ErrorResponseDto(
+                LocalDateTime.now(),
+                status.value(),
+                status.getReasonPhrase(),
+                exception.getReason()
+        );
+
+        return ResponseEntity
+                .status(status)
+                .body(response);
+    }
 
     //Für nicht gefundene Ressourcen (z.B. Tour-ID existiert nicht).
     @ExceptionHandler(ResourceNotFoundException.class)

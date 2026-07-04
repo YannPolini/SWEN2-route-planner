@@ -1,81 +1,541 @@
-.tour-list {
-  max-height: 60vh;
-  overflow-y: auto;
+:host {
+  display: block;
 }
 
-.tour-item {
-  cursor: pointer;
-  border: 1px solid transparent;
-  transition: background-color 0.15s ease, border-color 0.15s ease;
+.tours-page,
+.tour-detail-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  width: 100%;
+  max-width: 980px;
+  margin: 0 auto;
 }
 
-.tour-item:hover {
-  background-color: #f8f9fa;
+.page-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
 }
 
-.tour-item.active {
-  background-color: #e8f0fe;
-  border-color: #4285f4;
-  border-left: 3px solid #4285f4;
+.detail-header {
+  display: grid;
+  gap: 0.75rem;
 }
 
-.tour-item-name {
-  white-space: nowrap;
+.detail-topbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.page-heading h1,
+.detail-title h1 {
+  margin: 0;
+  color: #1f2933;
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.section-kicker {
+  margin: 0 0 0.25rem;
+  color: #6b7280;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.page-actions,
+.detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.summary-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
   overflow: hidden;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #e5e7eb;
+}
+
+.metric {
+  min-width: 0;
+  padding: 1rem;
+  background: #fff;
+}
+
+.metric span,
+.detail-facts span,
+.panel-heading span,
+.weather-day span {
+  display: block;
+  color: #6b7280;
+  font-size: 0.82rem;
+}
+
+.metric strong {
+  display: block;
+  margin-top: 0.25rem;
+  color: #111827;
+  font-size: 1.35rem;
+  line-height: 1.2;
+}
+
+.tour-toolbar {
+  display: grid;
+  grid-template-columns: minmax(220px, 360px) 1fr;
+  gap: 1rem;
+  align-items: center;
+}
+
+.filter-group {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.filter-chip {
+  border: 1px solid #d1d5db;
+  border-radius: 999px;
+  padding: 0.35rem 0.75rem;
+  background: #fff;
+  color: #374151;
+  font-size: 0.88rem;
+  line-height: 1.2;
+}
+
+.filter-chip.active {
+  border-color: #1f2937;
+  background: #1f2937;
+  color: #fff;
+}
+
+.filter-chip span {
+  margin-left: 0.25rem;
+  color: inherit;
+  opacity: 0.75;
+}
+
+.category-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  width: auto;
+  height: 2.1rem;
+  padding: 0 0.72rem;
+}
+
+.tour-list {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.tour-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: center;
+  min-height: 106px;
+  padding: 1.1rem 1.15rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fff;
+  color: inherit;
+  text-align: left;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.tour-card:hover,
+.tour-card:focus-visible {
+  border-color: #9ca3af;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+  transform: translateY(-1px);
+}
+
+.tour-row-main {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.8rem;
+  align-items: center;
+  min-width: 0;
+}
+
+.tour-name {
+  display: block;
+  color: #111827;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.tour-route {
+  display: block;
+  overflow: hidden;
+  color: #4b5563;
+  font-size: 0.9rem;
+  line-height: 1.35;
   text-overflow: ellipsis;
-  max-width: 200px;
-  display: inline-block;
+  white-space: nowrap;
 }
 
-.map-placeholder {
-  height: 280px;
+.tour-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.45rem;
+  min-width: 300px;
 }
 
-.weather-panel {
-  border-top: 1px solid #e9ecef;
-  padding-top: 1rem;
+.meta-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border-radius: 999px;
+  padding: 0.25rem 0.55rem;
+  background: #f3f4f6;
+  color: #374151;
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
 }
 
-.weather-days {
+.tour-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  width: auto;
+  height: 2.15rem;
+  border-radius: 999px;
+  padding: 0 0.7rem;
+  color: #111827;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.tour-type-bike {
+  background: #dbeafe;
+}
+
+.tour-type-hike {
+  background: #dcfce7;
+}
+
+.tour-type-running {
+  background: #fef3c7;
+}
+
+.tour-type-vehicle {
+  background: #cffafe;
+}
+
+.tour-type-default {
+  background: #e5e7eb;
+}
+
+.detail-title {
+  flex: 1;
+  min-width: 0;
+}
+
+.detail-title-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.detail-title p {
+  margin: 0.35rem 0 0;
+  color: #4b5563;
+}
+
+.detail-stack,
+.logs-section,
+.empty-state {
+  min-width: 0;
+}
+
+.detail-stack {
+  display: grid;
+  gap: 1rem;
+}
+
+.detail-panel,
+.weather-card,
+.logs-section,
+.empty-state {
+  min-width: 0;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.detail-panel,
+.weather-card,
+.logs-section {
+  padding: 1rem;
+}
+
+.detail-panel h2,
+.weather-card h2 {
+  margin: 0 0 0.75rem;
+  color: #1f2933;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.detail-panel p {
+  margin: 0 0 1rem;
+  color: #4b5563;
+}
+
+.detail-facts {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.75rem;
 }
 
-.weather-day {
-  border: 1px solid #dee2e6;
-  border-radius: 0.5rem;
-  padding: 0.75rem;
-  min-width: 0;
-  background: #fff;
-}
-
-.weather-main {
-  display: flex;
+.detail-facts div {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
-  gap: 0.5rem;
-  min-height: 3.5rem;
+  gap: 0.65rem;
+  min-width: 0;
+  border: 1px solid #eef0f3;
+  border-radius: 8px;
+  padding: 0.75rem;
 }
 
-.weather-icon {
-  width: 3rem;
-  height: 3rem;
-  flex: 0 0 auto;
+.fact-icon {
+  width: 1.35rem;
+  height: 1.35rem;
+  color: #2563eb;
+}
+
+.fact-copy {
+  min-width: 0;
+}
+
+.detail-facts .fact-copy > span {
+  display: block;
+  color: #6b7280;
+  font-size: 0.82rem;
+}
+
+.detail-facts strong {
+  display: block;
+  margin-top: 0.2rem;
+  color: #111827;
+  font-size: 1rem;
+}
+
+.panel-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: baseline;
+}
+
+.weather-list {
+  display: flex;
+  gap: 0.75rem;
+  max-width: 100%;
+  overflow-x: auto;
+  padding-bottom: 0.15rem;
+  scrollbar-width: thin;
+}
+
+.weather-day {
+  display: flex;
+  flex: 0 0 calc((100% - 1.5rem) / 3);
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: center;
+  min-width: 0;
+  border: 1px solid #eef0f3;
+  border-radius: 8px;
+  padding: 0.75rem;
+}
+
+.weather-day span {
+  text-transform: capitalize;
 }
 
 .weather-temp {
-  font-size: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: #111827;
+}
+
+.weather-temp img {
+  width: 2.25rem;
+  height: 2.25rem;
+}
+
+.muted-text {
+  margin: 0;
+  color: #6b7280;
+}
+
+.empty-state {
+  grid-column: 1 / -1;
+  padding: 3rem 1rem;
+  text-align: center;
+}
+
+.empty-state h1,
+.empty-state h2 {
+  margin: 0 0 0.5rem;
+  color: #1f2933;
+  font-size: 1.4rem;
+}
+
+.empty-state p {
+  margin: 0;
+  color: #6b7280;
+}
+
+.empty-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6rem;
+  margin-top: 1rem;
+}
+
+.empty-error {
+  margin-top: 0.75rem;
+  color: #b42318;
+  font-size: 0.9rem;
+}
+
+.detail-empty {
+  margin: 2rem auto;
+  max-width: 420px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+.transport-type-picker {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.transport-type-option {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.45rem;
+  min-height: 2.35rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 0.45rem 0.65rem;
+  background: #fff;
+  color: #374151;
+  font-size: 0.9rem;
   font-weight: 600;
   line-height: 1.2;
 }
 
-.weather-description {
-  text-transform: capitalize;
-  word-break: break-word;
+.transport-type-option:hover,
+.transport-type-option:focus-visible {
+  border-color: #9ca3af;
+  background: #f9fafb;
+}
+
+.transport-type-option.selected {
+  border-color: #1f2937;
+  background: #1f2937;
+  color: #fff;
+}
+
+.transport-type-option:focus-visible {
+  outline: 2px solid #93c5fd;
+  outline-offset: 2px;
+}
+
+@media (max-width: 991.98px) {
+  .summary-strip,
+  .tour-list {
+    grid-template-columns: 1fr;
+  }
+
+  .tour-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .filter-group {
+    justify-content: flex-start;
+  }
+
+  .detail-facts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .weather-list {
+    max-width: 100%;
+  }
+
+  .weather-day {
+    flex-basis: min(280px, 84%);
+  }
 }
 
 @media (max-width: 575.98px) {
-  .weather-days {
+  .page-heading,
+  .detail-topbar {
+    flex-direction: column;
+  }
+
+  .page-actions,
+  .detail-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .detail-facts {
+    grid-template-columns: 1fr;
+  }
+
+  .tour-card,
+  .tour-row-main {
+    grid-template-columns: 1fr;
+  }
+
+  .tour-card-meta {
+    justify-content: flex-start;
+    min-width: 0;
+  }
+
+  .tour-route {
+    white-space: normal;
+  }
+
+  .empty-actions {
+    justify-content: flex-start;
+  }
+
+  .transport-type-picker {
     grid-template-columns: 1fr;
   }
 }

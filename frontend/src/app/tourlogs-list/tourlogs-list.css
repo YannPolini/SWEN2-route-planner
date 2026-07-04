@@ -1,0 +1,75 @@
+:host {
+  display: block;
+}
+
+.log-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: center;
+  min-height: 96px;
+  padding: 1.05rem 1rem;
+}
+
+.log-date {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.75rem;
+  color: #111827;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.log-date-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.log-main p {
+  margin: 0.35rem 0 0;
+  color: #4b5563;
+  line-height: 1.35;
+}
+
+.log-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.35rem;
+  min-width: 220px;
+}
+
+.log-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border-radius: 999px;
+  padding: 0.22rem 0.5rem;
+  background: #f3f4f6;
+  color: #374151;
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.log-date .metric-icon {
+  color: #2563eb;
+}
+
+.log-pill .metric-icon {
+  color: inherit;
+}
+
+@media (max-width: 767.98px) {
+  .log-card {
+    grid-template-columns: 1fr;
+  }
+
+  .log-meta {
+    justify-content: flex-start;
+    min-width: 0;
+  }
+}

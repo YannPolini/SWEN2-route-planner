@@ -7,17 +7,18 @@ export interface Tour {
   from: string;
   to: string;
   transportType: TransportType;
-  // Exact coordinates of the picked autocomplete suggestions. Null when the
-  // user typed a free-text address — the backend then geocodes it as fallback.
   fromLat: number | null;
   fromLng: number | null;
   toLat: number | null;
   toLng: number | null;
   distance: number;
-  estimatedTime: number;      // seconds — formatDuration() converts to h/min display
+  estimatedTime: number;
   childFriendliness: number;
+  difficulty?: number | null;
+  ownerUserId?: number | null;
+  creatorName?: string | null;
   routeImagePath: string;
-  routeGeometry: string | null; // [[lat,lng],...] as JSON — null if ORS failed
+  routeGeometry: string | null;
   createdAt: Date;
 }
 

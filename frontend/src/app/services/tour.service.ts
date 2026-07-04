@@ -1,21 +1,18 @@
-import { Injectable, signal, computed, inject } from '@angular/core';
+import { computed, effect, inject, Injectable, signal } from '@angular/core';
+import { tap } from 'rxjs';
+import { AuthService } from '../auth/auth.service';
 import { Tour, TransportType } from '../models/tour.model';
 import { TourApiService } from '../models/tour.model.api';
 
-// ═══════════════════════════════════════════════════════
-// MODEL (Service) — domain data + business logic ONLY
-// No UI state, no form logic, no modal state here.
-// ═══════════════════════════════════════════════════════
 @Injectable({ providedIn: 'root' })
 export class TourService {
-  // ── Domain state (Single Source of Truth) ──
   private readonly _tours = signal<Tour[]>([]);
-
   private readonly _selectedTourId = signal<string | null>(null);
 
-  // ── Public readonly access ──
-  readonly tours = this._tours.asReadonly();
+  protected readonly api = inject(TourApiService);
+  private readonly authService = inject(AuthService);
 
+  readonly tours = this._tours.asReadonly();
   readonly selectedTourId = this._selectedTourId.asReadonly();
 
   readonly selectedTour = computed(() => {
@@ -23,7 +20,6 @@ export class TourService {
     return id ? (this._tours().find((t) => t.id === id) ?? null) : null;
   });
 
-  // ── Derived domain data ──
   readonly tourCount = computed(() => this._tours().length);
 
   readonly stats = computed(() => {
@@ -40,7 +36,20 @@ export class TourService {
     return { count, totalDistance, totalTime, avgDistance, avgTime, byType };
   });
 
-  // ── CRUD operations (business logic) ──
+  constructor() {
+    effect(() => {
+      const user = this.authService.currentUser();
+      this._selectedTourId.set(null);
+
+      if (!user) {
+        this._tours.set([]);
+        return;
+      }
+
+      this.loadTours(user.id);
+    });
+  }
+
   addTour(data: Omit<Tour, 'id' | 'createdAt'>): Tour {
     const newTour: Tour = {
       ...data,
@@ -49,13 +58,13 @@ export class TourService {
     };
     this.api.create(newTour).subscribe({
       next: () => this.loadTours(),
-      error: err => console.error('API Fehler beim Create:', err),
+      error: (err) => console.error('API Fehler beim Create:', err),
     });
     return newTour;
   }
 
   updateTour(id: string, changes: Partial<Tour>): void {
-    const existingTour = this._tours().find(tour => tour.id === id);
+    const existingTour = this._tours().find((tour) => tour.id === id);
     if (!existingTour) {
       console.error('Tour not found:', id);
       return;
@@ -63,10 +72,9 @@ export class TourService {
 
     const updatedTour: Tour = { ...existingTour, ...changes };
 
-    // Reload from backend on success so derived state stays in sync.
     this.api.update(updatedTour).subscribe({
       next: () => this.loadTours(),
-      error: err => console.error('API Fehler beim Update:', err),
+      error: (err) => console.error('API Fehler beim Update:', err),
     });
   }
 
@@ -78,8 +86,17 @@ export class TourService {
           this._selectedTourId.set(null);
         }
       },
-      error: err => console.error('API Fehler beim Delete:', err),
+      error: (err) => console.error('API Fehler beim Delete:', err),
     });
+  }
+
+  deleteAllTours() {
+    return this.api.deleteAll().pipe(
+      tap(() => {
+        this._selectedTourId.set(null);
+        this._tours.set([]);
+      }),
+    );
   }
 
   selectTour(id: string | null): void {
@@ -94,16 +111,25 @@ export class TourService {
     return this.api.getWeather(id);
   }
 
-  constructor() {
-    this.loadTours();
+  loadTours(expectedUserId = this.authService.currentUser()?.id): void {
+    if (expectedUserId == null) {
+      this._tours.set([]);
+      return;
+    }
+
+    this.api.getAll().subscribe({
+      next: (tours) => {
+        if (this.authService.currentUser()?.id !== expectedUserId) {
+          return;
+        }
+
+        this._tours.set(tours);
+      },
+      error: (err) => console.error('API Fehler:', err),
+    });
   }
 
-  protected readonly api = inject(TourApiService);
-
-  loadTours(): void {
-    this.api.getAll().subscribe({
-      next: tours => this._tours.set(tours),
-      error: err => console.error('API Fehler:', err),
-    });
+  seedDemoData() {
+    return this.api.seedDemoData().pipe(tap(() => this.loadTours()));
   }
 }

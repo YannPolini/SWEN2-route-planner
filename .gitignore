@@ -1,6 +1,15 @@
 .idea/
-backend/src/main/resources/application.properties
 .tools/
 
-# Secrets — never commit. Share via WhatsApp/secure channel, use .env.example as template.
+# Secrets - never commit. Share via a secure channel; use examples/templates instead.
 backend/.env
+
+# Dependencies and build output
+node_modules/
+.angular/
+dist/
+target/
+backend/.mvn/wrapper/dists/
+
+# Local logs
+*.log

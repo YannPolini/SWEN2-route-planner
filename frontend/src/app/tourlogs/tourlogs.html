@@ -1,271 +1,160 @@
-<section class="row g-4 align-items-start">
-  <!--  
-  <div class="col-12 col-lg-5">
-    <div class="card shadow-sm">
-      <div class="card-body">
-        <h1 class="h3 mb-3">Tour Logs</h1>
-        <p class="text-secondary mb-4">
-          Basic protected page with local demo data for the intermediate hand-in.
-        </p>
-        <button type="button" class="btn btn-primary" (click)="openAdd()"  [disabled]="!canAddLog()">Add log</button>
-        @if (!canAddLog()) {
-          <div class="alert alert-warning mt-2 mb-0">Bitte zuerst eine Tour auswählen.</div>
-}
-      </div>
+<section class="tourlogs-panel">
+  <div class="tourlogs-header">
+    <div>
+      <h2>Tour logs</h2>
+      <p class="entries-summary">
+        <span class="metric-icon metric-icon-logs" aria-hidden="true"></span>
+        <span>{{ filteredLogs().length }} entries for this tour</span>
+      </p>
     </div>
-  </div>
--->
-
-  <div class="col-12">
-    <h1 class="h3 mb-3">Tour Logs</h1>
-    <button type="button" class="btn btn-primary" (click)="openAdd()" [disabled]="!canAddLog()">
-      Add log
-    </button>
-    <span class="badge text-bg-light">{{ logList().length }} total entries</span>
-    <span class="badge text-bg-light">{{ filteredLogs().length }} total entries on this tour</span>
-    @if (selectedLog(); as log) {
-      <button type="button" class="btn btn-outline-primary me-3" (click)="openEdit(log)">Bearbeiten</button>
-      <button type="button" class="btn btn-outline-danger" (click)="deleteLog()">Delete</button>
-    }
-
-    <div class="mt-3">
-      <app-search-bar
-        placeholder="Search tour logs..."
-        [value]="searchTerm()"
-        (valueChange)="updateSearch($event)"
-      />
-    </div>
-
-    <div class="list d-flex flex-column gap-2 mt-3">
-      @for (log of filteredLogs(); track log.logID) {
-        <div
-          class="log-row"
-          [class.selected]="selectedLog()?.logID === log.logID"
-          (click)="selectLog(log)"
-        >
-          <app-tourlogs-list [log]="log"></app-tourlogs-list>
-        </div>
-      } @empty {
-        <div class="alert alert-light border mb-0">No logs available yet.</div>
-      }
-    </div>
-
-    <!--
-    @if (selectedLog(); as log) {
-      <div class="d-flex gap-2 mt-3">
-        <button type="button" class="btn btn-outline-primary" (click)="openEdit(log)">
-          Bearbeiten
+    <div class="tourlogs-actions">
+      @if (selectedLog(); as log) {
+        <button type="button" class="btn btn-outline-secondary btn-sm" (click)="openEdit(log)">
+          Edit
         </button>
-
-        <button type="button" class="btn btn-outline-danger" (click)="deleteLog()">Delete</button>
-      </div>
-    }
-    -->
+        <button type="button" class="btn btn-outline-danger btn-sm" (click)="deleteLog()">
+          Delete
+        </button>
+      }
+      <button type="button" class="btn btn-primary btn-sm" (click)="openAdd()" [disabled]="!canAddLog()">
+        Add Log
+      </button>
+    </div>
   </div>
 
-      <div class="mt-3">
-  <p>{{ logList().length }} Logs geladen</p>
+  <div class="tourlogs-search">
+    <app-search-bar
+      placeholder="Search logs"
+      [value]="searchTerm()"
+      (valueChange)="updateSearch($event)"
+    />
+  </div>
 
-  @for (log of logList(); track log.logID) {
-    <div class="card mb-2">
-      <div class="card-body">
-        <h5 class="card-title">Log #{{ log.logID }}</h5>
-
-        <p><strong>Datum:</strong> {{ log.date }}</p>
-        <p><strong>Zeit:</strong> {{ log.time }}</p>
-        <p><strong>Kommentar:</strong> {{ log.comment }}</p>
-        <p><strong>Schwierigkeit:</strong> {{ log.difficulty }}</p>
-        <p><strong>Distanz:</strong> {{ log.totalDistance }} km</p>
-        <p><strong>Zeit gesamt:</strong> {{ log.totalTime }} min</p>
-        <p><strong>Bewertung:</strong> {{ log.rating }}</p>
-        <p><strong>Tour-ID:</strong> {{ log.tourID }}</p>
-        <p><strong>Creator:</strong> {{ log.creatorName }}</p>
-      </div>
-    </div>
-  } @empty {
-    <div class="alert alert-warning">
-      Keine Logs vorhanden.
-    </div>
-  }
-</div>
-
-</section>
-<!--
-      <div class="card shadow-sm mt-4">
-        <div class="card-body">
-          <h2 class="h5 mb-3">Tourlog Details</h2>
-
-          <div class="row g-3">
-            <div class="col-12 col-md-6">
-              <strong>Datum:</strong>
-              <div>{{ log.date }}</div>
-            </div>
-
-            <div class="col-12 col-md-6">
-              <strong>Zeit:</strong>
-              <div>{{ log.time }}</div>
-            </div>
-
-            <div class="col-12">
-              <strong>Kommentar:</strong>
-              <div>{{ log.comment }}</div>
-            </div>
-
-            <div class="col-6 col-md-4">
-              <strong>Schwierigkeit:</strong>
-              <div>{{ log.difficulty }}</div>
-            </div>
-
-            <div class="col-6 col-md-4">
-              <strong>Gesamtdistanz:</strong>
-              <div>{{ log.totalDistance }} km</div>
-            </div>
-
-            <div class="col-6 col-md-4">
-              <strong>Gesamtzeit:</strong>
-              <div>{{ log.totalTime }} minute(n)</div>
-            </div>
-
-            <div class="col-6 col-md-4">
-              <strong>Bewertung:</strong>
-              <div>{{ log.rating }}</div>
-            </div>
-
-            <div class="col-6 col-md-4">
-              <strong>Tour-ID:</strong>
-              <div>{{ log.tourID }}</div>
-            </div>
-
-            <div class="col-6 col-md-4">
-              <strong>Log-ID:</strong>
-              <div>{{ log.logID }}</div>
-            </div>
-            
-             <div class="col-6 col-md-4">
-              <strong>Creator:</strong>
-              <div>{{ log.creatorName }}</div>
-            </div>
-
-          </div>
-        </div>
-      </div>
-    } @else {
-      <div class="alert alert-secondary mt-3 mb-0">Bitte ein Tourlog auswählen.</div>
+  <div class="logs-list">
+    @for (log of filteredLogs(); track log.logID) {
+      <button
+        type="button"
+        class="log-row"
+        [class.selected]="selectedLog()?.logID === log.logID"
+        (click)="selectLog(log)"
+      >
+        <app-tourlogs-list [log]="log"></app-tourlogs-list>
+      </button>
+    } @empty {
+      <div class="logs-empty">No logs available yet.</div>
     }
+  </div>
 </section>
 
-<!--Popup-->
 @if (showFormPopup()) {
   <div class="popup-backdrop">
     <div class="popup card shadow">
       <div class="popup-header">
-        <h2 class="h4 mb-0">
+        <h2>
           @if (editingLog()) {
-            Tourlog bearbeiten
+            Edit tour log
           } @else {
-            Neues Tourlog anlegen
+            Add tour log
           }
         </h2>
       </div>
 
       <div class="popup-content">
         <form [formGroup]="logForm">
-          <div class="mb-3">
-            <label for="edit-date" class="form-label">Datum (Frühestens heute)</label>
-            <input id="edit-date" class="form-control" type="date" formControlName="date" [max]="today"/>
-            @if (formSubmitted() && logForm.controls.date.hasError('required')) {
-              <div class="invalid-feedback d-block">Datum eingeben</div>
-            }
-            @if (formSubmitted() && logForm.controls.date.hasError('maxDate')) {
-              <div class="invalid-feedback d-block">Datum darf nicht in der Zukunft liegen</div>
-            }
-            @if (formSubmitted() && logForm.controls.date.hasError('minDate')) {
-              <div class="invalid-feedback d-block">Datum ist zu weit in der Vergangenheit</div>
-            }
-          </div>
+          <div class="row g-3">
+            <div class="col-12 col-md-6">
+              <label for="edit-date" class="form-label">Date</label>
+              <input id="edit-date" class="form-control" type="date" formControlName="date" [max]="today" />
+              @if (formSubmitted() && logForm.controls.date.hasError('required')) {
+                <div class="invalid-feedback d-block">Date is required.</div>
+              }
+              @if (formSubmitted() && logForm.controls.date.hasError('maxDate')) {
+                <div class="invalid-feedback d-block">Date cannot be in the future.</div>
+              }
+              @if (formSubmitted() && logForm.controls.date.hasError('minDate')) {
+                <div class="invalid-feedback d-block">Date is too far in the past.</div>
+              }
+            </div>
 
-          <div class="mb-3">
-            <label for="edit-time" class="form-label">Zeit</label>
-            <input id="edit-time" class="form-control" type="time" formControlName="time" />
-            @if (formSubmitted() && logForm.controls.time.invalid) {
-              <div class="invalid-feedback d-block">Zeit eingeben</div>
-            }
-          </div>
+            <div class="col-12 col-md-6">
+              <label for="edit-time" class="form-label">Start time</label>
+              <input id="edit-time" class="form-control" type="time" formControlName="time" />
+              @if (formSubmitted() && logForm.controls.time.invalid) {
+                <div class="invalid-feedback d-block">Start time is required.</div>
+              }
+            </div>
 
-          <div class="mb-3">
-            <label for="edit-comment" class="form-label">Kommentar</label>
-            <textarea
-              id="edit-comment"
-              class="form-control"
-              rows="3"
-              formControlName="comment"
-            ></textarea>
-            @if (formSubmitted() && logForm.controls.comment.invalid) {
-              <div class="invalid-feedback d-block">Kommentar eingeben</div>
-            }
-          </div>
+            <div class="col-12">
+              <label for="edit-comment" class="form-label">Comment</label>
+              <textarea
+                id="edit-comment"
+                class="form-control"
+                rows="3"
+                formControlName="comment"
+              ></textarea>
+              @if (formSubmitted() && logForm.controls.comment.invalid) {
+                <div class="invalid-feedback d-block">Comment is required.</div>
+              }
+            </div>
 
-          <div class="mb-3">
-            <label for="edit-difficulty" class="form-label">Schwierigkeit (0...leichteste Stufe, 5...schwerste Stufe)</label>
-            <input
-              id="edit-difficulty"
-              class="form-control"
-              type="number"
-              min="0"
-              max="5"
-              formControlName="difficulty"
-            />
-            @if (formSubmitted() && logForm.controls.difficulty.invalid) {
-              <div class="invalid-feedback d-block">
-                Schwierigkeitsgrad eingeben (1...leichteste Stufe, 5...schwerste Stufe), nur Nummern
-              </div>
-            }
-          </div>
+            <div class="col-12 col-md-4">
+              <label for="edit-difficulty" class="form-label">Difficulty</label>
+              <input
+                id="edit-difficulty"
+                class="form-control"
+                type="number"
+                min="0"
+                max="5"
+                formControlName="difficulty"
+              />
+              @if (formSubmitted() && logForm.controls.difficulty.invalid) {
+                <div class="invalid-feedback d-block">Use a value from 0 to 5.</div>
+              }
+            </div>
 
-          <div class="mb-3">
-            <label for="edit-totalDistance" class="form-label">Gesamtdistanz</label>
-            <input
-              id="edit-totalDistance"
-              class="form-control"
-              type="number"
-              min="0.1"
-              step="0.1"
-              formControlName="totalDistance"
-            />
-            @if (formSubmitted() && logForm.controls.totalDistance.invalid) {
-              <div class="invalid-feedback d-block">Gesamtdistanz eingeben (>0), nur Nummern</div>
-            }
-          </div>
+            <div class="col-12 col-md-4">
+              <label for="edit-totalDistance" class="form-label">Distance</label>
+              <input
+                id="edit-totalDistance"
+                class="form-control"
+                type="number"
+                min="0"
+                step="0.1"
+                formControlName="totalDistance"
+              />
+              @if (formSubmitted() && logForm.controls.totalDistance.invalid) {
+                <div class="invalid-feedback d-block">Distance must be 0 or higher.</div>
+              }
+            </div>
 
-          <div class="mb-3">
-            <label for="edit-totalTime" class="form-label">Gesamtzeit</label>
-            <input
-              id="edit-totalTime"
-              class="form-control"
-              type="number"
-              min="1"
-              formControlName="totalTime"
-            />
-            @if (formSubmitted() && logForm.controls.totalTime.invalid) {
-              <div class="invalid-feedback d-block">Gesamtzeit eingeben (>0), nur Nummern</div>
-            }
-          </div>
+            <div class="col-12 col-md-4">
+              <label for="edit-totalTime" class="form-label">Duration</label>
+              <input
+                id="edit-totalTime"
+                class="form-control"
+                type="number"
+                min="0"
+                formControlName="totalTime"
+              />
+              @if (formSubmitted() && logForm.controls.totalTime.invalid) {
+                <div class="invalid-feedback d-block">Duration must be 0 or higher.</div>
+              }
+            </div>
 
-          <div class="mb-3">
-            <label for="edit-rating" class="form-label">Bewertung (0 Sterne bis 5 Sterne)</label>
-            <input
-              id="edit-rating"
-              class="form-control"
-              type="number"
-              min="0"
-              max="5"
-              formControlName="rating"
-            />
-            @if (formSubmitted() && logForm.controls.rating.invalid) {
-              <div class="invalid-feedback d-block">
-                Bewertung eingeben (0 Sterne bis 5 Sterne), nur Nummern
-              </div>
-            }
+            <div class="col-12 col-md-4">
+              <label for="edit-rating" class="form-label">Rating</label>
+              <input
+                id="edit-rating"
+                class="form-control"
+                type="number"
+                min="0"
+                max="5"
+                formControlName="rating"
+              />
+              @if (formSubmitted() && logForm.controls.rating.invalid) {
+                <div class="invalid-feedback d-block">Use a value from 0 to 5.</div>
+              }
+            </div>
           </div>
         </form>
       </div>
@@ -273,14 +162,14 @@
       <div class="popup-footer">
         <button type="button" class="btn btn-primary" (click)="saveLog()">
           @if (editingLog()) {
-            Speichern
+            Save
           } @else {
-            Hinzufügen
+            Add
           }
         </button>
 
-        <button type="button" class="btn btn-secondary" (click)="closeFormPopup()">
-          Abbrechen
+        <button type="button" class="btn btn-outline-secondary" (click)="closeFormPopup()">
+          Cancel
         </button>
       </div>
     </div>

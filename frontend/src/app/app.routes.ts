@@ -3,7 +3,6 @@ import { authGuard } from './auth/auth.guard';
 import { LoginComponent } from './login/login';
 import { RegisterComponent } from './register/register';
 import { ProfileComponent } from './profile/profile';
-import { TourlogsComponent } from './tourlogs/tourlogs';
 import { ToursComponent } from './tours/tours';
 
 export const routes: Routes = [
@@ -26,9 +25,14 @@ export const routes: Routes = [
     canActivate: [authGuard],
   },
   {
-    path: 'tourlogs',
-    component: TourlogsComponent,
+    path: 'tours/:id',
+    component: ToursComponent,
     canActivate: [authGuard],
+  },
+  {
+    path: 'tourlogs',
+    redirectTo: 'tours',
+    pathMatch: 'full',
   },
   {
     path: 'profile',

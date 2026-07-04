@@ -123,12 +123,21 @@ public class OrsService {
 
     // Primary flow: route directly from coordinates picked in autocomplete. [lng, lat].
     public OrsRouteResult getRoute(double[] fromCoords, double[] toCoords, TransportType transportType) {
-        return requestDirections(fromCoords, toCoords, toOrsProfile(transportType));
+        return adjustDuration(requestDirections(fromCoords, toCoords, toOrsProfile(transportType)), transportType);
     }
 
     // Fallback flow: geocode free-text addresses, then route.
     public OrsRouteResult getRoute(String from, String to, TransportType transportType) {
-        return requestDirections(geocode(from), geocode(to), toOrsProfile(transportType));
+        return adjustDuration(requestDirections(geocode(from), geocode(to), toOrsProfile(transportType)), transportType);
+    }
+
+    private OrsRouteResult adjustDuration(OrsRouteResult result, TransportType transportType) {
+        if (transportType != TransportType.RUNNING) {
+            return result;
+        }
+
+        double runningSeconds = result.distanceKm() / 10.0 * 3600.0;
+        return new OrsRouteResult(result.distanceKm(), runningSeconds, result.coordinates());
     }
 
     private OrsRouteResult requestDirections(double[] fromCoords, double[] toCoords, String profile) {

@@ -138,7 +138,7 @@ public class AuthService {
         return new AuthResponse(session.getToken(), toUserResponse(user));
     }
 
-    private AppUser requireUser(String authorizationHeader) {
+    public AppUser requireUser(String authorizationHeader) {
         String token = extractToken(authorizationHeader);
         UserSession session = sessionRepository.findById(token)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid session."));

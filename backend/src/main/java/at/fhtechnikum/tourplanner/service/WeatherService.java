@@ -32,7 +32,7 @@ import java.util.Map;
 @Service
 public class WeatherService {
 
-    private static final int FORECAST_DAYS = 3;
+    private static final int FORECAST_DAYS = 5;
 
     @Value("${openweather.api.key:}")
     private String apiKey;

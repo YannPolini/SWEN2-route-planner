@@ -56,7 +56,7 @@ export class RegisterComponent {
         return;
       }
 
-      void this.router.navigate(['/tourlogs']);
+      void this.router.navigate(['/tours']);
     });
   }
 }

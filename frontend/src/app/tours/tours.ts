@@ -1,18 +1,18 @@
-import { Component, inject, signal, computed } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { DatePipe, DecimalPipe } from '@angular/common';
-import { TourService } from '../services/tour.service';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ImportExport } from '../import-export/import-export';
 import { Tour, TransportType, TRANSPORT_TYPES, WeatherForecast } from '../models/tour.model';
+import { TourService } from '../services/tour.service';
+import { AddressInputComponent, Coordinates } from '../shared/address-input/address-input';
 import { SearchBarComponent } from '../shared/search-bar/search-bar';
 import { TourMapComponent } from '../shared/tour-map/tour-map';
-import { TourlogsComponent } from '../tourlogs/tourlogs';
+import { TransportIconComponent } from '../shared/transport-icon/transport-icon';
 import { TourlogsModel } from '../tourlogs.model/tourlogs.model';
-import { AddressInputComponent, Coordinates } from '../shared/address-input/address-input';
+import { TourlogsComponent } from '../tourlogs/tourlogs';
 
-// ═══════════════════════════════════════════════════════
-// VIEW-MODEL (Component) — UI state, UI logic, actions
-// Connects the Model (TourService) with the View (template).
-// ═══════════════════════════════════════════════════════
 @Component({
   selector: 'app-tours',
   standalone: true,
@@ -22,81 +22,105 @@ import { AddressInputComponent, Coordinates } from '../shared/address-input/addr
     DecimalPipe,
     SearchBarComponent,
     TourMapComponent,
+    TransportIconComponent,
     TourlogsComponent,
     AddressInputComponent,
+    ImportExport,
   ],
   templateUrl: './tours.html',
   styleUrl: './tours.css',
 })
 export class ToursComponent {
-  // ── Injected Model (domain data + business logic) ──
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly tourService = inject(TourService);
   private readonly fb = inject(FormBuilder);
 
-  // ── Constants ──
+  protected readonly tourlogsModel = inject(TourlogsModel);
   protected readonly transportTypes = TRANSPORT_TYPES;
 
-  // ── UI state (owned by ViewModel) ──
-  protected readonly selectedTourId = this.tourService.selectedTourId;
+  protected readonly detailTourId = signal<string | null>(null);
   protected readonly searchTerm = signal<string>('');
   protected readonly filterType = signal<TransportType | null>(null);
   protected readonly showForm = signal(false);
   protected readonly editingTour = signal<Tour | null>(null);
   protected readonly deleteTarget = signal<Tour | null>(null);
+  protected readonly deleteAllOpen = signal(false);
+  protected readonly deleteAllLoading = signal(false);
+  protected readonly deleteAllError = signal('');
   protected readonly formSubmitted = signal(false);
   protected readonly weatherForecast = signal<WeatherForecast | null>(null);
   protected readonly weatherLoading = signal(false);
   protected readonly weatherError = signal(false);
-  private weatherRequestTourId: string | null = null;
-
-  // Exact coordinates from the address autocomplete. Null = user typed free
-  // text, so the backend geocodes the string instead of using these directly.
   protected readonly fromCoords = signal<Coordinates | null>(null);
   protected readonly toCoords = signal<Coordinates | null>(null);
+  protected readonly demoSeedLoading = signal(false);
+  protected readonly demoSeedError = signal('');
 
-  // ── Reactive Form (owned by ViewModel) ──
-  // distance + estimatedTime removed: backend computes them via ORS
+  private weatherRequestTourId: string | null = null;
+
   protected readonly tourForm = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.minLength(3)]],
     description: ['', [Validators.required]],
     from: ['', [Validators.required]],
     to: ['', [Validators.required]],
     transportType: ['hike' as TransportType, [Validators.required]],
-    childFriendliness: [0, [Validators.required, Validators.min(0), Validators.max(5)]],
   });
 
-  // ── Derived state (combines Model data + UI state) ──
   protected readonly filteredTours = computed(() => {
     const term = this.searchTerm().toLowerCase().trim();
     const type = this.filterType();
     let result = this.tourService.tours();
-    if (type) result = result.filter((t) => t.transportType === type);
+
+    if (type) result = result.filter((tour) => tour.transportType === type);
+
     if (term) {
       result = result.filter(
-        (t) =>
-          t.name.toLowerCase().includes(term) ||
-          t.description.toLowerCase().includes(term) ||
-          t.from.toLowerCase().includes(term) ||
-          t.to.toLowerCase().includes(term) ||
-          t.transportType.toLowerCase().includes(term) ||
-          String(t.childFriendliness).includes(term),
+        (tour) =>
+          tour.name.toLowerCase().includes(term) ||
+          tour.description.toLowerCase().includes(term) ||
+          tour.from.toLowerCase().includes(term) ||
+          tour.to.toLowerCase().includes(term) ||
+          tour.transportType.toLowerCase().includes(term) ||
+          String(tour.difficulty ?? '').includes(term) ||
+          String(tour.childFriendliness).includes(term),
       );
     }
+
     return result;
   });
 
-  // ── Delegated Model data (pass-through to template) ──
-  protected readonly selectedTour = this.tourService.selectedTour;
+  protected readonly selectedTour = computed(() => {
+    const id = this.detailTourId();
+    return id ? (this.tourService.getTourById(id) ?? null) : null;
+  });
+
   protected readonly tourCount = this.tourService.tourCount;
   protected readonly stats = this.tourService.stats;
 
-  // ══════════════════════════════════════
-  // ACTIONS — called from the template
-  // ══════════════════════════════════════
+  constructor() {
+    this.route.paramMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
+      const id = params.get('id');
+      this.detailTourId.set(id);
+      this.tourService.selectTour(id);
 
-  protected selectTour(id: string): void {
-    this.tourService.selectTour(id);
-    this.loadWeather(id);
+      if (id) {
+        this.loadWeather(id);
+      } else {
+        this.weatherForecast.set(null);
+        this.weatherError.set(false);
+        this.weatherLoading.set(false);
+      }
+    });
+  }
+
+  protected openTour(id: string): void {
+    this.router.navigate(['/tours', id]);
+  }
+
+  protected backToTours(): void {
+    this.router.navigate(['/tours']);
   }
 
   protected updateSearch(term: string): void {
@@ -107,7 +131,6 @@ export class ToursComponent {
     this.filterType.set(type);
   }
 
-  // ── Form workflow ──
   protected openCreateForm(): void {
     this.editingTour.set(null);
     this.tourForm.reset({
@@ -116,7 +139,6 @@ export class ToursComponent {
       from: '',
       to: '',
       transportType: 'hike',
-      childFriendliness: 0,
     });
     this.fromCoords.set(null);
     this.toCoords.set(null);
@@ -132,10 +154,7 @@ export class ToursComponent {
       from: tour.from,
       to: tour.to,
       transportType: tour.transportType,
-      childFriendliness: tour.childFriendliness,
     });
-    // Re-seed coordinates from the stored tour so an unchanged address keeps
-    // its exact point; editing a field clears them via coordinatesChange.
     this.fromCoords.set(
       tour.fromLat != null && tour.fromLng != null
         ? { lat: tour.fromLat, lng: tour.fromLng }
@@ -163,8 +182,6 @@ export class ToursComponent {
     const v = this.tourForm.getRawValue();
     const from = this.fromCoords();
     const to = this.toCoords();
-    // distance/estimatedTime/routeGeometry: placeholders, backend fills via ORS.
-    // from/to coordinates come from the autocomplete selection (null if typed).
     const data: Omit<Tour, 'id' | 'createdAt'> = {
       name: v.name.trim(),
       description: v.description.trim(),
@@ -177,46 +194,80 @@ export class ToursComponent {
       toLng: to?.lng ?? null,
       distance: 0,
       estimatedTime: 0,
-      childFriendliness: +v.childFriendliness,
+      childFriendliness: 0,
       routeImagePath: this.editingTour()?.routeImagePath ?? '',
       routeGeometry: null,
     };
 
     const editing = this.editingTour();
     if (editing) {
-      this.tourService.updateTour(editing.id, data); // ← calls Model
+      this.tourService.updateTour(editing.id, data);
     } else {
-      const newTour = this.tourService.addTour(data); // ← calls Model
-      this.tourService.selectTour(newTour.id);
+      const newTour = this.tourService.addTour(data);
+      this.router.navigate(['/tours', newTour.id]);
     }
+
     this.closeForm();
   }
 
-  // ── Delete workflow ──
   protected confirmDelete(tour: Tour): void {
     this.deleteTarget.set(tour);
   }
+
   protected cancelDelete(): void {
     this.deleteTarget.set(null);
   }
 
   protected executeDelete(): void {
-    const t = this.deleteTarget();
-    if (t) {
-      this.tourService.deleteTour(t.id); // ← calls Model
-      if (this.selectedTourId() === t.id) {
-        this.tourService.selectTour(null);
-        this.weatherForecast.set(null);
-        this.weatherError.set(false);
-        this.weatherLoading.set(false);
-      }
-    }
+    const target = this.deleteTarget();
+    if (!target) return;
+
+    const wasOpen = this.detailTourId() === target.id;
+    this.tourService.deleteTour(target.id);
     this.deleteTarget.set(null);
+
+    if (wasOpen) {
+      this.router.navigate(['/tours']);
+    }
   }
 
-  // ── Presentation helpers ──
+  protected confirmDeleteAll(): void {
+    if (this.tourCount() === 0) return;
+
+    this.deleteAllError.set('');
+    this.deleteAllOpen.set(true);
+  }
+
+  protected cancelDeleteAll(): void {
+    if (this.deleteAllLoading()) return;
+
+    this.deleteAllOpen.set(false);
+    this.deleteAllError.set('');
+  }
+
+  protected executeDeleteAll(): void {
+    if (this.deleteAllLoading()) return;
+
+    this.deleteAllLoading.set(true);
+    this.deleteAllError.set('');
+
+    this.tourService.deleteAllTours().subscribe({
+      next: () => {
+        this.tourlogsModel.loadLogs();
+        this.deleteAllLoading.set(false);
+        this.deleteAllOpen.set(false);
+        this.router.navigate(['/tours']);
+      },
+      error: (err) => {
+        console.error('Delete all tours failed:', err);
+        this.deleteAllError.set('Could not delete all tours. Please try again.');
+        this.deleteAllLoading.set(false);
+      },
+    });
+  }
+
   protected formatDuration(seconds: number): string {
-    if (!seconds || seconds <= 0) return '—';
+    if (!seconds || seconds <= 0) return '-';
     const h = Math.floor(seconds / 3600);
     const m = Math.floor((seconds % 3600) / 60);
     if (h > 0 && m > 0) return `${h}h ${m}min`;
@@ -224,18 +275,51 @@ export class ToursComponent {
     return `${m}min`;
   }
 
+  protected formatDifficulty(difficulty: number | null | undefined): string {
+    if (difficulty == null) return '-';
+
+    return Number.isInteger(difficulty) ? `${difficulty}/5` : `${difficulty.toFixed(1)}/5`;
+  }
+
   protected badgeClass(type: string): string {
     const map: Record<string, string> = {
-      bike: 'text-bg-primary',
-      hike: 'text-bg-success',
-      running: 'text-bg-warning',
-      vehicle: 'text-bg-info',
+      bike: 'tour-type-bike',
+      hike: 'tour-type-hike',
+      running: 'tour-type-running',
+      vehicle: 'tour-type-vehicle',
     };
-    return map[type] ?? 'text-bg-secondary';
+    return map[type] ?? 'tour-type-default';
+  }
+
+  protected transportLabel(type: TransportType | string): string {
+    return this.transportTypes.find((transport) => transport.value === type)?.label ?? 'Transport';
   }
 
   protected weatherIconUrl(icon: string): string {
     return `https://openweathermap.org/img/wn/${icon}@2x.png`;
+  }
+
+  protected logCount(tourId: string): number {
+    return this.tourlogsModel.getPopularity(tourId);
+  }
+
+  protected seedDemoData(): void {
+    if (this.demoSeedLoading()) return;
+
+    this.demoSeedLoading.set(true);
+    this.demoSeedError.set('');
+
+    this.tourService.seedDemoData().subscribe({
+      next: () => {
+        this.tourlogsModel.loadLogs();
+        this.demoSeedLoading.set(false);
+      },
+      error: (err) => {
+        console.error('Demo data seed failed:', err);
+        this.demoSeedError.set('Could not add demo data. Please try again.');
+        this.demoSeedLoading.set(false);
+      },
+    });
   }
 
   private loadWeather(tourId: string): void {
@@ -252,13 +336,10 @@ export class ToursComponent {
       },
       error: (err) => {
         if (this.weatherRequestTourId !== tourId) return;
-        console.error('API Fehler beim Wetter:', err);
+        console.error('Weather API error:', err);
         this.weatherError.set(true);
         this.weatherLoading.set(false);
       },
     });
   }
-
-  //popularity
-  protected readonly tourlogsModel = inject(TourlogsModel);
 }

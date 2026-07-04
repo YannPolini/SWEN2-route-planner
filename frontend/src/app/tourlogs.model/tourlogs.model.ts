@@ -1,4 +1,4 @@
-import { signal, computed, inject, Injectable } from '@angular/core';
+import { computed, effect, inject, Injectable, signal } from '@angular/core';
 import { AuthService } from '../auth/auth.service';
 import { TourService } from '../services/tour.service';
 import { TourLogApiService } from './TourLogApiService';
@@ -12,222 +12,115 @@ export type Log = {
   totalTime: number;
   rating: number;
   tourID: string;
-  logID: number;
+  logID: string;
+  ownerUserId?: number | null;
   creatorName: string;
 };
 
 @Injectable({ providedIn: 'root' })
 export class TourlogsModel {
-
   readonly logList = signal<Log[]>([]);
   readonly searchTerm = signal<string>('');
-  /*
-  readonly logList = signal<Log[]>([
-    {
-      date: '2026-03-20',
-      time: '08:45',
-      comment: 'Angenehme Tour mit schönem Wetter und guter Sicht.',
-      difficulty: 2,
-      totalDistance: 12.4,
-      totalTime: 150,
-      rating: 4,
-      tourID: '1',
-      logID: 1,
-      creatorName: 'Demo User 2'
-    },
-    {
-      date: '2026-03-21',
-      time: '14:10',
-      comment: 'Teilweise anstrengender Anstieg, aber insgesamt sehr lohnend.',
-      difficulty: 4,
-      totalDistance: 18.7,
-      totalTime: 245,
-      rating: 5,
-      tourID: '2',
-      logID: 2,
-      creatorName: 'Demo User'
-    },
-    {
-    date: '2026-04-01',
-    time: '09:15',
-    comment: 'Sehr schöne Morgenrunde entlang des Flusses, kaum Verkehr.',
-    difficulty: 2,
-    totalDistance: 10.5,
-    totalTime: 95,
-    rating: 4,
-    tourID: '3',
-    logID: 6,
-    creatorName: 'Demo User'
-  },
-  {
-    date: '2026-04-02',
-    time: '13:40',
-    comment: 'Heißes Wetter, aber tolle Aussicht auf den Bergen.',
-    difficulty: 4,
-    totalDistance: 21.3,
-    totalTime: 280,
-    rating: 5,
-    tourID: '4',
-    logID: 7,
-    creatorName: 'Demo User'
-  },
-  {
-    date: '2026-04-03',
-    time: '17:20',
-    comment: 'Kurze Feierabendtour, entspannend und ruhig.',
-    difficulty: 1,
-    totalDistance: 5.8,
-    totalTime: 60,
-    rating: 3,
-    tourID: '5',
-    logID: 8,
-    creatorName: 'Demo User'
-  },
-  {
-    date: '2026-04-04',
-    time: '08:00',
-    comment: 'Sehr anspruchsvoll, viele steile Abschnitte.',
-    difficulty: 5,
-    totalDistance: 25.0,
-    totalTime: 340,
-    rating: 5,
-    tourID: '1',
-    logID: 9,
-    creatorName: 'Demo User'
-  },
-  {
-    date: '2026-04-05',
-    time: '11:10',
-    comment: 'Gemütliche Tour durch den Wald, ideal zum Abschalten.',
-    difficulty: 2,
-    totalDistance: 13.2,
-    totalTime: 150,
-    rating: 4,
-    tourID: '2',
-    logID: 10,
-    creatorName: 'Demo User'
-  }
-  ]);
-  */
 
-  constructor() {
-    this.loadLogs();
-  }
-
-  private readonly authService = inject(AuthService);
   private readonly tourService = inject(TourService);
+  private readonly authService = inject(AuthService);
+  private readonly api = inject(TourLogApiService);
+
+  readonly popularityByTour = computed(() => {
+    const counts = new Map<string, number>();
+    for (const log of this.logList()) {
+      counts.set(log.tourID, (counts.get(log.tourID) ?? 0) + 1);
+    }
+    return counts;
+  });
 
   readonly filteredLogs = computed(() => {
     const selectedTourId = this.tourService.selectedTourId();
-    const currentUsername = this.authService.currentUser()?.name; 
     const term = this.searchTerm().toLowerCase().trim();
 
     if (!selectedTourId) {
       return [];
     }
 
-    let result = this.logList().filter(log => log.tourID === selectedTourId && log.creatorName === currentUsername);
+    let result = this.logList().filter((log) => log.tourID === selectedTourId);
 
     if (term) {
-      result = result.filter(log =>
-        log.date.toLowerCase().includes(term) ||
-        log.time.toLowerCase().includes(term) ||
-        log.comment.toLowerCase().includes(term) ||
-        String(log.difficulty).includes(term) ||
-        String(log.totalDistance).includes(term) ||
-        String(log.totalTime).includes(term) ||
-        String(log.rating).includes(term)
+      result = result.filter(
+        (log) =>
+          log.date.toLowerCase().includes(term) ||
+          log.time.toLowerCase().includes(term) ||
+          log.comment.toLowerCase().includes(term) ||
+          String(log.difficulty).includes(term) ||
+          String(log.totalDistance).includes(term) ||
+          String(log.totalTime).includes(term) ||
+          String(log.rating).includes(term),
       );
     }
 
     return result;
   });
 
+  constructor() {
+    effect(() => {
+      const user = this.authService.currentUser();
+      this.searchTerm.set('');
+
+      if (!user) {
+        this.logList.set([]);
+        return;
+      }
+
+      this.loadLogs(user.id);
+    });
+  }
+
   setSearchTerm(term: string): void {
     this.searchTerm.set(term);
   }
 
   addLog(newLog: Log): void {
-    //this.logList.update(logs => [newLog, ...logs]);     //newLog ist erstes im Array
-    //this.saveToBackend(newLog);
     this.api.create(newLog).subscribe({
       next: () => this.loadLogs(),
-      error: err => console.error('POST error:', err)
+      error: (err) => console.error('POST error:', err),
     });
   }
 
   updateLog(updatedLog: Log): void {
-    /*
-    this.logList.update(logs =>
-      logs.map(log => log.logID === updatedLog.logID ? updatedLog : log)  //wenn logID gleich updaeteLog hier speichern, sonst das alte log
-    );
-    */
-    //this.updateBackendLog(updatedLog);
     this.api.update(updatedLog).subscribe({
       next: () => this.loadLogs(),
-      error: err => console.error('PUT error:', err)
+      error: (err) => console.error('PUT error:', err),
     });
   }
 
-  deleteLog(logID: number): void {
-    //this.logList.update(logs => logs.filter(log => log.logID !== logID));
+  deleteLog(logID: string): void {
     this.api.delete(logID).subscribe({
       next: () => this.loadLogs(),
-      error: err => console.error('DELETE error:', err)
+      error: (err) => console.error('DELETE error:', err),
     });
   }
 
-  //um am anfang die logs aus dem backend zu laden
-  //brauche ich glaub ich garnicht mehr wegen contructor
-  setLogs(logs: Log[]) {
-    this.logList.set(logs);
-  }
+  loadLogs(expectedUserId = this.authService.currentUser()?.id): void {
+    if (expectedUserId == null) {
+      this.logList.set([]);
+      return;
+    }
 
-
-  //backend frontend
-
-  protected readonly api = inject(TourLogApiService);
-
-  loadLogs(): void {
     this.api.getAll().subscribe({
-      next: logs => {
-        console.log('Logs vom Backend:', logs);
+      next: (logs) => {
+        if (this.authService.currentUser()?.id !== expectedUserId) {
+          return;
+        }
 
         this.logList.set(logs);
-
-        console.log('Signal danach:', this.logList());
+        this.tourService.loadTours(expectedUserId);
       },
-      error: err => {
+      error: (err) => {
         console.error('API Fehler:', err);
-      }
-    });
-  }
-
-  saveToBackend(log: Log): void {
-    this.api.create(log).subscribe({
-      next: (response) => {
-        console.log('created:', response);
-        this.logList.update(logs => [log, ...logs]);
       },
-      error: (err) => {
-        console.error('POST error:', err);
-      }
-    });
-  }
-
-  updateBackendLog(log: Log): void {
-    this.api.update(log).subscribe({
-      next: (response) => {
-        console.log('updated:', response);
-        //this.addLog(log); //damit es auch auf der Website aufscheint, sonst müsste man die website neu laden oder loadlogs() auruft
-      },
-      error: (err) => {
-        console.error('PUT error:', err);
-      }
     });
   }
 
   getPopularity(tourID: string): number {
-    return this.logList().filter(log => log.tourID === tourID).length;
+    return this.popularityByTour().get(tourID) ?? 0;
   }
 }

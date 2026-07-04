@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "tour")
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)    //vllt weggeben
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -20,8 +20,6 @@ public class Tour {
 
     @Id
     @Column(nullable = false, updatable = false)
-    //@Setter(AccessLevel.NONE) // damit nicht manuell gesetzt werden kann aber id wird ium frontenfd erzeugt ode?
-    //@JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private String id;
 
     @Column(nullable = false)
@@ -32,12 +30,10 @@ public class Tour {
     private String description;
 
     @JsonProperty("from")
-    //@Column(name = "start_location") //is this needed?
     @Column(nullable = false)
     private String startLocation;
 
     @JsonProperty("to")
-    //@Column(name = "end_location")
     @Column(nullable = false)
     private String endLocation;
 
@@ -69,9 +65,22 @@ public class Tour {
     private double estimatedTime;
 
     @Column(nullable = false)
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Min(value = 0, message = "Child friendliness should not be less than 0")
     @Max(value = 5, message = "Child friendliness should not be more than 5")
     private int childFriendliness;
+
+    @Transient
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private Double difficulty;
+
+    @Column(name = "owner_user_id")
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private Long ownerUserId;
+
+    @Column
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private String creatorName;
 
     @Column(nullable = false)
     private String routeImagePath;
