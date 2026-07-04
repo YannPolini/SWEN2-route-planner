@@ -52,7 +52,7 @@ public class TourLog {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long ownerUserId;
 
-    @Column(nullable = false)
+    //@Column(nullable = false)
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private String creatorName;
 
