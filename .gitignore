@@ -1,5 +1,4 @@
 .idea/
-backend/src/main/resources/application.properties
 .tools/
 
 # Secrets - never commit. Share via a secure channel; use examples/templates instead.
