@@ -9,7 +9,7 @@ import {
 } from '@angular/forms';
 import { TourlogsList } from '../tourlogs-list/tourlogs-list';
 import { TourService } from '../services/tour.service';
-import { Log, TourlogsModel } from '../tourlogs.model/tourlogs.model';
+import { Log, TourlogsModel } from '../models/tourlog.model';
 import { SearchBarComponent } from '../shared/search-bar/search-bar';
 
 @Component({

@@ -10,7 +10,7 @@ import { AddressInputComponent, Coordinates } from '../shared/address-input/addr
 import { SearchBarComponent } from '../shared/search-bar/search-bar';
 import { TourMapComponent } from '../shared/tour-map/tour-map';
 import { TransportIconComponent } from '../shared/transport-icon/transport-icon';
-import { TourlogsModel } from '../tourlogs.model/tourlogs.model';
+import { TourlogsModel } from '../models/tourlog.model';
 import { TourlogsComponent } from '../tourlogs/tourlogs';
 
 @Component({
@@ -203,8 +203,8 @@ export class ToursComponent {
     if (editing) {
       this.tourService.updateTour(editing.id, data);
     } else {
-      const newTour = this.tourService.addTour(data);
-      this.router.navigate(['/tours', newTour.id]);
+      this.tourService.addTour(data);
+      this.router.navigate(['/tours']);
     }
 
     this.closeForm();

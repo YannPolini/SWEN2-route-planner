@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Log } from './tourlogs.model';
+import { Log } from './tourlog.model';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../auth/auth.service';
 

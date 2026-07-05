@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { Log } from '../tourlogs.model/tourlogs.model';
+import { Log } from '../models/tourlog.model';
 
 @Component({
   selector: 'app-tourlogs-list',

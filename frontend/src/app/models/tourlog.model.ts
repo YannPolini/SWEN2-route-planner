@@ -1,7 +1,7 @@
 import { computed, effect, inject, Injectable, signal } from '@angular/core';
 import { AuthService } from '../auth/auth.service';
 import { TourService } from '../services/tour.service';
-import { TourLogApiService } from './TourLogApiService';
+import { TourLogApiService } from './tourlog.model.api';
 
 export type Log = {
   date: string;
