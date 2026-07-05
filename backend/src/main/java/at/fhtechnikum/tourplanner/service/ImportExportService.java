@@ -117,7 +117,7 @@ public class ImportExportService {
                         }
 
                     } else {
-                        log.debug("Skipping LOG row {} because log_id is empty",
+                        log.debug("Failed LOG row {} because log_id is empty",
                                 record.getRecordNumber()
                         );
                         throw new IllegalArgumentException("Unknown row type: " + type);
@@ -251,7 +251,7 @@ public class ImportExportService {
         String tourId = getRequiredValue(record, "tour_id");
 
         if(tourRepository.findById(tourId).isPresent()) {
-            log.info("Tour with this ID already exists, skipping import, tourId={}", tourId);
+            log.info("Tour with this ID already exists, failed import, tourId={}", tourId);
             return null;
         }
 
@@ -330,7 +330,7 @@ public class ImportExportService {
         String logId = getOptionalValue(record, "log_id");
 
         if(tourLogRepository.findById(logId).isPresent()) {
-            log.info("LogID already exists, skipping import, tourId={}", logId);
+            log.info("LogID already exists, failed import, tourId={}", logId);
             return null;
         }
 
